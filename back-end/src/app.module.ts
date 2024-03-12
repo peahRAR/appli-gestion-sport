@@ -25,7 +25,7 @@ import { ListsMembersModule } from './lists-members/lists-members.module';
       
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: 'localhost',
+        host: '127.0.0.1',
         port: 5432,
         username: 'dampess',
         password: 'dgRGQEGGR55<§',

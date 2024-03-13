@@ -4,6 +4,7 @@ import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 
 
+
 @Controller('lists-members')
 export class ListsMembersController {
   constructor(private readonly listsMembersService: ListsMembersService) {}

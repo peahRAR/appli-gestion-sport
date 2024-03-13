@@ -1,4 +1,6 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+import { Event } from '../events/events.entity';
+import { User } from '../users/users.entity';
 
 @Entity()
 export class ListsMember {
@@ -8,7 +10,12 @@ export class ListsMember {
   @PrimaryColumn()
   userId: number;
 
-  @Column({ default: false }) // Champ booléen pour indiquer la participation
+  @Column({ default: false })
   isParticipant: boolean;
 
+  @ManyToOne(() => Event, event => event.listsMembers)
+  event: Event;
+
+  @ManyToOne(() => User, user => user.listsMembers)
+  user: User;
 }

@@ -28,4 +28,5 @@ export class Event {
   @ManyToMany(() => User)
   @JoinTable()
   participants: User[];
+  listsMembers: any;
 }

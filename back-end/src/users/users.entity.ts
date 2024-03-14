@@ -6,6 +6,9 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ length: 100 })
+  email: string; 
+
   @Column({ length: 50 })
   firstname: string;
 
@@ -52,4 +55,5 @@ export class User {
   @JoinTable()
   events: Event[];
   listsMembers: any;
+    useremail: any;
 }

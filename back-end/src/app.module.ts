@@ -11,6 +11,7 @@ import {ListsMember} from './lists-members/lists-member.entity'
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { ListsMembersModule } from './lists-members/lists-members.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -25,11 +26,11 @@ import { ListsMembersModule } from './lists-members/lists-members.module';
       
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: '127.0.0.1',
-        port: 5432,
-        username: 'dampess',
-        password: 'dgRGQEGGR55<§',
-        database: 'appli-gestion-sport',
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USERNAME'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME'),
         autoLoadEntities: true,
         entities: [User, Event, ListsMember],
         synchronize: configService.get('TYPEORM_SYNC', 'false') === 'true',
@@ -37,7 +38,8 @@ import { ListsMembersModule } from './lists-members/lists-members.module';
     }),
     UsersModule,
     EventsModule,
-    ListsMembersModule
+    ListsMembersModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

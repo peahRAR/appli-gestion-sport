@@ -1,3 +1,4 @@
+import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,9 +14,24 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
+    const { password } = createUserDto;
+  
+    // Hashage des mots de passe
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 est le nombre de tours de hachage (salt rounds)
+    
+  
+    // Création de l'utilisateur avec les données hachées
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+      
+      
+    });
+  
+    // Sauvegarde de l'utilisateur
     return this.userRepository.save(newUser);
   }
+  
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();

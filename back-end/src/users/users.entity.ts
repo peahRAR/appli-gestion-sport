@@ -21,7 +21,7 @@ export class User {
   @Column()
   password: string;
 
-  @Column('json', { nullable: true })
+  @Column('json')
   birthday: {
     identifier: string;
     data: string;

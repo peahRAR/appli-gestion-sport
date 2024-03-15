@@ -1,5 +1,14 @@
 // create-user.dto.ts
-import { IsString, IsBoolean, IsDate, IsOptional, IsNotEmpty, IsEmail } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsDate,
+  IsOptional,
+  IsNotEmpty,
+  IsEmail,
+  IsDateString
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -8,7 +17,7 @@ export class CreateUserDto {
 
   @IsEmail({}, { message: "L'adresse email doit être un email valide" })
   email: string;
-  
+
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -19,6 +28,7 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsDate()
+  @Type(() => Date)
   birthday: Date;
 
   @IsNotEmpty()
@@ -33,7 +43,7 @@ export class CreateUserDto {
   @IsString()
   tel_emergency: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   weight: number;
 
   @IsOptional()
@@ -41,7 +51,7 @@ export class CreateUserDto {
   licence: string;
 
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   date_subscribe: Date;
 
   @IsOptional()
@@ -58,5 +68,4 @@ export class CreateUserDto {
 
   @IsOptional()
   role: number;
-
 }

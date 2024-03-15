@@ -65,62 +65,44 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // Date anniversaire
+    const birthdayString = createUserDto.birthday.toString();
+  
+    // Date création de compte
+    const dateSubscribeString = new Date().toString();
+  
+    // Créer les champs encryptés
+    const encryptedBirthday = this.createEncryptedField(birthdayString);
+    const encryptedDateSubscribe = this.createEncryptedField(dateSubscribeString);
+  
+    // Créer le mailIdentifier
     const mailIdentifier = this.createMailIdentifier(createUserDto.email);
-     const encryptedBirthday = this.createEncryptedField(createUserDto.birthday.toString());
-     const encryptedTelMedic = this.createEncryptedField(createUserDto.tel_medic);
-     const encryptedTelEmergency = this.createEncryptedField(createUserDto.tel_emergency);
-     const encryptedWeight = this.createEncryptedField(createUserDto.weight.toString());
-     const encryptedLicence = this.createEncryptedField(createUserDto.licence);
-     const encryptedDateSubscribe = this.createEncryptedField(createUserDto.date_subscribe.toISOString());
-     const encryptedDatePayment = this.createEncryptedField(createUserDto.date_payment.toISOString());
-     const encryptedDateEndPay = this.createEncryptedField(createUserDto.date_end_pay.toISOString());
- 
-
-    //  Vérifier si un utilisateur avec le même mailIdentifier existe déjà
-    const hashedPassword = await bcrypt.hash(createUserDto.password,10)
-
-    const newUser= this.userRepository.create({
-      ...createUserDto,
+  
+    // Hashage Mot de passe
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+  
+    // Créer la nouvelle entité utilisateur
+    const newUser = this.userRepository.create({
+      gender: createUserDto.gender,
+      firstname: createUserDto.firstname,
+      name: createUserDto.name,
       password: hashedPassword,
-      email:{
-        mailIdentifier:mailIdentifier,
-        mailData:this.createMailData(createUserDto.email)
+      email: {
+        mailIdentifier: mailIdentifier,
+        mailData: this.createMailData(createUserDto.email),
       },
-      birthday:{
-        identifier:encryptedBirthday,
-        data:this.createEncryptedField(createUserDto.birthday)
+      birthday: {
+        identifier: encryptedBirthday,
+        data: encryptedBirthday,
       },
-      tel_medic:{
-        identifier:encryptedTelMedic,
-        data:this.createEncryptedField(createUserDto.tel_medic)
+      date_subscribe: {
+        identifier: encryptedDateSubscribe,
+        data: encryptedDateSubscribe,
       },
-      tel_emergency:{
-        identifier:encryptedTelEmergency,
-        data:this.createEncryptedField(createUserDto.tel_emergency)
-      },
-      weight:{
-        identifier:encryptedWeight,
-        data:this.createEncryptedField(createUserDto.weight)
-      },
-      licence:{
-        identifier:encryptedLicence,
-        data:this.createEncryptedField(createUserDto.licence)
-      },
-      date_subscribe:{
-        identifier:encryptedDateSubscribe,
-        data:this.createEncryptedField(createUserDto.date_subscribe)
-      },
-      date_end_pay:{
-        identifier:encryptedDateEndPay,
-        data:this.createEncryptedField(createUserDto.date_end_pay)
-      },
-      date_payment:{
-        identifier:encryptedDatePayment,
-        date:this.createEncryptedField(createUserDto.date_payment)
-      },
-    })
-
-    return this.userRepository.save(newUser)
+    });
+  
+    // Enregistrer et retourner l'utilisateur
+    return this.userRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {

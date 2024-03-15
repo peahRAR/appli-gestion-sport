@@ -204,16 +204,22 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    console.log('coucou');
-
     // Créer le mailIdentifier à partir de l'e-mail fourni
     const mailIdentifier = this.createMailIdentifier(email);
 
     // Rechercher l'utilisateur dans la base de données en utilisant le mailIdentifier
-    return this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { email: { mailIdentifier } },
     });
-  }
+
+    // Vérifier si un utilisateur a été trouvé et le retourner
+    if (user) {
+      return user;
+    } else {
+      return undefined; // Utilisateur non trouvé
+    }
+}
+
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
     // Récupérer l'utilisateur existant

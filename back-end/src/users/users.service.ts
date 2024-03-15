@@ -146,41 +146,31 @@ export class UsersService {
 
       // Décrypter la date de paiment s'il n'est pas null
       if (user.date_payment && user.date_payment.data) {
-        const decryptedDatePayment = this.decryptField(
-          user.date_payment.data,
-        );
+        const decryptedDatePayment = this.decryptField(user.date_payment.data);
         user.date_payment.data = decryptedDatePayment;
       }
 
       // Décrypter la date de fin de paiment s'il n'est pas null
       if (user.date_end_pay && user.date_end_pay.data) {
-        const decryptedDateEndPay = this.decryptField(
-          user.date_end_pay.data,
-        );
+        const decryptedDateEndPay = this.decryptField(user.date_end_pay.data);
         user.date_end_pay.data = decryptedDateEndPay;
       }
 
       // Décrypter la licence s'il n'est pas null
       if (user.licence && user.licence.data) {
-        const decryptedLicence = this.decryptField(
-          user.licence.data,
-        );
+        const decryptedLicence = this.decryptField(user.licence.data);
         user.licence.data = decryptedLicence;
       }
 
       // Décrypter le poids s'il n'est pas null
       if (user.weight && user.weight.data) {
-        const decryptedWeight = this.decryptField(
-          user.weight.data,
-        );
+        const decryptedWeight = this.decryptField(user.weight.data);
         user.weight.data = decryptedWeight;
       }
 
       // Décrypter le numéro medecin s'il n'est pas null
       if (user.tel_medic && user.tel_medic.data) {
-        const decryptedTelMedic = this.decryptField(
-          user.tel_medic.data,
-        );
+        const decryptedTelMedic = this.decryptField(user.tel_medic.data);
         user.tel_medic.data = decryptedTelMedic;
       }
 
@@ -191,8 +181,6 @@ export class UsersService {
         );
         user.tel_emergency.data = decryptedTelEmergency;
       }
-
-      
     }
 
     // Retourner les utilisateurs avec les données décryptées
@@ -212,22 +200,19 @@ export class UsersService {
       where: { email: { mailIdentifier } },
     });
 
-    // Vérifier si un utilisateur a été trouvé et le retourner
-    if (user) {
-      return user;
-    } else {
-      return undefined; // Utilisateur non trouvé
-    }
-}
+    return user;
+  }
 
-
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User | undefined> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-       throw new Error('Utilisateur non trouvé');
+      throw new Error('Utilisateur non trouvé');
     }
 
     // Mettre à jour le mot de passe s'il est fourni
@@ -238,55 +223,66 @@ export class UsersService {
 
     // Crypter les autres champs s'ils sont non null
     if (updateUserDto.tel_medic) {
-      const telMedicEncrypt = this.createEncryptedField(updateUserDto.tel_medic);
+      const telMedicEncrypt = this.createEncryptedField(
+        updateUserDto.tel_medic,
+      );
       user.tel_medic = {
         identifier: telMedicEncrypt,
         data: telMedicEncrypt,
       };
     }
     if (updateUserDto.tel_emergency) {
-      const telEmergencyEncrypt = this.createEncryptedField(updateUserDto.tel_emergency);
+      const telEmergencyEncrypt = this.createEncryptedField(
+        updateUserDto.tel_emergency,
+      );
       user.tel_emergency = {
         identifier: telEmergencyEncrypt,
         data: telEmergencyEncrypt,
       };
     }
     if (updateUserDto.weight) {
-      const weightEncrypt = this.createEncryptedField(updateUserDto.weight.toString());
+      const weightEncrypt = this.createEncryptedField(
+        updateUserDto.weight.toString(),
+      );
       user.weight = {
         identifier: weightEncrypt,
         data: weightEncrypt,
       };
     }
     if (updateUserDto.licence) {
-      const licenceEncrypt = this.createEncryptedField(updateUserDto.licence.toString());
+      const licenceEncrypt = this.createEncryptedField(
+        updateUserDto.licence.toString(),
+      );
       user.licence = {
         identifier: licenceEncrypt,
         data: licenceEncrypt,
       };
     }
     if (updateUserDto.date_payment) {
-      const datePaymentEncrypt = this.createEncryptedField(updateUserDto.date_payment.toString());
+      const datePaymentEncrypt = this.createEncryptedField(
+        updateUserDto.date_payment.toString(),
+      );
       user.date_payment = {
         identifier: datePaymentEncrypt,
         data: datePaymentEncrypt,
       };
     }
     if (updateUserDto.date_end_pay) {
-      const dateEndPayEncrypt = this.createEncryptedField(updateUserDto.date_end_pay.toString());
+      const dateEndPayEncrypt = this.createEncryptedField(
+        updateUserDto.date_end_pay.toString(),
+      );
       user.date_end_pay = {
         identifier: dateEndPayEncrypt,
         data: dateEndPayEncrypt,
       };
     }
-  
+
     // Enregistrer les modifications
     await this.userRepository.save(user);
-  
+
     // Retourner l'utilisateur mis à jour
     return user;
-}
-
+  }
 
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);

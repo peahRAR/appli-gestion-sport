@@ -19,17 +19,17 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    console.log('coucou')
-    return this.usersService.findOne(+id);
-  }
+  @Get('id/:id')
+findOne(@Param('id') id: string) {
+  return this.usersService.findOne(+id);
+}
 
-  @Get(':email')
-  findByEmail(@Param('email') email: string) {
-    console.log('route')
-    return this.usersService.findByEmail(email);
-  }
+@Get('email/:email')
+findByEmail(@Param('email') email: string) {
+  console.log('route');
+  return this.usersService.findByEmail(email);
+}
+
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

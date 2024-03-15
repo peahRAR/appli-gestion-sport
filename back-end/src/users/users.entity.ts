@@ -6,8 +6,11 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
-  email: string; 
+  @Column('json')
+  email: {
+    mailIdentifier:string;
+    mailData:string;
+  }; 
 
   @Column({ length: 50 })
   firstname: string;
@@ -18,32 +21,56 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ type: 'date' })
-  birthday: Date;
+  @Column('json', { nullable: true })
+  birthday: {
+    identifier: string;
+    data: string;
+  };
 
   @Column({ type: 'boolean' })
   gender: boolean;
 
-  @Column({ length: 20, nullable: true })
-  tel_medic: string;
+  @Column('json', { nullable: true })
+  tel_medic: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column({ length: 20, nullable: true })
-  tel_emergency: string;
+  @Column('json', { nullable: true })
+  tel_emergency: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column('float')
-  weight: number;
+  @Column('json', { nullable: true })
+  weight: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column({ length: 50, nullable: true })
-  licence: string;
+  @Column('json', { nullable: true })
+  licence: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column({ type: 'date', nullable: true })
-  date_subscribe: Date;
+  @Column('json', { nullable: true })
+  date_subscribe: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column({ type: 'date', nullable: true })
-  date_payment: Date;
+  @Column('json', { nullable: true })
+  date_payment: {
+    identifier: string;
+    data: string;
+  };
 
-  @Column({ type: 'date', nullable: true })
-  date_end_pay: Date;
+  @Column('json', { nullable: true })
+  date_end_pay: {
+    identifier: string;
+    data: string;
+  };
 
   @Column({ nullable: true })
   avatar: string;
@@ -51,9 +78,11 @@ export class User {
   @Column({type:'int', default: 0 })
   role: number;
 
+
   @ManyToMany(() => Event)
   @JoinTable()
   events: Event[];
   listsMembers: any;
     useremail: any;
+
 }

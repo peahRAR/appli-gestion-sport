@@ -1,15 +1,14 @@
 // create-user.dto.ts
-import { IsString, IsBoolean, IsDate, IsOptional, IsNotEmpty } from 'class-validator';
+import { IsString, IsBoolean, IsDate, IsOptional, IsNotEmpty, IsEmail } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   firstname: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsEmail({}, { message: "L'adresse email doit être un email valide" })
   email: string;
-
+  
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -59,4 +58,5 @@ export class CreateUserDto {
 
   @IsOptional()
   role: number;
+
 }

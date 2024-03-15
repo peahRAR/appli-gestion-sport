@@ -21,13 +21,20 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log('coucou')
     return this.usersService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  @Get(':email')
+  findByEmail(@Param('email') email: string) {
+    console.log('route')
+    return this.usersService.findByEmail(email);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(+id, updateUserDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

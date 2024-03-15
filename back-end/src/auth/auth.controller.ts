@@ -17,4 +17,6 @@ export class AuthController {
     // Récupérer les informations de l'utilisateur à partir du token JWT
     return req.user;
   }
+
+  
 }

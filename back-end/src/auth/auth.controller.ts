@@ -11,7 +11,7 @@ export class AuthController {
     return this.authService.signIn(email, password);
   }
 
-  @Get('')
+  @Get('profile')
   @UseGuards(JwtAuthGuard) // Utiliser le guard JWT pour authentifier l'utilisateur
   getProfile(@Request() req) {
     // Récupérer les informations de l'utilisateur à partir du token JWT

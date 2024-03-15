@@ -197,11 +197,16 @@ export class UsersService {
 
     // Rechercher l'utilisateur dans la base de données en utilisant le mailIdentifier
     const user = await this.userRepository.findOne({
-      where: { email: { mailIdentifier } },
+      where: { 
+        email: {
+          mailIdentifier: mailIdentifier
+        }
+      }
     });
 
     return user;
-  }
+}
+
 
   async update(
     id: number,

@@ -196,16 +196,13 @@ export class UsersService {
     const mailIdentifier = this.createMailIdentifier(email);
 
     // Rechercher l'utilisateur dans la base de données en utilisant le mailIdentifier
-    const user = await this.userRepository.findOne({
-      where: { 
-        email: {
-          mailIdentifier: mailIdentifier
-        }
-      }
-    });
+    const user = await this.userRepository
+      .createQueryBuilder("users")
+      .where("users.email->>'mailIdentifier' = :mailIdentifier", { mailIdentifier })
+      .getOne();
 
     return user;
-}
+  }
 
 
   async update(

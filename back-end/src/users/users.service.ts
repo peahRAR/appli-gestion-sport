@@ -21,12 +21,12 @@ export class UsersService {
     this.salt = this.configService.get<string>('SALT');
   }
 
-  private createMailIdentifier(email: string): string {
+  private createidentifier(email: string): string {
     const secretKey = this.configService.get<string>('PASSWORDMAIL');
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
-  private createMailData(email: string): string {
+  private createdata(email: string): string {
     const secret = this.configService.get<string>('ENCRYPTION_KEY');
     if (!secret) {
       throw new Error('Secret key is not defined in the configuration');
@@ -77,6 +77,39 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+
+    console.log("entrée create")
+    console.log(typeof(createUserDto.role))
+    console.log(createUserDto.role)
+
+    let isActive=false
+    let role=0
+
+    if (+createUserDto.role===2) {
+
+      console.log("coucou")
+
+      const existingSuperAdmin = await this.userRepository.findOne({
+        where: { role: 2 },
+      });
+      
+       role = existingSuperAdmin ? existingSuperAdmin.role : (!createUserDto.role ? 0 : createUserDto.role );
+  
+      console.log(role)
+      console.log(typeof(+role))
+  
+       isActive = +role === 2 ? true : false;
+  
+      console.log(isActive)
+  
+      if (existingSuperAdmin) {
+        throw new Error('Un superAdmin existe déjà.');
+      }
+
+    }
+
+
+
     // Date anniversaire
     const birthdayString = createUserDto.birthday.toString();
 
@@ -88,11 +121,27 @@ export class UsersService {
     const encryptedDateSubscribe =
       this.createEncryptedField(dateSubscribeString);
 
-    // Créer le mailIdentifier
-    const mailIdentifier = this.createMailIdentifier(createUserDto.email);
+    // Créer le identifier
+    const identifier = this.createidentifier(createUserDto.email);
 
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    // Vérifier si un utilisateur avec le même identifier existe déjà
+
+    const existingUser = await this.userRepository
+      .createQueryBuilder('users')
+      .where("users.email->>'identifier' = :identifier", {
+        identifier,
+      })
+      .getOne();
+
+    // Si un utilisateur existe déjà avec le même identifier, renvoyer une erreur
+    if (existingUser) {
+      throw new Error('Cette adresse E-mail est déjà utilisée.');
+    }
+
+    
 
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
@@ -101,8 +150,8 @@ export class UsersService {
       name: createUserDto.name,
       password: hashedPassword,
       email: {
-        mailIdentifier: mailIdentifier,
-        mailData: this.createMailData(createUserDto.email),
+        identifier: identifier,
+        data: this.createdata(createUserDto.email),
       },
       birthday: {
         identifier: encryptedBirthday,
@@ -112,6 +161,8 @@ export class UsersService {
         identifier: encryptedDateSubscribe,
         data: encryptedDateSubscribe,
       },
+      role: role,
+      isActive: isActive
     });
 
     // Enregistrer et retourner l'utilisateur
@@ -125,9 +176,9 @@ export class UsersService {
     // Parcourir chaque utilisateur
     for (const user of users) {
       // Décrypter l'email s'il n'est pas null
-      if (user.email && user.email.mailData) {
-        const decryptedEmail = this.decryptField(user.email.mailData);
-        user.email.mailData = decryptedEmail;
+      if (user.email && user.email.data) {
+        const decryptedEmail = this.decryptField(user.email.data);
+        user.email.data = decryptedEmail;
       }
 
       // Décrypter la date de naissance s'il n'est pas null
@@ -192,18 +243,19 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    // Créer le mailIdentifier à partir de l'e-mail fourni
-    const mailIdentifier = this.createMailIdentifier(email);
+    // Créer le identifier à partir de l'e-mail fourni
+    const identifier = this.createidentifier(email);
 
-    // Rechercher l'utilisateur dans la base de données en utilisant le mailIdentifier
+    // Rechercher l'utilisateur dans la base de données en utilisant le identifier
     const user = await this.userRepository
-      .createQueryBuilder("users")
-      .where("users.email->>'mailIdentifier' = :mailIdentifier", { mailIdentifier })
+      .createQueryBuilder('users')
+      .where("users.email->>'identifier' = :identifier", {
+        identifier,
+      })
       .getOne();
 
     return user;
   }
-
 
   async update(
     id: number,
@@ -214,8 +266,9 @@ export class UsersService {
 
     // Vérifier si l'utilisateur existe
     if (!user) {
-      throw new Error('Utilisateur non trouvé');
+      throw new Error('Aucun utilisateur trouvé.');
     }
+    
 
     // Mettre à jour le mot de passe s'il est fourni
     if (updateUserDto.password) {

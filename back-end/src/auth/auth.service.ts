@@ -14,7 +14,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  private createMailIdentifier(email: string): string {
+  private createidentifier(email: string): string {
     const secretKey = this.configService.get<string>('PASSWORDMAIL');
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }

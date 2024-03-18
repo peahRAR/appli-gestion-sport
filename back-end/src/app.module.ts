@@ -12,6 +12,8 @@ import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
 import { ListsMembersModule } from './lists-members/lists-members.module';
 import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
+import { AdminModule } from './admin/admin.module';
 
 
 @Module({
@@ -39,7 +41,8 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     EventsModule,
     ListsMembersModule,
-    AuthModule
+    AuthModule,
+    AdminModule
   ],
   controllers: [AppController],
   providers: [AppService],

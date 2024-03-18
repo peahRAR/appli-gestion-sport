@@ -8,8 +8,8 @@ export class User {
 
   @Column('json')
   email: {
-    mailIdentifier:string;
-    mailData:string;
+    identifier:string;
+    data:string;
   }; 
 
   @Column({ length: 50 })
@@ -74,6 +74,10 @@ export class User {
 
   @Column({ nullable: true })
   avatar: string;
+
+
+  @Column({ default: false })
+  isActive: boolean;
 
   @Column({type:'int', default: 0 })
   role: number;

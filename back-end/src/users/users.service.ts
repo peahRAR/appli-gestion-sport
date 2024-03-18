@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { promisify } from 'util';
 import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly mailerService: MailerService,
   ) {
     this.salt = this.configService.get<string>('SALT');
   }
@@ -77,38 +79,26 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    let isActive = false;
+    let role = 0;
 
-    console.log("entrée create")
-    console.log(typeof(createUserDto.role))
-    console.log(createUserDto.role)
-
-    let isActive=false
-    let role=0
-
-    if (+createUserDto.role===2) {
-
-      console.log("coucou")
-
+    if (+createUserDto.role === 2) {
       const existingSuperAdmin = await this.userRepository.findOne({
         where: { role: 2 },
       });
-      
-       role = existingSuperAdmin ? existingSuperAdmin.role : (!createUserDto.role ? 0 : createUserDto.role );
-  
-      console.log(role)
-      console.log(typeof(+role))
-  
-       isActive = +role === 2 ? true : false;
-  
-      console.log(isActive)
-  
+
+      role = existingSuperAdmin
+        ? existingSuperAdmin.role
+        : !createUserDto.role
+          ? 0
+          : createUserDto.role;
+
+      isActive = +role === 2 ? true : false;
+
       if (existingSuperAdmin) {
         throw new Error('Un superAdmin existe déjà.');
       }
-
     }
-
-
 
     // Date anniversaire
     const birthdayString = createUserDto.birthday.toString();
@@ -141,8 +131,6 @@ export class UsersService {
       throw new Error('Cette adresse E-mail est déjà utilisée.');
     }
 
-    
-
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
       gender: createUserDto.gender,
@@ -162,8 +150,15 @@ export class UsersService {
         data: encryptedDateSubscribe,
       },
       role: role,
-      isActive: isActive
+      isActive: isActive,
     });
+
+    // // Envoi d'un e-mail à l'utilisateur
+    // await this.mailerService.sendMail({
+    //   to: createUserDto.email,
+    //   subject: 'Bienvenue sur notre application !',
+    //   text: `Votre compte a été créé avec succès. Il sera bientôt validé par un membre de notre équipe.`,
+    // });
 
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
@@ -268,7 +263,6 @@ export class UsersService {
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
-    
 
     // Mettre à jour le mot de passe s'il est fourni
     if (updateUserDto.password) {
@@ -342,4 +336,34 @@ export class UsersService {
   async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
   }
+
+  // async requestPasswordReset(email: string, id: string): Promise<void> {
+  //   const user = await this.userRepository.findOne(id);
+  //   if (!user) {
+  //     throw new Error('Utilisateur non trouvé.');
+  //   }
+
+  //   // Générer un token unique et le stocker en base de données avec l'utilisateur
+  //   const resetToken = crypto.randomBytes(20).toString('hex');
+  //   user.resetPasswordToken = resetToken;
+  //   user.resetPasswordExpires = new Date(Date.now() + 600000); // 10 minutes
+  //   await this.userRepository.save(user);
+
+  //   // Envoyer un email à l'utilisateur avec le lien de réinitialisation
+  //   const resetUrl = `https://votre-site.com/reset-password/${resetToken}`;
+  //   await this.mailerService.sendMail({
+  //     to: user.email,
+  //     subject: 'Réinitialisation du mot de passe',
+  //     text: `Pour réinitialiser votre mot de passe, veuillez cliquer sur ce lien : ${resetUrl}`,
+  //   });
+  // }
+
+  // async resetPassword(token: string, newPassword: string): Promise<void> {
+  //   const user = await this.userRepository.findOne({
+  //     where: { resetPasswordToken: token },
+  //   });
+  //   if (!user || user.resetPasswordExpires < new Date()) {
+  //     throw new Error('Token de réinitialisation invalide ou expiré.');
+  //   }
+  // }
 }

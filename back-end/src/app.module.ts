@@ -13,7 +13,9 @@ import { EventsModule } from './events/events.module';
 import { ListsMembersModule } from './lists-members/lists-members.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
-import { AdminModule } from './admin/admin.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { mailerConfig } from './mailer.config';
+
 
 
 @Module({
@@ -21,6 +23,7 @@ import { AdminModule } from './admin/admin.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    MailerModule.forRoot(mailerConfig),
     
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

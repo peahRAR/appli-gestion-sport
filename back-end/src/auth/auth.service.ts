@@ -19,17 +19,18 @@ export class AuthService {
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
-  async signIn(
-    email: string,
-    password: string,
-  ): Promise<{ access_token: string }> {
-
+  async signIn(email: string, password: string): Promise<{ access_token: string }> {
     // Rechercher l'utilisateur dans la base de données en utilisant le service UsersService
     const user = await this.usersService.findByEmail(email);
 
     // Vérifier si l'utilisateur existe
     if (!user) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
+    }
+
+    // Vérifier si l'utilisateur est activé
+    if (!user.isActive) {
+      throw new UnauthorizedException('Votre compte n\'est pas activé');
     }
 
     // Comparer le mot de passe fourni avec le mot de passe chiffré

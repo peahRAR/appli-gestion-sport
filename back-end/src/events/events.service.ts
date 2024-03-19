@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { Event } from './events.entity';
 
 @Injectable()
@@ -34,5 +34,18 @@ export class EventsService {
 
   async remove(id: number): Promise<void> {
     await this.eventRepository.delete(id);
+  }
+
+  async deleteExpiredEvents(): Promise<void> {
+    // Date d'expiration = aujourd'hui - 1 jour
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() - 1);
+    
+    // Supprimer les événements dont la date est inférieure à la date d'expiration
+    await this.eventRepository
+      .createQueryBuilder()
+      .delete()
+      .where('date < :expirationDate', { expirationDate })
+      .execute();
   }
 }

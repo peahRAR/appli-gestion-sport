@@ -49,16 +49,16 @@ export class AdminService {
     // Décrypter l'adresse email
     const decryptedEmail = this.decryptEmail(user.email.data);
 
-    // Envoyer l'email de confirmation
-    // await this.mailerService.sendMail({
-    //     to: decryptedEmail,
-    //     subject: 'Confirmation de compte',
-    //     template: 'confirmation',
-    //     context: {
-    //       email: decryptedEmail,
-    //       // Autres variables nécessaires pour le template...
-    //     },
-    // });
+    
+    await this.mailerService.sendMail({
+        to: decryptedEmail,
+        subject: 'Confirmation de compte',
+        template: 'activation',
+        context: {
+          email: decryptedEmail,
+          
+        },
+    });
   }
 
   async changeUserRole(id: number, newRole: number): Promise<void> {

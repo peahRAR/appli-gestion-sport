@@ -31,8 +31,8 @@ export class AuthController {
     return req.user;
   }
 
-  @Post('reset-password')
-  requestPasswordReset(@Param('id') id: string) {
-    return this.usersService.requestPasswordReset(id);
+  @Post('resetpassword')
+  async requestPasswordReset( @Body('email') email: string) {
+    return this.usersService.requestPasswordReset(email);
   }
 }

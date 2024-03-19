@@ -341,6 +341,7 @@ export class UsersService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
+    
     // Rechercher l'utilisateur par email et récupérer son ID
     const user = await this.findByEmail( email );
     if (!user) {
@@ -355,13 +356,20 @@ export class UsersService {
       token: resetToken,
       expires: resetExpires,
     });
-
+    
+    const decryptedEmail = this.decryptField(user.email.data)
+  
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `https://localhost:3000/reset-password/${resetToken}`;
+    const resetUrl = `https://localhost:3000/resetpassword/${resetToken}`;
+    
     await this.mailerService.sendMail({
-      to: user.email.data,
+      to: decryptedEmail,
       subject: 'Réinitialisation du mot de passe',
-      text: `Pour réinitialiser votre mot de passe, veuillez cliquer sur ce lien : ${resetUrl}`,
+      template: 'reset-password',
+      context: {
+        email: decryptedEmail,
+        resetUrl: resetUrl,
+      },
     });
   }
 

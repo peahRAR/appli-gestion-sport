@@ -1,28 +1,33 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('lists-members')
 export class ListsMembersController {
   constructor(private readonly listsMembersService: ListsMembersService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   create(@Body() createListsMemberDto: CreateListsMemberDto) {
     return this.listsMembersService.create(createListsMemberDto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.listsMembersService.findAll();
   }
 
   @Get(':eventId/:userId')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('eventId') eventId: string, @Param('userId') userId: string) {
     return this.listsMembersService.findOne(+eventId, +userId);
   }
 
   @Patch(':eventId/:userId')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('eventId') eventId: string,
     @Param('userId') userId: string,
@@ -32,6 +37,7 @@ export class ListsMembersController {
   }
 
   @Delete(':eventId/:userId')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('eventId') eventId: string, @Param('userId') userId: string) {
     return this.listsMembersService.remove(+eventId, +userId);
   }

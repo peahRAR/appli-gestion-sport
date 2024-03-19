@@ -9,7 +9,7 @@ export const mailerConfig: MailerOptions = {
   transport: {
     host: SMTP_HOST,
     port: parseInt(SMTP_PORT),
-    secure: false, // true for secure connection (TLS), false otherwise
+    secure: true, // true for secure connection (TLS), false otherwise
     auth: {
       user: SMTP_USER,
       pass: SMTP_PASS,

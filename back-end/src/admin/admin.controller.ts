@@ -1,5 +1,9 @@
 import { Controller, Put, Param, Post, Patch } from '@nestjs/common';
 import { AdminService } from './admin.service';
+import { SetMetadata } from '@nestjs/common';
+
+export const Role = (...role: number[]) => SetMetadata('role', role);
+
 
 @Controller('admin')
 export class AdminController {

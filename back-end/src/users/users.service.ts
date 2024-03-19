@@ -10,11 +10,14 @@ import { promisify } from 'util';
 import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ResetPassword } from './reset-password.entity';
 
 @Injectable()
 export class UsersService {
   private readonly salt: string;
   constructor(
+    @InjectRepository(ResetPassword)
+    private readonly resetPasswordRepository: Repository<ResetPassword>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
@@ -337,33 +340,47 @@ export class UsersService {
     await this.userRepository.delete(id);
   }
 
-  // async requestPasswordReset(email: string, id: string): Promise<void> {
-  //   const user = await this.userRepository.findOne(id);
-  //   if (!user) {
-  //     throw new Error('Utilisateur non trouvé.');
-  //   }
+  async requestPasswordReset(email: string): Promise<void> {
+    // Rechercher l'utilisateur par email et récupérer son ID
+    const user = await this.findByEmail( email );
+    if (!user) {
+      throw new Error('Utilisateur non trouvé.');
+    }
 
-  //   // Générer un token unique et le stocker en base de données avec l'utilisateur
-  //   const resetToken = crypto.randomBytes(20).toString('hex');
-  //   user.resetPasswordToken = resetToken;
-  //   user.resetPasswordExpires = new Date(Date.now() + 600000); // 10 minutes
-  //   await this.userRepository.save(user);
+    // Générer un token unique et le stocker dans la table de réinitialisation de mot de passe
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetExpires = new Date(Date.now() + 600000); // 10 minutes
+    await this.resetPasswordRepository.save({
+      userId: user.id,
+      token: resetToken,
+      expires: resetExpires,
+    });
 
-  //   // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-  //   const resetUrl = `https://votre-site.com/reset-password/${resetToken}`;
-  //   await this.mailerService.sendMail({
-  //     to: user.email,
-  //     subject: 'Réinitialisation du mot de passe',
-  //     text: `Pour réinitialiser votre mot de passe, veuillez cliquer sur ce lien : ${resetUrl}`,
-  //   });
-  // }
+    // Envoyer un email à l'utilisateur avec le lien de réinitialisation
+    const resetUrl = `https://localhost:3000/reset-password/${resetToken}`;
+    await this.mailerService.sendMail({
+      to: user.email.data,
+      subject: 'Réinitialisation du mot de passe',
+      text: `Pour réinitialiser votre mot de passe, veuillez cliquer sur ce lien : ${resetUrl}`,
+    });
+  }
 
-  // async resetPassword(token: string, newPassword: string): Promise<void> {
-  //   const user = await this.userRepository.findOne({
-  //     where: { resetPasswordToken: token },
-  //   });
-  //   if (!user || user.resetPasswordExpires < new Date()) {
-  //     throw new Error('Token de réinitialisation invalide ou expiré.');
-  //   }
-  // }
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    // Rechercher le token dans la table de réinitialisation de mot de passe
+    const resetRecord = await this.resetPasswordRepository.findOne({
+      where: { token },
+    });
+    if (!resetRecord || resetRecord.expires < new Date()) {
+      throw new Error('Token de réinitialisation invalide ou expiré.');
+    }
+
+    // Mettre à jour le mot de passe de l'utilisateur et supprimer l'enregistrement de réinitialisation
+    const user = await this.findOne(resetRecord.userId);
+    if (!user) {
+      throw new Error('Utilisateur non trouvé.');
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user);
+    await this.resetPasswordRepository.delete(resetRecord.id);
+  }
 }

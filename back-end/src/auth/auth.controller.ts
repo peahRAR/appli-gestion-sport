@@ -1,14 +1,26 @@
-import { Controller, Body, Post, Get, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Post,
+  Get,
+  Request,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { AuthService } from './auth.service';
+import { UsersService } from '../users/users.service'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    private usersService: UsersService) {}
 
   @Post('login')
-  async signIn(@Body('email') email: string, @Body('password') password: string) {
-
+  async signIn(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
     return this.authService.signIn(email, password);
   }
 
@@ -19,5 +31,8 @@ export class AuthController {
     return req.user;
   }
 
-  
+  @Post('reset-password')
+  requestPasswordReset(@Param('id') id: string) {
+    return this.usersService.requestPasswordReset(id);
+  }
 }

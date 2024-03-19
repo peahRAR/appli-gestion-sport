@@ -39,7 +39,7 @@ export class AuthService {
     }
 
     // Générer un JWT avec les informations de l'utilisateur comme payload
-    const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
+    const payload = { sub: user.id, email: user.email, role: user.role }; // Utilisez les informations appropriées de l'utilisateur
     const access_token = await this.jwtService.signAsync(payload);
 
     // Retourner le token JWT

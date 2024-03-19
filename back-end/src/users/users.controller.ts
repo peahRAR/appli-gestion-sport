@@ -12,6 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { AdminGuard } from '../auth/admin.guard';
 
 @Controller('users')
 export class UsersController {
@@ -23,6 +24,7 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(AdminGuard)
   @UseGuards(JwtAuthGuard)
   findAll() {
     return this.usersService.findAll();
@@ -41,6 +43,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminGuard)
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

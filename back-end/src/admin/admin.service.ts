@@ -17,18 +17,6 @@ export class AdminService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  private decryptEmail(encryptedEmail: string): string {
-    const secret = this.configService.get<string>('ENCRYPTION_KEY');
-    // Extraire l'IV de la chaîne encryptée
-    const [ivString, encryptedString] = encryptedEmail.split(':');
-    const iv = Buffer.from(ivString, 'hex');
-    const key = crypto.scryptSync(secret, 'salt', 32);
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decryptedEmail = decipher.update(encryptedString, 'hex', 'utf-8');
-    decryptedEmail += decipher.final('utf-8');
-
-    return decryptedEmail;
-  }
 
   async activateUser(id: number): Promise<void> {
     // Récupérer l'utilisateur à partir de l'ID
@@ -47,7 +35,7 @@ export class AdminService {
     await this.userRepository.save(user);
 
     // Décrypter l'adresse email
-    const decryptedEmail = this.decryptEmail(user.email.data);
+    const decryptedEmail = this.usersService.decryptField(user.email.data);
 
     
     await this.mailerService.sendMail({

@@ -12,11 +12,17 @@ export class User {
     data:string;
   }; 
 
-  @Column({ length: 50 })
-  firstname: string;
+  @Column('json')
+  firstname: {
+    identifier:string;
+    data:string;
+  }; 
 
-  @Column({ length: 50 })
-  name: string;
+  @Column('json')
+  name: {
+    identifier:string;
+    data:string;
+  }; 
 
   @Column()
   password: string;
@@ -72,8 +78,11 @@ export class User {
     data: string;
   };
 
-  @Column({ nullable: true })
-  avatar: string;
+  @Column('json', { nullable: true })
+  avatar: {
+    identifier: string;
+    data: string;
+  };
 
 
   @Column({ default: false })

@@ -69,7 +69,7 @@ export class UsersService {
     return iv.toString('hex') + ':' + encrypted;
   }
 
-  private decryptField(encryptedData: string): string {
+  public decryptField(encryptedData: string): string {
     const secret = this.configService.get<string>('ENCRYPTION_KEY');
     // Extraire l'IV de la chaîne encryptée
     const [ivString, encryptedString] = encryptedData.split(':');
@@ -113,6 +113,10 @@ export class UsersService {
     const encryptedBirthday = this.createEncryptedField(birthdayString);
     const encryptedDateSubscribe =
       this.createEncryptedField(dateSubscribeString);
+    const encryptedName = this.createEncryptedField(createUserDto.name);
+    const encryptedFirstName = this.createEncryptedField(
+      createUserDto.firstname,
+    );
 
     // Créer le identifier
     const identifier = this.createidentifier(createUserDto.email);
@@ -134,11 +138,19 @@ export class UsersService {
       throw new Error('Cette adresse E-mail est déjà utilisée.');
     }
 
+    const decryptedEmail = createUserDto.email;
+
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
       gender: createUserDto.gender,
-      firstname: createUserDto.firstname,
-      name: createUserDto.name,
+      firstname: {
+        identifier: encryptedFirstName,
+        data: encryptedFirstName,
+      },
+      name: {
+        identifier: encryptedName,
+        data: encryptedName,
+      },
       password: hashedPassword,
       email: {
         identifier: identifier,
@@ -156,11 +168,14 @@ export class UsersService {
       isActive: isActive,
     });
 
-    // // Envoi d'un e-mail à l'utilisateur
-    // await this.mailerService.sendMail({
-    //   to: createUserDto.email,
-    //   subject: 'Bienvenue sur notre application !',
-    //   text: `Votre compte a été créé avec succès. Il sera bientôt validé par un membre de notre équipe.`,
+    //   await this.mailerService.sendMail({
+    //     to: decryptedEmail,
+    //     subject: 'Confirmation de compte',
+    //     template: 'activation',
+    //     context: {
+    //       email: decryptedEmail,
+
+    //     },
     // });
 
     // Enregistrer et retourner l'utilisateur
@@ -171,64 +186,30 @@ export class UsersService {
     // Récupérer tous les utilisateurs depuis la base de données
     const users = await this.userRepository.find();
 
+    // Définir les champs à décrypter
+    const fieldsToDecrypt = [
+      'email',
+      'name',
+      'firstname',
+      'avatar',
+      'birthday',
+      'date_subscribe',
+      'date_payment',
+      'date_end_pay',
+      'licence',
+      'weight',
+      'tel_medic',
+      'tel_emergency',
+    ];
+
     // Parcourir chaque utilisateur
     for (const user of users) {
-      // Décrypter l'email s'il n'est pas null
-      if (user.email && user.email.data) {
-        const decryptedEmail = this.decryptField(user.email.data);
-        user.email.data = decryptedEmail;
-      }
-
-      // Décrypter la date de naissance s'il n'est pas null
-      if (user.birthday && user.birthday.data) {
-        const decryptedBirthday = this.decryptField(user.birthday.data);
-        user.birthday.data = decryptedBirthday;
-      }
-
-      // Décrypter la date d'inscription s'il n'est pas null
-      if (user.date_subscribe && user.date_subscribe.data) {
-        const decryptedDateSubscribe = this.decryptField(
-          user.date_subscribe.data,
-        );
-        user.date_subscribe.data = decryptedDateSubscribe;
-      }
-
-      // Décrypter la date de paiment s'il n'est pas null
-      if (user.date_payment && user.date_payment.data) {
-        const decryptedDatePayment = this.decryptField(user.date_payment.data);
-        user.date_payment.data = decryptedDatePayment;
-      }
-
-      // Décrypter la date de fin de paiment s'il n'est pas null
-      if (user.date_end_pay && user.date_end_pay.data) {
-        const decryptedDateEndPay = this.decryptField(user.date_end_pay.data);
-        user.date_end_pay.data = decryptedDateEndPay;
-      }
-
-      // Décrypter la licence s'il n'est pas null
-      if (user.licence && user.licence.data) {
-        const decryptedLicence = this.decryptField(user.licence.data);
-        user.licence.data = decryptedLicence;
-      }
-
-      // Décrypter le poids s'il n'est pas null
-      if (user.weight && user.weight.data) {
-        const decryptedWeight = this.decryptField(user.weight.data);
-        user.weight.data = decryptedWeight;
-      }
-
-      // Décrypter le numéro medecin s'il n'est pas null
-      if (user.tel_medic && user.tel_medic.data) {
-        const decryptedTelMedic = this.decryptField(user.tel_medic.data);
-        user.tel_medic.data = decryptedTelMedic;
-      }
-
-      // Décrypter le numéro de tel d'urgence s'il n'est pas null
-      if (user.tel_emergency && user.tel_emergency.data) {
-        const decryptedTelEmergency = this.decryptField(
-          user.tel_emergency.data,
-        );
-        user.tel_emergency.data = decryptedTelEmergency;
+      // Parcourir chaque champ à décrypter
+      for (const field of fieldsToDecrypt) {
+        if (user[field] && user[field].data) {
+          const decryptedField = this.decryptField(user[field].data);
+          user[field].data = decryptedField;
+        }
       }
     }
 
@@ -328,6 +309,15 @@ export class UsersService {
         data: dateEndPayEncrypt,
       };
     }
+    if (updateUserDto.avatar) {
+      const avatarEncrypt = this.createEncryptedField(
+        updateUserDto.avatar,
+      );
+      user.avatar = {
+        identifier: avatarEncrypt,
+        data: avatarEncrypt,
+      };
+    }
 
     // Enregistrer les modifications
     await this.userRepository.save(user);
@@ -341,9 +331,8 @@ export class UsersService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
-    
     // Rechercher l'utilisateur par email et récupérer son ID
-    const user = await this.findByEmail( email );
+    const user = await this.findByEmail(email);
     if (!user) {
       throw new Error('Utilisateur non trouvé.');
     }
@@ -356,12 +345,12 @@ export class UsersService {
       token: resetToken,
       expires: resetExpires,
     });
-    
-    const decryptedEmail = this.decryptField(user.email.data)
-  
+
+    const decryptedEmail = this.decryptField(user.email.data);
+
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
     const resetUrl = `https://localhost:3000/resetpassword/${resetToken}`;
-    
+
     await this.mailerService.sendMail({
       to: decryptedEmail,
       subject: 'Réinitialisation du mot de passe',

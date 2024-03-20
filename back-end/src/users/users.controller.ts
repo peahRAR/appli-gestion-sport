@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
+import { UsersGuard } from './users.guard';
 
 @Controller('users')
 export class UsersController {
@@ -37,6 +38,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(UsersGuard)
   @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);

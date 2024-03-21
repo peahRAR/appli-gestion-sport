@@ -16,6 +16,9 @@ import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './mailer.config';
 
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronjobsModule } from './cronjobs/cronjobs.module';
+
 
 
 @Module({
@@ -24,6 +27,7 @@ import { mailerConfig } from './mailer.config';
       isGlobal: true,
     }),
     MailerModule.forRoot(mailerConfig),
+    ScheduleModule .forRoot(),
     
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -45,7 +49,8 @@ import { mailerConfig } from './mailer.config';
     EventsModule,
     ListsMembersModule,
     AuthModule,
-    AdminModule
+    AdminModule,
+    CronjobsModule
   ],
   controllers: [AppController],
   providers: [AppService],

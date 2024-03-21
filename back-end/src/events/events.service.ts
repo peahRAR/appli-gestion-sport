@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { LessThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Event } from './events.entity';
+
 
 @Injectable()
 export class EventsService {
@@ -45,7 +46,7 @@ export class EventsService {
     await this.eventRepository
       .createQueryBuilder()
       .delete()
-      .where('date < :expirationDate', { expirationDate })
+      .where('date_event < :expirationDate', { expirationDate })
       .execute();
   }
 }

@@ -17,6 +17,9 @@ export class Event {
   places: number;
 
   @Column()
+  totalPlaces: number;
+
+  @Column()
   name_event: string;
 
   @Column()

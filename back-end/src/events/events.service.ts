@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions } from 'typeorm';
 import { Event } from './events.entity';
-
 
 @Injectable()
 export class EventsService {
@@ -18,17 +17,25 @@ export class EventsService {
     await this.eventRepository.save(newEvent);
     return newEvent;
   }
-  
 
   async findAll(): Promise<Event[]> {
-    return this.eventRepository.find();
+    const options: FindManyOptions<Event> = {
+      order: {
+        date_event: 'ASC',
+      },
+    };
+
+    return this.eventRepository.find(options);
   }
 
   async findOne(id: number): Promise<Event | undefined> {
     return this.eventRepository.findOne({ where: { id } });
   }
 
-  async update(id: number, updateeventDto: UpdateEventDto): Promise<Event | undefined> {
+  async update(
+    id: number,
+    updateeventDto: UpdateEventDto,
+  ): Promise<Event | undefined> {
     await this.eventRepository.update(id, updateeventDto);
     return this.eventRepository.findOne({ where: { id } });
   }
@@ -41,7 +48,7 @@ export class EventsService {
     // Date d'expiration = aujourd'hui - 1 jour
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() - 1);
-    
+
     // Supprimer les événements dont la date est inférieure à la date d'expiration
     await this.eventRepository
       .createQueryBuilder()

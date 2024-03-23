@@ -6,7 +6,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import { ConfigService } from '@nestjs/config';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { promisify } from 'util';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -167,16 +169,16 @@ export class UsersService {
       role: role,
       isActive: isActive,
     });
-
-    //   await this.mailerService.sendMail({
-    //     to: decryptedEmail,
-    //     subject: 'Confirmation de compte',
-    //     template: 'activation',
-    //     context: {
-    //       email: decryptedEmail,
-
-    //     },
-    // });
+    console.log('coucou');
+    await this.mailerService.sendMail({
+      to: decryptedEmail,
+      subject: 'Confirmation de compte',
+      template: 'activation',
+      context: {
+        email: decryptedEmail,
+      },
+    });
+    console.log('yess');
 
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
@@ -218,7 +220,50 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User | undefined> {
-    return this.userRepository.findOne({ where: { id } });
+    // Récupérer l'utilisateur depuis la base de données
+    const user = await this.userRepository.findOne({ where: { id } });
+
+    // Vérifier si l'utilisateur n'existe pas
+    if (!user) {
+      return undefined;
+    }
+
+    // Déchiffrer les champs encryptés s'ils sont non null
+    if (user.email?.data) {
+      user.email.data = this.decryptField(user.email.data);
+    }
+    if (user.weight?.data) {
+      user.weight.data = this.decryptField(user.weight.data)
+    }
+    if (user.licence?.data) {
+      user.licence.data = this.decryptField(user.licence.data);
+    }
+    if (user.name?.data) {
+      user.name.data = this.decryptField(user.name.data);
+    }
+    if (user.firstname?.data) {
+      user.firstname.data = this.decryptField(user.firstname.data);
+    }
+    if (user.tel_medic?.data) {
+      user.tel_medic.data = this.decryptField(user.tel_medic.data);
+    }
+    if (user.tel_emergency?.data) {
+      user.tel_emergency.data = this.decryptField(user.tel_emergency.data);
+    }
+    if (user.avatar?.data) {
+      user.avatar.data = this.decryptField(user.avatar.data);
+    }
+    if (user.date_end_pay?.data) {
+      user.date_end_pay.data = this.decryptField(user.date_end_pay.data);
+    }
+    if (user.date_payment?.data) {
+      user.date_payment.data = this.decryptField(user.date_payment.data);
+    }
+    if (user.date_subscribe?.data) {
+      user.date_subscribe.data = this.decryptField(user.date_subscribe.data);
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -310,9 +355,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.avatar) {
-      const avatarEncrypt = this.createEncryptedField(
-        updateUserDto.avatar,
-      );
+      const avatarEncrypt = this.createEncryptedField(updateUserDto.avatar);
       user.avatar = {
         identifier: avatarEncrypt,
         data: avatarEncrypt,
@@ -327,6 +370,18 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<void> {
+    const user = await this.findOne(id);
+
+    const decryptedEmail = this.decryptField(user.email.data);
+
+    await this.mailerService.sendMail({
+      to: decryptedEmail,
+      subject: 'Suppression de compte',
+      template: 'suppression',
+      context: {
+        email: decryptedEmail,
+      },
+    });
     await this.userRepository.delete(id);
   }
 

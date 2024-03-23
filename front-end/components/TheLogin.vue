@@ -14,6 +14,7 @@
             </div>
             <!-- Afficher le message d'erreur s'il y a lieu -->
             <p v-if="errorMessage" class="text-red-500 mt-4 text-center">{{ errorMessage }}</p>
+        
             <div class="flex justify-center">
                 <button type="submit"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Se
@@ -26,6 +27,7 @@
 </template>
 
 <script>
+
 export default {
     name: "TheLogin",
     data() {
@@ -40,7 +42,9 @@ export default {
 
     methods: {
         async signIn() {
+            console.log(this.user)
             try {
+                console.log(this.user)
                 const { data } = await useFetch('http://localhost:8080/auth/login', {
                     method: 'POST',
                     mode: 'cors',
@@ -50,19 +54,21 @@ export default {
                     }
                 });
 
-                // Vérifiez si la connexion a réussi et que le token d'accès est présent dans la réponse
-                if (data && data.value && data.value.access_token) {
-                    // Stockez le token d'accès dans le localStorage
-                    localStorage.setItem('accessToken', data.value.access_token);
-                    console.log('Token d\'accès stocké dans le localStorage :', data.value.access_token);
-                } else {
-                    // Afficher un message d'erreur si le token d'accès n'est pas trouvé dans la réponse
-                    this.errorMessage = "Email ou mot de passe invalide.";
-                }
+
+                // Stockez le token d'accès dans le localStorage
+                localStorage.setItem('accessToken', data.value.access_token);
+                console.log('Token d\'accès stocké dans le localStorage :', data.value.access_token);
+                document.location.href="/profil"
+
+
+
+
             } catch (error) {
                 console.error('Erreur lors de la connexion :', error);
                 // Afficher un message d'erreur générique en cas d'erreur
                 this.errorMessage = "Une erreur s'est produite lors de la connexion. Veuillez réessayer.";
+                // Afficher un message d'erreur si le token d'accès n'est pas trouvé dans la réponse
+                this.errorMessage = "Email ou mot de passe invalide.";
             }
         }
     },

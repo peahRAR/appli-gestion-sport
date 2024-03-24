@@ -7,7 +7,7 @@
                     <div>
                         <p class="text-gray-800 text-xl font-bold capitalize">{{ formatDate(event.date_event) }}</p>
                     </div>
-                    <div class="flex flex-row justify-between items-center rounded px-1" :class="{
+                    <div @click="openModal" class="flex flex-row justify-between items-center rounded px-1" :class="{
             'bg-transparent': event.places === 0, // gris transparent quand il reste 0 place
             'bg-orange-500': event.places > 0 && event.places <= event.totalPlaces * 0.2, // couleur orangée quand il reste moins de 20% des places
             'bg-green-600': event.places > event.totalPlaces * 0.2 // couleur verte par défaut
@@ -47,10 +47,12 @@
                     <p class="text-gray-500 ml-1">({{ formatDuration(event.duration) }})</p>
                 </div>
                 <div class="flex flex-col">
-                    <p class="text-gray-500 mb-4 p-1" :class="{ 'line-clamp-3': !showOverflow }">{{ event.overview }}
+                    <p class="text-gray-500 mb-4 p-1 text-justify" :class="{ 'line-clamp-3': !showOverflow }">
+                        {{ formatOverview(event.overview) }}
                     </p>
-                    <button @click="toggleOverflow" class="text-gray-800 font-semibold text-sm focus:outline-none text-center"
-                        v-if="event.overview.length > 300 || showOverflow">
+                    <button @click="toggleOverflow"
+                        class="text-gray-800 font-semibold text-sm focus:outline-none text-center"
+                        v-if="event.overview.length > 150 || showOverflow">
                         Afficher {{ showOverflow ? 'moins &#x25B2;' : 'plus &#x25BC;' }}
                     </button>
                 </div>
@@ -71,6 +73,16 @@
             </div>
         </div>
     </div>
+    <div v-if="showModal"
+        class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Liste des participants</h3>
+            <ul>
+                <li v-for="participant in eventParticipants" :key="participant.id">{{ participant.name }}</li>
+            </ul>
+            <button @click="closeModal" class="text-gray-800 font-semibold mt-4">Fermer</button>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -78,7 +90,9 @@ export default {
     data() {
         return {
             events: [],
-            showOverflow: false
+            showOverflow: false,
+            showModal: false,
+            eventParticipants: []
         };
     },
     async mounted() {
@@ -148,6 +162,29 @@ export default {
         },
         toggleOverflow() {
             this.showOverflow = !this.showOverflow;
+        },
+        formatOverview(overview) {
+            // Formater le texte en divisant en lignes de 50 caractères et passer automatiquement à la ligne suivante
+            let formattedOverview = '';
+            for (let i = 0; i < overview.length; i += 20) {
+                formattedOverview += overview.substring(i, i + 20) + '\n'; // Ajouter un saut de ligne après chaque ligne de 50 caractères
+            }
+            return formattedOverview;
+        },
+        openModal() {
+            // Vous devez remplacer cette logique par la récupération réelle des participants pour l'événement actuel
+            // C'est un exemple de données statiques
+            this.eventParticipants = [
+                { id: 1, name: 'Participant 1' },
+                { id: 2, name: 'Participant 2' },
+                { id: 3, name: 'Participant 3' }
+            ];
+
+            this.showModal = true;
+        },
+        // Méthode pour fermer la modale
+        closeModal() {
+            this.showModal = false;
         }
 
     }

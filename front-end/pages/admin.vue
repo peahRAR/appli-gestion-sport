@@ -146,7 +146,7 @@
                 <div class="flex flex-col">
                     <label for="description" class="font-semibold">Description du cours</label>
                     <textarea v-model="newCourse.overview" id="description"
-                        class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"></textarea>
+                        class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" placeholder=""></textarea>
                 </div>
                 <div class="flex flex-col">
                     <label for="date">Date et heure de début</label>
@@ -226,7 +226,7 @@ export default {
             users: [], // Liste des utilisateurs
             newCourse: { // Nouveau cours à créer
                 name_event: '',
-                overview: '',
+                overview: String,
                 coach: '',
                 date_event: null,
                 duration: null * 60,

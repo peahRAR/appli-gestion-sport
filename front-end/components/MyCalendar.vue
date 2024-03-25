@@ -205,7 +205,11 @@ export default {
                     throw new Error('Failed to fetch event participants');
                 }
                 const data = await response.json();
-                this.eventParticipants = data; // Mettez à jour la liste des participants avec les données récupérées
+                // Mettez à jour la liste des participants avec les données récupérées, y compris le nom et le prénom de l'utilisateur
+                this.eventParticipants = data.map(participant => ({
+                    id: participant.id,
+                    name: `${participant.firstName} ${participant.lastName}` // Ajoutez le nom et le prénom de l'utilisateur
+                }));
                 this.showModal = true; // Affichez la modale une fois les données récupérées
             } catch (error) {
                 console.error('Error fetching event participants:', error);
@@ -231,7 +235,7 @@ export default {
                             'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
-                            eventId: event.id,
+                            eventId: event.id, // Utilisation de l'ID de l'événement spécifique
                             userId: userId
                         })
                     });
@@ -239,7 +243,7 @@ export default {
                         throw new Error('Failed to participate in the event');
                     }
 
-                    // Mettez à jour localement la liste des participants et le nombre de places disponibles
+                    // Mettez à jour localement la liste des participants et le nombre de places disponibles pour cet événement spécifique
                     this.eventParticipants.push({ id: userId, name: 'Nom de l\'utilisateur' });
                     event.places--;
 
@@ -264,7 +268,7 @@ export default {
                     // Si l'utilisateur est inscrit, retirez son ID de la liste des participants
                     this.eventParticipants.splice(index, 1);
 
-                    // Incrémentez le nombre de places disponibles
+                    // Incrémentez le nombre de places disponibles pour cet événement spécifique
                     event.places++;
 
                     // Supprimez l'inscription de l'utilisateur à l'événement sur le serveur

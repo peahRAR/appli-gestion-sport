@@ -169,7 +169,7 @@ export class UsersService {
       role: role,
       isActive: isActive,
     });
-    console.log('coucou');
+    
     await this.mailerService.sendMail({
       to: decryptedEmail,
       subject: 'Confirmation de compte',
@@ -178,7 +178,7 @@ export class UsersService {
         email: decryptedEmail,
       },
     });
-    console.log('yess');
+    
 
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
@@ -292,10 +292,11 @@ export class UsersService {
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
-
+    console.log("new password :"+updateUserDto.password)
     // Mettre à jour le mot de passe s'il est fourni
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+
       user.password = hashedPassword;
     }
 

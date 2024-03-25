@@ -91,26 +91,28 @@ export default {
     data() {
         return {
             user: {
-                name: '',
-                firstname: '',
-                date_Subscribe: '',
-                email: '',
-                weight: '',
-                licence: '',
-                gender: '',
-                tel_medic: '',
-                tel_emergency: '',
-                avatar: ''
+                name: null,
+                firstname: null,
+                date_Subscribe: null,
+                email: null,
+                weight: null,
+                licence: null,
+                gender: null,
+                tel_medic: null,
+                tel_emergency: null,
+                avatar: null,
+                password: null
             },
             isEditing: false,
-            editedName: '',
-            editedEmail: '',
-            editedWeight: '',
-            editedLicence: '',
-            editedGender: '',
-            editedTelMedic: '',
-            editedTelEmergency: '',
-            avatar: ''
+            editedName: null,
+            editedEmail: null,
+            editedWeight: null,
+            editedLicence: null,
+            editedGender: null,
+            editedTelMedic: null,
+            editedTelEmergency: null,
+            avatar: null,
+            password: null,
         };
     },
     async mounted() {
@@ -163,16 +165,17 @@ export default {
         editProfile() {
             this.isEditing = true;
             // Initialiser les champs d'entrée avec les valeurs actuelles de l'utilisateur
-            this.editedWeight = this.user.weight ? this.user.weight.data : '';
-            this.editedLicence = this.user.licence ? this.user.licence.data : '';
-            this.editedTelMedic = this.user.tel_medic ? this.user.tel_medic.data : '';
-            this.editedTelEmergency = this.user.tel_emergency ? this.user.tel_emergency.data : '';
+            this.editedWeight = this.user.weight ? this.user.weight.data : null;
+            this.editedLicence = this.user.licence ? this.user.licence.data : null;
+            this.editedTelMedic = this.user.tel_medic ? this.user.tel_medic.data : null;
+            this.editedTelEmergency = this.user.tel_emergency ? this.user.tel_emergency.data : null;
         },
         async saveChanges() {
             this.user.weight = this.editedWeight;
             this.user.licence = this.editedLicence;
             this.user.tel_medic = this.editedTelMedic;
             this.user.tel_emergency = this.editedTelEmergency;
+            this.user.password = null;
             try {
                 const token = localStorage.getItem('accessToken');
                 const userId = this.getUserIdFromToken();
@@ -190,13 +193,13 @@ export default {
                     }
                 });
                 this.isEditing = false;
-                this.editedName = '';
-                this.editedEmail = '';
-                this.editedWeight = '';
-                this.editedLicence = '';
-                this.editedGender = '';
-                this.editedTelMedic = '';
-                this.editedTelEmergency = '';
+                this.editedName = null;
+                this.editedEmail = null;
+                this.editedWeight = null;
+                this.editedLicence = null;
+                this.editedGender = null;
+                this.editedTelMedic = null;
+                this.editedTelEmergency = null;
 
                 document.location.href = "/profil"
             } catch (error) {

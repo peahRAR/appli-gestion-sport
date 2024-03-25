@@ -171,16 +171,34 @@ export default {
             }
             return formattedOverview;
         },
-        openModal() {
-            // Vous devez remplacer cette logique par la récupération réelle des participants pour l'événement actuel
-            // C'est un exemple de données statiques
-            this.eventParticipants = [
-                { id: 1, name: 'Participant 1' },
-                { id: 2, name: 'Participant 2' },
-                { id: 3, name: 'Participant 3' }
-            ];
-
-            this.showModal = true;
+        openModal(eventId, userId) {
+            
+            // Récupération des membres liés à l'événement actif
+            const token = localStorage.getItem('accessToken');
+            fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                    
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la récupération des membres');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Enregistrer les membres récupérés dans la variable eventParticipants
+                    this.eventParticipants = data;
+                    // Afficher la modale une fois les données récupérées
+                    this.showModal = true;
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+                });
         },
         // Méthode pour fermer la modale
         closeModal() {

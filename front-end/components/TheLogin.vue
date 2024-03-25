@@ -36,7 +36,7 @@ export default {
                 email: null,
                 password: null,
             },
-            errorMessage: "", // Variable pour stocker le message d'erreur
+            errorMessage: null, // Variable pour stocker le message d'erreur
         };
     },
 
@@ -56,6 +56,7 @@ export default {
 
 
                 // Stockez le token d'accès dans le localStorage
+                console.log(localStorage)
                 localStorage.setItem('accessToken', data.value.access_token);
                 console.log('Token d\'accès stocké dans le localStorage :', data.value.access_token);
                 document.location.href="/"

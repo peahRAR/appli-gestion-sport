@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -294,11 +294,29 @@ export class UsersService {
     }
     console.log("new password :"+updateUserDto.password)
     // Mettre à jour le mot de passe s'il est fourni
-    if (updateUserDto.password) {
-      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+     if (updateUserDto.password) {
+       // Vérifier si le mot de passe actuel est fourni
+       if (!updateUserDto.currentPassword) {
+         throw new BadRequestException(
+           'Le mot de passe actuel est requis pour changer le mot de passe.',
+         );
+       }
 
-      user.password = hashedPassword;
-    }
+       // Comparer le mot de passe actuel fourni avec le mot de passe actuel de l'utilisateur
+       const isPasswordValid = await bcrypt.compare(
+         updateUserDto.currentPassword,
+         user.password,
+       );
+       if (!isPasswordValid) {
+         throw new UnauthorizedException('Mot de passe actuel incorrect.');
+       }
+
+       // Hasher le nouveau mot de passe
+       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+
+       // Mettre à jour le mot de passe de l'utilisateur
+       user.password = hashedPassword;
+     }
 
     // Crypter les autres champs s'ils sont non null
     if (updateUserDto.name) {

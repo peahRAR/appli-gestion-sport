@@ -81,6 +81,61 @@
                 </div>
             </div>
         </div>
+        <button @click="openChangePasswordModal"
+            class="bg-yellow-500 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4">
+            Changer le mot de passe
+        </button>
+
+        <!-- Modal de changement de mot de passe -->
+        <div v-if="showChangePasswordModal" class="fixed z-10 inset-0 overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div
+                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900">Changer le mot de passe</h3>
+                                <div class="mt-2">
+                                    <div class="mb-4">
+                                        <label for="currentPassword" class="block text-sm font-medium text-gray-700">Mot
+                                            de passe actuel</label>
+                                        <input type="password" v-model="currentPassword" id="currentPassword"
+                                            name="currentPassword" class="input-field">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label for="newPassword" class="block text-sm font-medium text-gray-700">Nouveau
+                                            mot de passe</label>
+                                        <input type="password" v-model="newPassword" id="newPassword" name="newPassword"
+                                            class="input-field">
+                                    </div>
+                                    <div>
+                                        <label for="confirmNewPassword"
+                                            class="block text-sm font-medium text-gray-700">Confirmer le nouveau mot de
+                                            passe</label>
+                                        <input type="password" v-model="confirmNewPassword" id="confirmNewPassword"
+                                            name="confirmNewPassword" class="input-field">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button @click="changePassword" type="button"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Changer
+                        </button>
+                        <button @click="closeChangePasswordModal" type="button"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Annuler
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>
@@ -113,6 +168,10 @@ export default {
             editedTelEmergency: null,
             avatar: null,
             password: null,
+            currentPassword: null,
+            newPassword: null,
+            confirmNewPassword: null,
+            showChangePasswordModal: false,
         };
     },
     async mounted() {
@@ -176,6 +235,12 @@ export default {
             this.user.tel_medic = this.editedTelMedic;
             this.user.tel_emergency = this.editedTelEmergency;
             this.user.password = null;
+            this.user.name = null;
+            this.user.firstname = null;
+            this.user.date_end_pay = null;
+            this.user.date_payment = null;
+
+            
             try {
                 const token = localStorage.getItem('accessToken');
                 const userId = this.getUserIdFromToken();
@@ -239,6 +304,7 @@ export default {
         async handleAvatarUpload(event) {
             const file = event.target.files[0];
             if (file) {
+                // Si un fichier est sélectionné, procédez comme d'habitude pour mettre à jour l'avatar
                 const token = localStorage.getItem('accessToken');
                 const userId = this.getUserIdFromToken();
                 if (!userId) {
@@ -273,6 +339,59 @@ export default {
                 } catch (error) {
                     console.error('Erreur lors du téléchargement de la photo de profil:', error);
                 }
+            } else {
+                // Si aucun fichier n'est sélectionné, ne rien faire
+                console.log('Aucun fichier sélectionné pour l\'avatar.');
+            }
+        },
+        openChangePasswordModal() {
+            this.showChangePasswordModal = true;
+        },
+        closeChangePasswordModal() {
+            this.showChangePasswordModal = false;
+            // Réinitialiser les champs de mot de passe lorsque la modal est fermée
+            this.currentPassword = '';
+            this.newPassword = '';
+            this.confirmNewPassword = '';
+        },
+        async changePassword() {
+            
+            // Vérifier si les nouveaux mots de passe correspondent
+            if (this.newPassword !== this.confirmNewPassword) {
+                alert("Les nouveaux mots de passe ne correspondent pas.");
+                return;
+            }
+
+            try {
+                // Envoyer une requête au serveur pour changer le mot de passe
+                const token = localStorage.getItem('accessToken');
+                const userId = this.getUserIdFromToken();
+                if (!userId) {
+                    console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
+                    return;
+                }
+                const response = await fetch(`http://localhost:8080/users/${userId}/`, {
+                    method: 'PATCH',
+                    mode: 'cors',
+                    body: JSON.stringify({
+                        currentPassword: this.currentPassword,
+                        password: this.newPassword
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    alert("Mot de passe changé avec succès.");
+                    this.closeChangePasswordModal();
+                } else {
+                    const errorMessage = await response.text();
+                    alert(`Erreur lors du changement de mot de passe : ${errorMessage}`);
+                }
+            } catch (error) {
+                console.error('Erreur lors du changement de mot de passe', error);
+                alert("Erreur lors du changement de mot de passe. Veuillez réessayer.");
             }
         },
 

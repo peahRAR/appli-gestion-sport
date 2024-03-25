@@ -301,6 +301,22 @@ export class UsersService {
     }
 
     // Crypter les autres champs s'ils sont non null
+    if (updateUserDto.name) {
+      const nameEncrypt = this.createEncryptedField(
+        updateUserDto.name,
+      );
+      user.name = {
+        identifier: nameEncrypt,
+        data: nameEncrypt,
+      };
+    }
+    if (updateUserDto.firstname) {
+      const firstnameEncrypt = this.createEncryptedField(updateUserDto.firstname);
+      user.firstname = {
+        identifier: firstnameEncrypt,
+        data: firstnameEncrypt,
+      };
+    }
     if (updateUserDto.tel_medic) {
       const telMedicEncrypt = this.createEncryptedField(
         updateUserDto.tel_medic,

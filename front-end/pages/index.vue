@@ -28,7 +28,8 @@ export default {
                 // Si aucun token d'accès n'est présent, ou s'il n'est pas valide, mettre à jour isAuthenticated à false
                 this.isAuthenticated = false;
             }
-        }
+        },
+        
     }
 };
 

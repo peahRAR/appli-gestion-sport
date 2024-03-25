@@ -60,15 +60,16 @@
 
 
 
-                <div class="flex flex-col justify-between mt-4 ">
-                    <button
+                <div class="flex flex-col justify-between mt-4">
+                    <button @click="participate(event)"
                         class="bg-green-600 hover:bg-gray-700 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500">
                         Je participe
                     </button>
 
-                    <button
-                        class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Je
-                        ne participe pas</button>
+                    <button @click="unparticipate(event)"
+                        class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Je ne participe pas
+                    </button>
                 </div>
             </div>
         </div>
@@ -98,7 +99,11 @@ export default {
     async mounted() {
         // Charger les événements depuis votre API lors du montage du composant
         await this.loadEvents();
+        await this.getUserIdFromToken();
+        const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
+        console.log('User ID:', userId);
     },
+
     methods: {
         async loadEvents() {
             try {
@@ -117,6 +122,20 @@ export default {
                 this.events = response.data;
             } catch (error) {
                 console.error('Erreur lors du chargement des événements', error);
+            }
+        },
+        async getUserIdFromToken() {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                // Analysez le token JWT pour obtenir les informations de l'utilisateur
+                const payload = token.split('.')[1];
+                const decodedPayload = atob(payload);
+                const parsedPayload = JSON.parse(decodedPayload);
+                return parsedPayload.sub; // Retourne la promesse de l'ID de l'utilisateur
+            } else {
+                // Gérer le cas où aucun token n'est disponible
+                console.error('Aucun token JWT trouvé dans le localStorage');
+                return null;
             }
         },
         formatDate(dateString) {
@@ -171,39 +190,117 @@ export default {
             }
             return formattedOverview;
         },
-        openModal(eventId, userId) {
-            
-            // Récupération des membres liés à l'événement actif
+        async openModal(eventId) {
             const token = localStorage.getItem('accessToken');
-            fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                    
-                }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erreur lors de la récupération des membres');
+            const userId = await this.getUserIdFromToken();
+            try {
+                const response = await fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    // Enregistrer les membres récupérés dans la variable eventParticipants
-                    this.eventParticipants = data;
-                    // Afficher la modale une fois les données récupérées
-                    this.showModal = true;
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
                 });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch event participants');
+                }
+                const data = await response.json();
+                this.eventParticipants = data; // Mettez à jour la liste des participants avec les données récupérées
+                this.showModal = true; // Affichez la modale une fois les données récupérées
+            } catch (error) {
+                console.error('Error fetching event participants:', error);
+                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+            }
         },
         // Méthode pour fermer la modale
         closeModal() {
             this.showModal = false;
+        },
+        async participate(event) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                const userId = await this.getUserIdFromToken();
+
+                // Vérifie si l'utilisateur est déjà inscrit à l'événement
+                if (!this.eventParticipants.some(participant => participant.id === userId)) {
+                    // Si l'utilisateur n'est pas inscrit, ajoutez son ID à la liste des participants
+                    const response = await fetch(`http://localhost:8080/lists-members`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            eventId: event.id,
+                            userId: userId
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to participate in the event');
+                    }
+
+                    // Mettez à jour localement la liste des participants et le nombre de places disponibles
+                    this.eventParticipants.push({ id: userId, name: 'Nom de l\'utilisateur' });
+                    event.places--;
+
+                    // Mettez à jour l'événement sur le serveur
+                    await this.updateEvent(event, token);
+                }
+            } catch (error) {
+                console.error('Error participating in the event:', error);
+                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+            }
+        },
+        async unparticipate(event) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                const userId = await this.getUserIdFromToken();
+
+                // Recherchez l'indice de l'utilisateur dans la liste des participants
+                const index = this.eventParticipants.findIndex(participant => participant.id === userId);
+
+                // Vérifie si l'utilisateur est inscrit à l'événement
+                if (index !== -1) {
+                    // Si l'utilisateur est inscrit, retirez son ID de la liste des participants
+                    this.eventParticipants.splice(index, 1);
+
+                    // Incrémentez le nombre de places disponibles
+                    event.places++;
+
+                    // Supprimez l'inscription de l'utilisateur à l'événement sur le serveur
+                    const response = await fetch(`http://localhost:8080/lists-members/${event.id}/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to unparticipate in the event');
+                    }
+
+                    // Mettez à jour l'événement sur le serveur
+                    await this.updateEvent(event, token);
+                }
+            } catch (error) {
+                console.error('Error unparticipating in the event:', error);
+                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+            }
+        },
+
+        async updateEvent(event, token) {
+            // Enregistrez les modifications de l'événement sur le serveur
+            await useFetch(`http://localhost:8080/events/${event.id}`, {
+                method: 'PATCH',
+                mode: 'cors',
+                body: JSON.stringify(event),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
         }
+
 
     }
 };

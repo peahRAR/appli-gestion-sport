@@ -248,6 +248,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
+                
                 await useFetch(`http://localhost:8080/users/${userId}`, {
                     method: 'PATCH',
                     mode: 'cors',

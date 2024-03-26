@@ -110,10 +110,6 @@ export default {
         const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
         console.log('User ID:', userId);
     },
-    computed: {
-        
-
-    },
 
     methods: {
         async loadEvents() {
@@ -273,15 +269,17 @@ export default {
                         })
                     });
                     if (!response.ok) {
-                        throw new Error('Failed to participate in the event');
+                        alert ('Désolé, il n\'y a plus de place pour ce cours');
                     }
-
+                    console.log('cest la fin')
+                    this.event = await this.loadEvents();
 
                 }
             } catch (error) {
                 console.error('Error participating in the event:', error);
                 // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
             }
+            
         },
        
         calculateEndTime(startTime, duration) {

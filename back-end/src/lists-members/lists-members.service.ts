@@ -39,9 +39,13 @@ export class ListsMembersService {
     userId: number,
     updateListsMemberDto: UpdateListsMemberDto,
   ): Promise<ListsMember | undefined> {
-    
     const response = await this.eventsService.findOne(eventId);
     let places = response.places;
+
+    // Vérifier si l'utilisateur souhaite s'inscrire et s'il reste des places disponibles
+    if (updateListsMemberDto.isParticipant && places <= 0) {
+      throw new Error("Désolé, il n'y a plus de place pour ce cours");
+    }
 
     // Récupérer l'entrée de la liste des membres correspondant à l'utilisateur et à l'événement
     const fetchBdd = await this.listsMemberRepository.findOne({
@@ -60,7 +64,6 @@ export class ListsMembersService {
     if (updateListsMemberDto.isParticipant === false) {
       if (!fetchBdd) {
         this.create({ eventId, userId, isParticipant: false });
-        
       } else {
         await this.listsMemberRepository.update(
           { eventId, userId },

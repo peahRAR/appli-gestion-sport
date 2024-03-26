@@ -198,9 +198,9 @@
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
                     <p><strong>Poids:</strong> {{ selectedUser.weight.data || 'Non renseigné' }}Kg</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                        'Non renseigné' }}</p>
+                            'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -250,8 +250,10 @@ export default {
     methods: {
         async createCourse() {
             try {
+
                 this.newCourse.places = this.newCourse.totalPlaces
                 this.newCourse.duration = this.newCourse.duration * 60
+
                 const token = localStorage.getItem('accessToken');
                 // Envoyer une requête HTTP POST pour créer le cours
                 const response = await fetch('http://localhost:8080/events', {
@@ -300,7 +302,7 @@ export default {
         // Méthode pour ouvrir la modal et afficher les informations de l'utilisateur sélectionné
         openModal(user) {
             this.selectedUser = user;
-            
+
         },
         // Méthode pour fermer la modal
         closeModal() {
@@ -386,7 +388,7 @@ export default {
                 const token = localStorage.getItem('accessToken');
                 const userId = this.selectedUser.id; // Récupérez l'ID de l'utilisateur sélectionné
                 this.selectedUser.password = null;
-                
+
 
                 // Faire une requête HTTP PATCH pour mettre à jour les informations de l'utilisateur
                 const response = await useFetch(`http://localhost:8080/users/${userId}`, {

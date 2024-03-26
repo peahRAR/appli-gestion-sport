@@ -41,8 +41,13 @@
                         <path fill="currentColor"
                             d="m12.5 12.387l2.788 2.788q.14.136.14.339t-.14.35q-.146.165-.356.155q-.21-.01-.357-.156l-2.833-2.832q-.13-.131-.186-.275q-.056-.143-.056-.296V8.423q0-.212.144-.356T12 7.923t.356.144q.143.144.143.356zM12 6q-.213 0-.357-.144q-.143-.143-.143-.356V4h1v1.5q0 .213-.144.356Q12.212 6 12 6m6 6q0-.213.144-.357q.144-.143.356-.143H20v1h-1.5q-.213 0-.356-.144Q18 12.212 18 12m-6 6q.213 0 .357.144q.143.144.143.356V20h-1v-1.5q0-.213.144-.356Q11.788 18 12 18m-6-6q0 .213-.144.357q-.143.143-.356.143H4v-1h1.5q.213 0 .356.144Q6 11.788 6 12m6.003 9q-1.866 0-3.51-.708q-1.643-.709-2.859-1.924q-1.216-1.214-1.925-2.856Q3 13.87 3 12.003q0-1.866.708-3.51q.709-1.643 1.924-2.859q1.214-1.216 2.856-1.925Q10.13 3 11.997 3q1.866 0 3.51.708q1.643.709 2.859 1.924q1.216 1.214 1.925 2.856Q21 10.13 21 11.997q0 1.866-.708 3.51q-.709 1.643-1.924 2.859q-1.214 1.216-2.856 1.925Q13.87 21 12.003 21M20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20q3.35 0 5.675-2.325T20 12m-8 0" />
                     </svg>
-                    <p class="text-gray-800 font-semibold ">À:</p>
+                    <p class="text-gray-800 font-semibold ">De:</p>
                     <p class="text-gray-800 font-semibold ml-1">{{ formatTime(event.date_event) }}</p>
+                    <p class="text-gray-800 font-semibold ml-1 ">à</p>
+                    <p class="text-gray-800 font-semibold ml-1">{{ calculateEndTime(event.date_event, event.duration) }}
+                    </p>
+
+
 
                     <p class="text-gray-500 ml-1">({{ formatDuration(event.duration) }})</p>
                 </div>
@@ -175,8 +180,24 @@ export default {
         },
         formatDuration(duration) {
             // Formater la durée en chaîne de caractères
-            const hours = duration.hours;
-            const minutes = duration.minutes;
+            let hours = duration.hours;
+            let minutes = duration.minutes;
+            // Vérifier si aucune valeur n'est retournée pour les heures
+            if (!hours && hours !== 0) {
+                // Si aucune valeur n'est retournée, définir les heures par défaut à '00'
+                hours = '00';
+            } else if (hours < 10) {
+                // Si les heures sont inférieures à 10, ajouter un zéro devant pour le formatage
+                hours = `0${hours}`;
+            }
+            // Vérifier si aucune valeur n'est retournée pour les minutes
+            if (!minutes && minutes !== 0) {
+                // Si aucune valeur n'est retournée, définir les minutes par défaut à '00'
+                minutes = '00';
+            } else if (minutes < 10) {
+                // Si les minutes sont inférieures à 10, ajouter un zéro devant pour le formatage
+                minutes = `0${minutes}`;
+            }
             return `${hours}h ${minutes}`;
         },
         toggleOverflow() {
@@ -303,7 +324,23 @@ export default {
                     'Authorization': `Bearer ${token}`
                 }
             });
-        }
+        },
+        calculateEndTime(startTime, duration) {
+            // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
+            const startDate = new Date(startTime);
+
+            // Convertir la durée en minutes totales
+            const totalMinutes = (duration.hours || 0) * 60 + (duration.minutes || 0);
+
+            // Ajouter les minutes totales à l'heure de début de l'événement
+            const endTime = new Date(startDate.getTime() + totalMinutes * 60000);
+
+            // Formater l'heure de fin pour l'affichage
+            const formattedEndTime = this.formatTime(endTime);
+
+            return formattedEndTime;
+        },
+
 
 
     }

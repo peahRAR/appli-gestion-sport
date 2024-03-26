@@ -198,9 +198,9 @@
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
                     <p><strong>Poids:</strong> {{ selectedUser.weight.data || 'Non renseigné' }}Kg</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                        'Non renseigné' }}</p>
+                            'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -227,6 +227,110 @@
             </div>
         </div>
     </div>
+    <!-- Tableau des événements -->
+    <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <h2 class="text-xl font-semibold mb-2">Liste des événements</h2>
+        <div class="max-w-screen-lg mx-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col"
+                            class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date de l'événement
+                        </th>
+                        <th scope="col"
+                            class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Nom de l'événement
+                        </th>
+                        <th scope="col"
+                            class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr v-for="(event, index) in events" :key="event.id">
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize">
+                            {{ formatDate(event.date_event) }}
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize">
+                            {{ event.name_event }}
+                        </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500">
+                            <!-- Boutons pour modifier et supprimer l'événement -->
+                            <button @click="editEvent(event)"
+                                class="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600">Modifier</button>
+                            <button @click="deleteEvent(event.id)"
+                                class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600">Supprimer</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Modale pour l'édition de l'événement -->
+    <div v-if="showModal" class="fixed z-10 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+
+            <!-- Fond semi-transparent -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+            <!-- Conteneur de la modale -->
+            <div class="bg-white rounded-lg overflow-hidden shadow-xl transform transition-all sm:max-w-lg w-full">
+                <!-- Contenu de la modale -->
+                <div class="px-6 py-4">
+                    <!-- Titre de la modale -->
+                    <h2 class="text-lg font-medium text-gray-900">Modifier l'événement</h2>
+
+                    <!-- Formulaire pour l'édition de l'événement -->
+                    <form @submit.prevent="saveChanges">
+
+                        <div class="flex flex-col">
+                            <label for="title" class="font-semibold">Titre du cours</label>
+                            <input type="text" v-model="editedEvent.name_event" id="title"
+                                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="description" class="font-semibold">Description du cours</label>
+                            <textarea v-model="editedEvent.overview" id="description"
+                                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+                                placeholder=""></textarea>
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="coach">Nom du coach</label>
+                            <input type="text" v-model="editedEvent.coach" id="coach"
+                                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="duration">Durée du cours (en minutes)</label>
+                            <input type="number" v-model="durationInHours" id="duration"
+                                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md">
+                        </div>
+                        <!-- Champ pour le nombre de places total disponibles -->
+                        <div class="flex flex-col">
+                            <label for="totalSeats">Nombre de places total disponibles</label>
+                            <input type="number" v-model="editedEvent.totalPlaces" id="totalSeats"
+                                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md">
+                        </div>
+
+
+
+                        <!-- Boutons pour annuler ou sauvegarder -->
+                        <div class="flex justify-end">
+                            <button type="button" @click="closeModal"
+                                class="mr-2 bg-gray-200 text-gray-800 px-4 py-1 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                Annuler
+                            </button>
+                            <button type="submit"
+                                class="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                Sauvegarder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 export default {
@@ -238,14 +342,24 @@ export default {
                 overview: null,
                 coach: null,
                 date_event: null,
-                duration: 0 ,
+                duration: 0,
                 totalPlaces: null,
                 places: null
             },
             selectedUser: null,
             inactiveUsers: [],
+            events: [],
+            showModal: false, // Indicateur pour afficher ou masquer la modale
+            editedEvent: {},
 
         };
+    },
+    async mounted() {
+        // Charger les événements depuis votre API lors du montage du composant
+        await this.loadEvents();
+        await this.loadUsers();
+        await this.loadInactiveUsers();
+
     },
     computed: {
         durationInHours: {
@@ -260,6 +374,25 @@ export default {
         }
     },
     methods: {
+        async loadEvents() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                // Faire une requête GET à votre API pour récupérer les événements
+                const response = await useFetch('http://localhost:8080/events', {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // Stocker les événements dans la variable events
+                this.events = response.data;
+            } catch (error) {
+                console.error('Erreur lors du chargement des événements', error);
+            }
+        },
         async createCourse() {
             try {
 
@@ -389,6 +522,28 @@ export default {
             }
 
             return age;
+        },
+        formatDate(dateString) {
+            // Convertir la chaîne de caractères de la date en objet Date
+            const date = new Date(dateString);
+
+            // Formater la date au format "jour semaine, jour mois année"
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+
+            let formattedDate = date.toLocaleDateString('fr-FR', options);
+
+            // Extraire les deux derniers chiffres de l'année
+            const lastTwoDigitsOfYear = formattedDate.slice(-2);
+
+            // Retirer l'année complète et ajouter les deux derniers chiffres
+            formattedDate = formattedDate.replace(date.getFullYear(), lastTwoDigitsOfYear);
+
+            return formattedDate;
         },
         async updateUser() {
             try {
@@ -537,13 +692,76 @@ export default {
                 console.error('Erreur lors de la modification du rôle de l\'utilisateur :', error);
                 // Afficher un message d'erreur à l'utilisateur, par exemple avec un toast ou une alerte
             }
-        }
+        },
+        async deleteEvent(eventId) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                // Envoyer une requête HTTP DELETE pour supprimer l'événement avec l'ID spécifié
+                const response = await fetch(`http://localhost:8080/events/${eventId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // Vérifier si la suppression a réussi (statut 200)
+                if (response.ok) {
+                    // Mettre à jour la liste des événements après la suppression
+                    this.loadEvents(); // Vous devez implémenter la méthode loadEvents pour charger à nouveau la liste des événements depuis votre API
+                    // Afficher un message de succès à l'utilisateur
+                    alert('L\'événement a été supprimé avec succès!');
+                } else {
+                    // En cas d'erreur, afficher un message d'erreur
+                    throw new Error('Erreur lors de la suppression de l\'événement');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la suppression de l\'événement:', error);
+                // Vous pouvez également afficher un message d'erreur à l'utilisateur ici
+            }
+        },
+        closeModal() {
+            // Réinitialiser les données de l'événement en cours d'édition
+            this.editedEvent = {};
+            // Masquer la modale
+            this.showModal = false;
+        },
+        editEvent(event) {
+            // Mettre à jour les données de l'événement en cours d'édition
+            this.editedEvent = { ...event };
+            // Afficher la modale
+            this.showModal = true;
+        },
+        async saveChanges() {
+            const token = localStorage.getItem('accessToken');
+            try {
+                // Effectuer une requête PATCH pour mettre à jour l'événement
+                const response = await fetch(`http://localhost:8080/events/${eventId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(this.editedEvent),
+                });
+
+                if (response.ok) {
+                    // Mettre à jour l'événement dans la liste des événements après la modification
+                    // Vous pouvez implémenter cette partie en fonction de la logique de votre application
+                    console.log('Événement modifié avec succès');
+                } else {
+                    console.error('Erreur lors de la modification de l\'événement');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la modification de l\'événement :', error);
+            } finally {
+                // Masquer la modale après avoir enregistré les modifications
+                this.closeModal();
+            }
+        },
+
+
 
     },
-    created() {
-        // Appel de la méthode pour récupérer la liste des utilisateurs lors de la création du composant
-        this.loadUsers();
-        this.loadInactiveUsers();
-    }
+
 };
 </script>

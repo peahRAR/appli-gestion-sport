@@ -4,6 +4,7 @@ import { ListsMembersController } from './lists-members.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ListsMember } from './lists-member.entity';import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventsModule } from 'src/events/events.module';
 
 
 @Module({
@@ -17,6 +18,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         signOptions: { expiresIn: configService.get<string>('JWT_EXP') },
       }),
     }),
+    EventsModule
   ],
   controllers: [ListsMembersController],
   providers: [ListsMembersService],

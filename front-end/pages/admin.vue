@@ -160,7 +160,7 @@
                 </div>
                 <div class="flex flex-col">
                     <label for="duration">Durée du cours (en minutes)</label>
-                    <input type="number" v-model="newCourse.duration" id="duration"
+                    <input type="number" v-model="durationInHours" id="duration"
                         class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md">
                 </div>
                 <!-- Champ pour le nombre de places total disponibles -->
@@ -198,9 +198,9 @@
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
                     <p><strong>Poids:</strong> {{ selectedUser.weight.data || 'Non renseigné' }}Kg</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                            'Non renseigné' }}</p>
+                        'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -234,11 +234,11 @@ export default {
         return {
             users: [], // Liste des utilisateurs
             newCourse: { // Nouveau cours à créer
-                name_event: '',
+                name_event: null,
                 overview: null,
-                coach: '',
+                coach: null,
                 date_event: null,
-                duration: null * 60,
+                duration: 0 ,
                 totalPlaces: null,
                 places: null
             },
@@ -247,12 +247,24 @@ export default {
 
         };
     },
+    computed: {
+        durationInHours: {
+            get() {
+                // Renvoie la valeur de newCourse.duration divisée par 60
+                return this.newCourse.duration / 60;
+            },
+            set(value) {
+                // Met à jour newCourse.duration avec la valeur entrée multipliée par 60
+                this.newCourse.duration = value * 60;
+            }
+        }
+    },
     methods: {
         async createCourse() {
             try {
 
                 this.newCourse.places = this.newCourse.totalPlaces
-                this.newCourse.duration = this.newCourse.duration * 60
+                const duration = this.newCourse.duration * 60
 
                 const token = localStorage.getItem('accessToken');
                 // Envoyer une requête HTTP POST pour créer le cours

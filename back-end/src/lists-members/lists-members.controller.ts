@@ -1,6 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
-import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
@@ -10,12 +9,6 @@ import { AdminGuard } from '../auth/admin.guard';
 export class ListsMembersController {
   constructor(private readonly listsMembersService: ListsMembersService) {}
 
-  @Post()
-  @UseGuards(AdminGuard)
-  @UseGuards(JwtAuthGuard)
-  create(@Body() createListsMemberDto: CreateListsMemberDto) {
-    return this.listsMembersService.create(createListsMemberDto);
-  }
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -30,7 +23,6 @@ export class ListsMembersController {
   }
 
   @Patch(':eventId/:userId')
-  @UseGuards(AdminGuard)
   @UseGuards(JwtAuthGuard)
   update(
     @Param('eventId') eventId: string,

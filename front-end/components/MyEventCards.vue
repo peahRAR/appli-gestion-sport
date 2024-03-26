@@ -1,6 +1,6 @@
 <template>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="event in events" :key="event.id"
+        <div v-for="(event,index) in events" :key="event.id"
             class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mx-2 ">
             <div class="p-2">
                 <div class="flex felx-rox justify-between mb-4 border-b border-gray-300 pb-2">
@@ -21,12 +21,12 @@
                                     clip-rule="evenodd" />
                             </g>
                         </svg>
-                        <p class="text-gray-800 font-semibold text-xs ">{{ event.places }} places restantes</p>
+                        <p class="text-gray-800 font-semibold text-xs ">{{event.places}}</p>
                     </div>
 
                 </div>
                 <div class="flex flex-row justify-between items-center  ">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-2">{{ event.name_event }}</h2>
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2 uppercase">{{ event.name_event }}</h2>
                     <div class="flex flex-row justify-between">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512">
                             <circle cx="256" cy="56" r="56" fill="text-gray-500" />
@@ -52,13 +52,13 @@
                     <p class="text-gray-500 ml-1">({{ formatDuration(event.duration) }})</p>
                 </div>
                 <div class="flex flex-col">
-                    <p class="text-gray-500 mb-4 p-1 text-justify" :class="{ 'line-clamp-3': !showOverflow }">
+                    <p class="text-gray-500 mb-4 p-1 text-left" :class="{ 'line-clamp-3': !event.showOverflow }">
                         {{ formatOverview(event.overview) }}
                     </p>
-                    <button @click="toggleOverflow"
+                    <button @click="toggleOverflow(event)"
                         class="text-gray-800 font-semibold text-sm focus:outline-none text-center"
                         v-if="event.overview.length > 150 || showOverflow">
-                        Afficher {{ showOverflow ? 'moins &#x25B2;' : 'plus &#x25BC;' }}
+                        Afficher {{ event.showOverflow ? 'moins &#x25B2;' : 'plus &#x25BC;' }}
                     </button>
                 </div>
 
@@ -66,12 +66,12 @@
 
 
                 <div class="flex flex-col justify-between mt-4">
-                    <button @click="participate(event)"
+                    <button  @click="participate(event,true)"
                         class="bg-green-600 hover:bg-gray-700 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500">
                         Je participe
                     </button>
 
-                    <button @click="unparticipate(event)"
+                    <button  @click="participate(event,false)"
                         class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         Je ne participe pas
                     </button>
@@ -92,13 +92,15 @@
 </template>
 
 <script>
+
 export default {
     data() {
         return {
             events: [],
             showOverflow: false,
             showModal: false,
-            eventParticipants: []
+            eventParticipants: [],
+            // nombreParticipant
         };
     },
     async mounted() {
@@ -107,6 +109,10 @@ export default {
         await this.getUserIdFromToken();
         const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
         console.log('User ID:', userId);
+    },
+    computed: {
+        
+
     },
 
     methods: {
@@ -178,6 +184,9 @@ export default {
 
             return formattedTime;
         },
+        nbPlaces(places) {
+            console.log(places)
+        },
         formatDuration(duration) {
             // Formater la durée en chaîne de caractères
             let hours = duration.hours;
@@ -200,8 +209,9 @@ export default {
             }
             return `${hours}h ${minutes}`;
         },
-        toggleOverflow() {
-            this.showOverflow = !this.showOverflow;
+        toggleOverflow(event) {
+
+            event.showOverflow = !event.showOverflow;
         },
         formatOverview(overview) {
             // Formater le texte en divisant en lignes de 50 caractères et passer automatiquement à la ligne suivante
@@ -211,120 +221,69 @@ export default {
             }
             return formattedOverview;
         },
-        async openModal(eventId) {
-            const token = localStorage.getItem('accessToken');
-            const userId = await this.getUserIdFromToken();
-            try {
-                const response = await fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch event participants');
-                }
-                const data = await response.json();
-                // Mettez à jour la liste des participants avec les données récupérées, y compris le nom et le prénom de l'utilisateur
-                this.eventParticipants = data.map(participant => ({
-                    id: participant.id,
-                    name: `${participant.firstName} ${participant.lastName}` // Ajoutez le nom et le prénom de l'utilisateur
-                }));
-                this.showModal = true; // Affichez la modale une fois les données récupérées
-            } catch (error) {
-                console.error('Error fetching event participants:', error);
-                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
-            }
-        },
+        // async openModal(eventId) {
+        //     const token = localStorage.getItem('accessToken');
+        //     const userId = await this.getUserIdFromToken();
+        //     try {
+        //         const response = await fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
+        //             method: 'GET',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'Authorization': `Bearer ${token}`
+        //             }
+        //         });
+        //         if (!response.ok) {
+        //             throw new Error('Failed to fetch event participants');
+        //         }
+        //         const data = await response.json();
+        //         // Mettez à jour la liste des participants avec les données récupérées, y compris le nom et le prénom de l'utilisateur
+        //         this.eventParticipants = data.map(participant => ({
+        //             id: participant.id,
+        //             name: `${participant.firstName} ${participant.lastName}` // Ajoutez le nom et le prénom de l'utilisateur
+        //         }));
+        //         this.showModal = true; // Affichez la modale une fois les données récupérées
+        //     } catch (error) {
+        //         console.error('Error fetching event participants:', error);
+        //         // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+        //     }
+        // },
         // Méthode pour fermer la modale
         closeModal() {
             this.showModal = false;
         },
-        async participate(event) {
+        async participate(event,value) {
             try {
                 const token = localStorage.getItem('accessToken');
                 const userId = await this.getUserIdFromToken();
+                
 
                 // Vérifie si l'utilisateur est déjà inscrit à l'événement
                 if (!this.eventParticipants.some(participant => participant.id === userId)) {
                     // Si l'utilisateur n'est pas inscrit, ajoutez son ID à la liste des participants
-                    const response = await fetch(`http://localhost:8080/lists-members`, {
-                        method: 'POST',
+                    const response = await fetch(`http://localhost:8080/lists-members/${event.id}/${userId}`, {
+                        method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
                         body: JSON.stringify({
                             eventId: event.id, // Utilisation de l'ID de l'événement spécifique
-                            userId: userId
+                            userId: userId,
+                            isParticipant: value
                         })
                     });
                     if (!response.ok) {
                         throw new Error('Failed to participate in the event');
                     }
 
-                    // Mettez à jour localement la liste des participants et le nombre de places disponibles pour cet événement spécifique
-                    this.eventParticipants.push({ id: userId, name: 'Nom de l\'utilisateur' });
-                    event.places--;
 
-                    // Mettez à jour l'événement sur le serveur
-                    await this.updateEvent(event, token);
                 }
             } catch (error) {
                 console.error('Error participating in the event:', error);
                 // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
             }
         },
-        async unparticipate(event) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                const userId = await this.getUserIdFromToken();
-
-                // Recherchez l'indice de l'utilisateur dans la liste des participants
-                const index = this.eventParticipants.findIndex(participant => participant.id === userId);
-
-                // Vérifie si l'utilisateur est inscrit à l'événement
-                if (index !== -1) {
-                    // Si l'utilisateur est inscrit, retirez son ID de la liste des participants
-                    this.eventParticipants.splice(index, 1);
-
-                    // Incrémentez le nombre de places disponibles pour cet événement spécifique
-                    event.places++;
-
-                    // Supprimez l'inscription de l'utilisateur à l'événement sur le serveur
-                    const response = await fetch(`http://localhost:8080/lists-members/${event.id}/${userId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error('Failed to unparticipate in the event');
-                    }
-
-                    // Mettez à jour l'événement sur le serveur
-                    await this.updateEvent(event, token);
-                }
-            } catch (error) {
-                console.error('Error unparticipating in the event:', error);
-                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
-            }
-        },
-
-        async updateEvent(event, token) {
-            // Enregistrez les modifications de l'événement sur le serveur
-            await useFetch(`http://localhost:8080/events/${event.id}`, {
-                method: 'PATCH',
-                mode: 'cors',
-                body: JSON.stringify(event),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-        },
+       
         calculateEndTime(startTime, duration) {
             // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
             const startDate = new Date(startTime);
@@ -341,6 +300,8 @@ export default {
             return formattedEndTime;
         },
 
+
+    
 
 
     }

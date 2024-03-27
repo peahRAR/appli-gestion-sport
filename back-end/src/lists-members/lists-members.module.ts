@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { ListsMembersController } from './lists-members.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -18,7 +18,7 @@ import { EventsModule } from 'src/events/events.module';
         signOptions: { expiresIn: configService.get<string>('JWT_EXP') },
       }),
     }),
-    EventsModule
+    forwardRef(() => EventsModule),
   ],
   controllers: [ListsMembersController],
   providers: [ListsMembersService],

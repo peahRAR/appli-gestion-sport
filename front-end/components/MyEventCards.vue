@@ -7,7 +7,8 @@
                     <div>
                         <p class="text-gray-800 text-xl font-bold capitalize">{{ formatDate(event.date_event) }}</p>
                     </div>
-                    <div @click="openModal" class="flex flex-row justify-between items-center rounded px-1" :class="{
+                    <div @click="openModal(event)" class="flex flex-row justify-between items-center rounded px-1"
+                        :class="{
             'bg-transparent': event.places === 0, // gris transparent quand il reste 0 place
             'bg-orange-500': event.places > 0 && event.places <= event.totalPlaces * 0.2, // couleur orangée quand il reste moins de 20% des places
             'bg-green-600': event.places > event.totalPlaces * 0.2 // couleur verte par défaut
@@ -66,12 +67,12 @@
 
 
                 <div class="flex flex-col justify-between mt-4">
-                    <button  @click="participate(event,true)"
+                    <button @click="participate(event,true)"
                         class="bg-green-600 hover:bg-gray-700 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500">
                         Je participe
                     </button>
 
-                    <button  @click="participate(event,false)"
+                    <button @click="participate(event,false)"
                         class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         Je ne participe pas
                     </button>
@@ -84,9 +85,49 @@
         <div class="bg-white p-4 rounded-lg">
             <h3 class="text-lg font-semibold mb-2">Liste des participants</h3>
             <ul>
-                <li v-for="participant in eventParticipants" :key="participant.id">{{ participant.name }}</li>
+                <li v-for="participant in eventParticipants" :key="participant.id">
+                    <div>
+                        <span>{{ participant.name }}</span>
+                        <!-- Condition pour afficher la flèche uniquement pour le rôle 1 ou 2 -->
+                        <span v-if="userRole === 1 || userRole === 2" @click="openDetailsModal(participant)"
+                            class="cursor-pointer">▼</span>
+                    </div>
+                </li>
             </ul>
             <button @click="closeModal" class="text-gray-800 font-semibold mt-4">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Deuxième modale pour afficher les détails supplémentaires -->
+    <div v-if="showDetailsModal"
+        class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-4 rounded-lg">
+            <h3 class="text-lg font-semibold mb-2">Détails de l'utilisateur</h3>
+            <ul>
+                <li class="capitalize">
+                    <strong>Nom:</strong> {{ userDetails.name.data }}
+                </li>
+                <li class="capitalize">
+                    <strong>Prénom:</strong> {{ userDetails.firstname.data }}
+                </li>
+
+                <li>
+                    <strong>E-mail:</strong> {{ userDetails.email.data }}
+                </li>
+                <li>
+                    <strong>Poids:</strong> {{ userDetails.weight.data }}
+                </li>
+                <li>
+                    <strong>Genre:</strong> {{ userDetails.gender ? 'Homme' : 'Femme' }}
+                </li>
+                <li>
+                    <strong>Licence:</strong> {{ userDetails.licence.data }}
+                </li>
+                <li>
+                    <strong>Date de fin de paiement:</strong> {{ userDetails.date_end_pay.data }}
+                </li>
+            </ul>
+            <button @click="closeDetailsModal" class="text-gray-800 font-semibold mt-4">Fermer</button>
         </div>
     </div>
 </template>
@@ -99,7 +140,10 @@ export default {
             events: [],
             showOverflow: false,
             showModal: false,
+            showDetailsModal: false,
             eventParticipants: [],
+            userDetails: {},
+            userRole: 0,
             // nombreParticipant
         };
     },
@@ -107,8 +151,9 @@ export default {
         // Charger les événements depuis votre API lors du montage du composant
         await this.loadEvents();
         await this.getUserIdFromToken();
+        await this.checkUserRole();
         const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
-        console.log('User ID:', userId);
+        
     },
 
     methods: {
@@ -217,35 +262,81 @@ export default {
             }
             return formattedOverview;
         },
-        // async openModal(eventId) {
-        //     const token = localStorage.getItem('accessToken');
-        //     const userId = await this.getUserIdFromToken();
-        //     try {
-        //         const response = await fetch(`http://localhost:8080/lists-members/${eventId}/${userId}`, {
-        //             method: 'GET',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'Authorization': `Bearer ${token}`
-        //             }
-        //         });
-        //         if (!response.ok) {
-        //             throw new Error('Failed to fetch event participants');
-        //         }
-        //         const data = await response.json();
-        //         // Mettez à jour la liste des participants avec les données récupérées, y compris le nom et le prénom de l'utilisateur
-        //         this.eventParticipants = data.map(participant => ({
-        //             id: participant.id,
-        //             name: `${participant.firstName} ${participant.lastName}` // Ajoutez le nom et le prénom de l'utilisateur
-        //         }));
-        //         this.showModal = true; // Affichez la modale une fois les données récupérées
-        //     } catch (error) {
-        //         console.error('Error fetching event participants:', error);
-        //         // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
-        //     }
-        // },
+        async openModal(event) {
+            const token = localStorage.getItem('accessToken');
+            console.log(event);
+            try {
+                const response = await fetch(`http://localhost:8080/lists-members/by-event/${event.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch event participants');
+                }
+                const data = await response.json();
+                console.log(data);
+
+                // Récupérer les utilisateurs correspondant aux IDs des participants
+                const usersPromises = data.map(async participant => {
+                    const userResponse = await fetch(`http://localhost:8080/users/${participant.userId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    if (!userResponse.ok) {
+                        throw new Error('Failed to fetch user');
+                    }
+                    const userData = await userResponse.json();
+                    return userData;
+                });
+
+                // Attendre la résolution de toutes les promesses pour obtenir les utilisateurs
+                const users = await Promise.all(usersPromises);
+
+                // Mettez à jour la liste des participants avec les données récupérées des utilisateurs
+                this.eventParticipants = users.map(user => ({
+                    id: user.id,
+                    name: `${user.firstname.data} ${user.name.data}` // Ajouter le nom et le prénom de l'utilisateur
+                }));
+                this.showModal = true; // Afficher la modale une fois les données récupérées
+            } catch (error) {
+                console.error('Error fetching event participants:', error);
+                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+            }
+        },
+        async openDetailsModal(participant) {
+            const token = localStorage.getItem('accessToken');
+            try {
+                const response = await fetch(`http://localhost:8080/users/${participant.id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user details');
+                }
+                const userDetails = await response.json();
+                this.userDetails = userDetails;
+                this.showDetailsModal = true;
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+                // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
+            }
+        },
         // Méthode pour fermer la modale
         closeModal() {
             this.showModal = false;
+            
+        },
+        closeDetailsModal(){
+            this.showDetailsModal = false;
         },
         async participate(event,value) {
             try {
@@ -296,6 +387,15 @@ export default {
             const formattedEndTime = this.formatTime(endTime);
 
             return formattedEndTime;
+        },
+        checkUserRole() {
+            const accessToken = localStorage.getItem('accessToken');
+            if (accessToken) {
+                const decodedToken = JSON.parse(atob(accessToken.split('.')[1]));
+                this.userRole = decodedToken.role;
+            } else {
+                this.userRole = 0;
+            }
         },
 
 

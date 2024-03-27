@@ -9,16 +9,24 @@ import { AdminGuard } from '../auth/admin.guard';
 export class ListsMembersController {
   constructor(private readonly listsMembersService: ListsMembersService) {}
 
-
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {
+    console.log('Non');
     return this.listsMembersService.findAll();
+  }
+
+  @Get('by-event/:eventId') // Ajoutez un chemin d'accès distinct pour findAllByIdEvent
+  findAllByIdEvent(@Param('eventId') eventId: string) {
+    console.log(eventId);
+    
+    return this.listsMembersService.findAllByIdEvent(+eventId);
   }
 
   @Get(':eventId/:userId')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('eventId') eventId: string, @Param('userId') userId: string) {
+    console.log('Aurevoir');
     return this.listsMembersService.findOne(+eventId, +userId);
   }
 
@@ -29,7 +37,11 @@ export class ListsMembersController {
     @Param('userId') userId: string,
     @Body() updateListsMemberDto: UpdateListsMemberDto,
   ) {
-    return this.listsMembersService.update(+eventId, +userId, updateListsMemberDto);
+    return this.listsMembersService.update(
+      +eventId,
+      +userId,
+      updateListsMemberDto,
+    );
   }
 
   @Delete(':eventId/:userId')

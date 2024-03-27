@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ListsMember } from './lists-member.entity';
@@ -11,8 +11,8 @@ export class ListsMembersService {
   constructor(
     @InjectRepository(ListsMember)
     private readonly listsMemberRepository: Repository<ListsMember>,
-    @Inject(EventsService)
-    private readonly eventsService: EventsService,
+    @Inject(forwardRef(() => EventsService))
+    private eventsService: EventsService,
   ) {}
 
   async create(
@@ -25,6 +25,10 @@ export class ListsMembersService {
 
   async findAll(): Promise<ListsMember[]> {
     return this.listsMemberRepository.find();
+  }
+
+  async findAllByIdEvent(eventId): Promise<ListsMember[]> {
+    return this.listsMemberRepository.find({ where: { eventId } });
   }
 
   async findOne(

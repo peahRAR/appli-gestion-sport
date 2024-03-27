@@ -115,16 +115,16 @@
                     <strong>E-mail:</strong> {{ userDetails.email.data }}
                 </li>
                 <li>
-                    <strong>Poids:</strong> {{ userDetails.weight.data }}
+                    <strong>Poids:</strong> {{ userDetails.weight && userDetails.weight.data || 'Non renseigné' }}
                 </li>
                 <li>
                     <strong>Genre:</strong> {{ userDetails.gender ? 'Homme' : 'Femme' }}
                 </li>
                 <li>
-                    <strong>Licence:</strong> {{ userDetails.licence.data }}
+                    <strong>Licence:</strong> {{ userDetails.licence && userDetails.licence.data || 'Non renseigné' }}
                 </li>
                 <li>
-                    <strong>Date de fin de paiement:</strong> {{ userDetails.date_end_pay.data }}
+                    <strong>Date de fin de paiement:</strong> {{ userDetails.date_end_pay && userDetails.date_end_pay.data || 'Non renseigné' }}
                 </li>
             </ul>
             <button @click="closeDetailsModal" class="text-gray-800 font-semibold mt-4">Fermer</button>
@@ -279,8 +279,11 @@ export default {
                 const data = await response.json();
                 console.log(data);
 
+                // Filtrer les participants ayant isParticipant = true
+                const participants = data.filter(participant => participant.isParticipant === true);
+
                 // Récupérer les utilisateurs correspondant aux IDs des participants
-                const usersPromises = data.map(async participant => {
+                const usersPromises = participants.map(async participant => {
                     const userResponse = await fetch(`http://localhost:8080/users/${participant.userId}`, {
                         method: 'GET',
                         headers: {
@@ -303,12 +306,14 @@ export default {
                     id: user.id,
                     name: `${user.firstname.data} ${user.name.data}` // Ajouter le nom et le prénom de l'utilisateur
                 }));
+                this.event = await this.loadEvents();
                 this.showModal = true; // Afficher la modale une fois les données récupérées
             } catch (error) {
                 console.error('Error fetching event participants:', error);
                 // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
             }
         },
+
         async openDetailsModal(participant) {
             const token = localStorage.getItem('accessToken');
             try {
@@ -324,6 +329,7 @@ export default {
                 }
                 const userDetails = await response.json();
                 this.userDetails = userDetails;
+                
                 this.showDetailsModal = true;
             } catch (error) {
                 console.error('Error fetching user details:', error);

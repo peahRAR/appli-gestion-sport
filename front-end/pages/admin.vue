@@ -134,7 +134,7 @@
                 </table>
             </div>
         </div>
-
+        <!-- Création de cours  -->
         <div class="bg-white mx-2 rounded p-2">
             <h2 class="text-xl font-semibold mb-2">Créer un nouveau cours</h2>
             <form @submit.prevent="createCourse" class="flex flex-col space-y-4">
@@ -175,6 +175,7 @@
         </div>
 
     </div>
+    <!-- Modale Utilisateur  -->
     <div v-if="selectedUser"
         class="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
         <div class="bg-white rounded-lg p-6 max-w-lg w-full">
@@ -194,13 +195,13 @@
                         <!-- Autres informations de l'utilisateur -->
                     </div>
                     <p><strong>E-mail:</strong> {{ selectedUser.email.data }}</p>
-                    <p><strong>Date de naissance:</strong> {{ selectedUser.birthday.data }}</p>
+                    <p><strong>Date de naissance:</strong> {{ formatDate(selectedUser.birthday.data) }}</p>
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
-                    <p><strong>Poids:</strong> {{ selectedUser.weight.data || 'Non renseigné' }}Kg</p>
+                    <p><strong>Poids:</strong> {{ selectedUser.weight && selectedUser.weight.data + 'Kg' || 'Non renseigné' }}</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                        'Non renseigné' }}</p>
+                            'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -221,7 +222,7 @@
                         <button v-if="selectedUser.role === 0" @click="changeUserRole(selectedUser.id)"
                             class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Passer Admin</button>
                     </div>
-                    <button @click="closeModal"
+                    <button @click="closeModalUser"
                         class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Fermer</button>
                 </div>
             </div>
@@ -236,11 +237,11 @@
                     <tr>
                         <th scope="col"
                             class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date de l'événement
+                            Date
                         </th>
                         <th scope="col"
-                            class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Nom de l'événement
+                            class="px-3 py-1 text-left max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Intitulé
                         </th>
                         <th scope="col"
                             class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -253,13 +254,13 @@
                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize">
                             {{ formatDate(event.date_event) }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
+                        <td class="px-3 py-2 max-w-20 whitespace-nowrap text-sm text-gray-500 uppercase">
                             {{ event.name_event }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500">
+                        <td class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500">
                             <!-- Boutons pour modifier et supprimer l'événement -->
                             <button @click="editEvent(event)"
-                                class="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600">Modifier</button>
+                                class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600">Modifier</button>
                             <button @click="deleteEvent(event.id)"
                                 class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600">Supprimer</button>
                         </td>
@@ -450,7 +451,7 @@ export default {
 
         },
         // Méthode pour fermer la modal
-        closeModal() {
+        closeModalUser() {
             this.selectedUser = null;
         },
         sortByAge(order) {
@@ -772,3 +773,4 @@ export default {
 
 };
 </script>
+

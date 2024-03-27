@@ -106,11 +106,15 @@
                                         <input type="password" v-model="currentPassword" id="currentPassword"
                                             name="currentPassword" class="input-field">
                                     </div>
-                                    <div class="mb-4">
+                                    <div class="mt-2">
                                         <label for="newPassword" class="block text-sm font-medium text-gray-700">Nouveau
                                             mot de passe</label>
                                         <input type="password" v-model="newPassword" id="newPassword" name="newPassword"
                                             class="input-field">
+                                        <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères -->
+                                        <p v-if="!validatePassword(newPassword)" class="text-red-500 text-xs mt-1">Le
+                                            mot de passe doit contenir au moins une lettre majuscule, une lettre
+                                            minuscule, un chiffre et un caractère spécial.</p>
                                     </div>
                                     <div>
                                         <label for="confirmNewPassword"
@@ -394,6 +398,11 @@ export default {
                 console.error('Erreur lors du changement de mot de passe', error);
                 alert("Erreur lors du changement de mot de passe. Veuillez réessayer.");
             }
+        },
+        validatePassword(password) {
+            // Expression régulière pour valider le mot de passe
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return passwordRegex.test(password);
         },
 
     }

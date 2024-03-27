@@ -44,15 +44,19 @@
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto;">
             <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
             <div class="flex items-center space-x-4 mb-4">
-                <select @change="handleSort($event.target.value)">
+                <select @change="updateSortBy(value)">
                     <option value="">Trier par...</option>
-                    <option value="age_asc">Âge croissant</option>
-                    <option value="age_desc">Âge décroissant</option>
-                    <option value="gender_asc">Genre (Homme-Femme)</option>
-                    <option value="weight_asc">Poids croissant</option>
-                    <option value="weight_desc">Poids décroissant</option>
+                    <option value="age">Âge</option>
+                    <option value="gender">Genre</option>
+                    <option value="weight">Poids</option>
                     <!-- Ajoutez d'autres options de tri ici -->
                 </select>
+                <select @change="updateSortOrder(value)">
+                    <option value="">Trier par...</option>
+                    <option value="asc">Croissant</option>
+                    <option value="desc">Décroissant</option>
+                </select>
+                <button @click="handleSort"> Filtrer</button>
             </div>
 
             <div class="overflow-x-auto">
@@ -199,9 +203,9 @@
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
                     <p><strong>Poids:</strong> {{ selectedUser.weight && selectedUser.weight.data + 'Kg' || 'Non renseigné' }}</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                            'Non renseigné' }}</p>
+                        'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -352,6 +356,8 @@ export default {
             events: [],
             showModal: false, // Indicateur pour afficher ou masquer la modale
             editedEvent: {},
+            sortBy: null, 
+            sortOrder: null
 
         };
     },
@@ -454,76 +460,7 @@ export default {
         closeModalUser() {
             this.selectedUser = null;
         },
-        sortByAge(order) {
-            this.users.sort((a, b) => {
-                const ageA = this.calculateAge(a.birth_date);
-                const ageB = this.calculateAge(b.birth_date);
-                if (order === 'asc') {
-                    return ageA - ageB;
-                } else {
-                    return ageB - ageA;
-                }
-            });
-        },
-        sortByGender(order) {
-            this.users.sort((a, b) => {
-                if (order === 'asc') {
-                    return a.gender.localeCompare(b.gender);
-                } else {
-                    return b.gender.localeCompare(a.gender);
-                }
-            });
-        },
-        sortByWeight(order) {
-            this.users.sort((a, b) => {
-                if (order === 'asc') {
-                    return a.weight - b.weight;
-                } else {
-                    return b.weight - a.weight;
-                }
-            });
-        },
-        handleSort(value) {
-            switch (value) {
-                case 'age_asc':
-                    this.sortByAge('asc');
-                    break;
-                case 'age_desc':
-                    this.sortByAge('desc');
-                    break;
-                case 'gender_asc':
-                    this.sortByGender('asc');
-                    break;
-                case 'weight_asc':
-                    this.sortByWeight('asc');
-                    break;
-                case 'weight_desc':
-                    this.sortByWeight('desc');
-                    break;
-                // Ajouter d'autres cas pour d'autres options de tri ici
-                default:
-                    break;
-            }
-        },
-        calculateAge(birthDate) {
-            // Convertir la date de naissance en objet Date
-            const birthDateObj = new Date(birthDate);
-
-            // Obtenir la date actuelle
-            const currentDate = new Date();
-
-            // Calculer la différence entre les années
-            let age = currentDate.getFullYear() - birthDateObj.getFullYear();
-
-            // Vérifier si l'anniversaire de cette année n'est pas encore passé
-            const currentMonth = currentDate.getMonth();
-            const birthMonth = birthDateObj.getMonth();
-            if (currentMonth < birthMonth || (currentMonth === birthMonth && currentDate.getDate() < birthDateObj.getDate())) {
-                age--;
-            }
-
-            return age;
-        },
+        
         formatDate(dateString) {
             // Convertir la chaîne de caractères de la date en objet Date
             const date = new Date(dateString);
@@ -770,6 +707,44 @@ export default {
 
 
     },
+    updateSortBy(value) {
+        this.sortBy = value; // Mettre à jour la variable sortBy avec la valeur sélectionnée
+        this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
+    },
+    updateSortOrder(value) {
+        this.sortOrder = value; // Mettre à jour la variable sortOrder avec la valeur sélectionnée
+        this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
+    },
+    async handleSort() {
+        // Vérifier si les options de tri sont sélectionnées
+        if (this.sortBy && this.sortOrder) {
+            // Copier la liste des utilisateurs pour ne pas modifier l'original
+            let sortedUsers = [...this.users];
+
+            // Logique de tri en fonction de l'option sélectionnée dans la première liste déroulante (sortBy)
+            switch (this.sortBy) {
+                case 'age':
+                    sortedUsers.sort((a, b) => {
+                        return this.sortOrder === 'asc' ? a.age - b.age : b.age - a.age;
+                    });
+                    break;
+                case 'gender':
+                    sortedUsers.sort((a, b) => {
+                        return this.sortOrder === 'asc' ? a.gender.localeCompare(b.gender) : b.gender.localeCompare(a.gender);
+                    });
+                    break;
+                case 'weight':
+                    sortedUsers.sort((a, b) => {
+                        return this.sortOrder === 'asc' ? a.weight - b.weight : b.weight - a.weight;
+                    });
+                    break;
+                // Ajoutez d'autres cas de tri ici si nécessaire
+            }
+
+            // Mettre à jour la liste des utilisateurs avec les utilisateurs triés
+            this.users = sortedUsers;
+        }
+    }
 
 };
 </script>

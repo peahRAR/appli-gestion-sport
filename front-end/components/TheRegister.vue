@@ -43,6 +43,10 @@
             <input v-model="user.password" type="password" id="password" name="password"
                 placeholder="Votre mot de passe"
                 class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400">
+            <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères -->
+            <p v-if="user.password && !validatePassword(user.password) " class="text-red-500 text-xs mt-1">Le mot de
+                passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère
+                spécial.</p>
         </div>
 
         <div class="mb-4">
@@ -115,6 +119,11 @@ export default {
             this.user.firstname = null;
             this.user.birthday = null;
             this.user.gender = null;
+        },
+        validatePassword(password) {
+            // Expression régulière pour valider le mot de passe
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return passwordRegex.test(password);
         },
     },
 };

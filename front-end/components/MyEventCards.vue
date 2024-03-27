@@ -1,6 +1,6 @@
 <template>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="(event,index) in events" :key="event.id"
+        <div v-for="(event, index) in events" :key="event.id"
             class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mx-2 ">
             <div class="p-2">
                 <div class="flex felx-rox justify-between mb-4 border-b border-gray-300 pb-2">
@@ -22,7 +22,7 @@
                                     clip-rule="evenodd" />
                             </g>
                         </svg>
-                        <p class="text-gray-800 font-semibold text-xs ">{{event.places}}</p>
+                        <p class="text-gray-800 font-semibold text-xs ">{{ event.places }}</p>
                     </div>
 
                 </div>
@@ -48,8 +48,6 @@
                     <p class="text-gray-800 font-semibold ml-1">{{ calculateEndTime(event.date_event, event.duration) }}
                     </p>
 
-
-
                     <p class="text-gray-500 ml-1">({{ formatDuration(event.duration) }})</p>
                 </div>
                 <div class="flex flex-col">
@@ -62,17 +60,13 @@
                         Afficher {{ event.showOverflow ? 'moins &#x25B2;' : 'plus &#x25BC;' }}
                     </button>
                 </div>
-
-
-
-
                 <div class="flex flex-col justify-between mt-4">
-                    <button @click="participate(event,true)"
+                    <button @click="participate(event, true)"
                         class="bg-green-600 hover:bg-gray-700 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500">
                         Je participe
                     </button>
 
-                    <button @click="participate(event,false)"
+                    <button @click="participate(event, false)"
                         class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
                         Je ne participe pas
                     </button>
@@ -80,14 +74,19 @@
             </div>
         </div>
     </div>
+    <!-- List Modale Participants -->
     <div v-if="showModal"
         class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
         <div class="bg-white p-4 rounded-lg">
             <h3 class="text-lg font-semibold mb-2">Liste des participants</h3>
             <ul>
-                <li v-for="participant in eventParticipants" :key="participant.id">
+                <li v-for="participant in eventParticipants" :key="participant.id" :class="{
+            'bg-orange-600': (!participant.licence || !participant.date_end_pay || new Date(participant.date_end_pay.data) < new Date()) && (userRole === 1 || userRole === 2),
+            'bg-red-600': (!participant.licence && (!participant.date_end_pay || new Date(participant.date_end_pay.data) < new Date())) && (userRole === 1 || userRole === 2),
+            'bg-white': (participant.licence && ( participant.date_end_pay || new Date(participant.date_end_pay.data) >= new Date())) && (userRole === 1 || userRole === 2)
+        }">
                     <div>
-                        <span>{{ participant.name }}</span>
+                        <span class="capitalize">{{ participant.name }}</span>
                         <!-- Condition pour afficher la flèche uniquement pour le rôle 1 ou 2 -->
                         <span v-if="userRole === 1 || userRole === 2" @click="openDetailsModal(participant)"
                             class="cursor-pointer">▼</span>
@@ -124,7 +123,8 @@
                     <strong>Licence:</strong> {{ userDetails.licence && userDetails.licence.data || 'Non renseigné' }}
                 </li>
                 <li>
-                    <strong>Date de fin de paiement:</strong> {{ userDetails.date_end_pay && userDetails.date_end_pay.data || 'Non renseigné' }}
+                    <strong>Date de fin de paiement:</strong> {{ userDetails.date_end_pay &&
+                    userDetails.date_end_pay.data || 'Non renseigné' }}
                 </li>
             </ul>
             <button @click="closeDetailsModal" class="text-gray-800 font-semibold mt-4">Fermer</button>
@@ -153,7 +153,7 @@ export default {
         await this.getUserIdFromToken();
         await this.checkUserRole();
         const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
-        
+
     },
 
     methods: {
@@ -329,7 +329,7 @@ export default {
                 }
                 const userDetails = await response.json();
                 this.userDetails = userDetails;
-                
+
                 this.showDetailsModal = true;
             } catch (error) {
                 console.error('Error fetching user details:', error);
@@ -339,16 +339,16 @@ export default {
         // Méthode pour fermer la modale
         closeModal() {
             this.showModal = false;
-            
+
         },
-        closeDetailsModal(){
+        closeDetailsModal() {
             this.showDetailsModal = false;
         },
-        async participate(event,value) {
+        async participate(event, value) {
             try {
                 const token = localStorage.getItem('accessToken');
                 const userId = await this.getUserIdFromToken();
-                
+
 
                 // Vérifie si l'utilisateur est déjà inscrit à l'événement
                 if (!this.eventParticipants.some(participant => participant.id === userId)) {
@@ -366,7 +366,7 @@ export default {
                         })
                     });
                     if (!response.ok) {
-                        alert ('Désolé, il n\'y a plus de place pour ce cours');
+                        alert('Désolé, il n\'y a plus de place pour ce cours');
                     }
                     console.log('cest la fin')
                     this.event = await this.loadEvents();
@@ -376,9 +376,9 @@ export default {
                 console.error('Error participating in the event:', error);
                 // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
             }
-            
+
         },
-       
+
         calculateEndTime(startTime, duration) {
             // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
             const startDate = new Date(startTime);
@@ -403,9 +403,10 @@ export default {
                 this.userRole = 0;
             }
         },
+        
 
 
-    
+
 
 
     }

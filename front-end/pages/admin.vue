@@ -198,9 +198,9 @@
                     <p><strong>Genre:</strong> {{ selectedUser.gender ? 'Homme' : 'Femme' }}</p>
                     <p><strong>Poids:</strong> {{ selectedUser.weight.data || 'Non renseigné' }}Kg</p>
                     <p><strong>Téléphone médical:</strong> {{ selectedUser.tel_medic && selectedUser.tel_medic.data ||
-                            'Non renseigné' }}</p>
+                        'Non renseigné' }}</p>
                     <p><strong>Téléphone d'urgence:</strong> {{ selectedUser.tel_emergency &&
-                            selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
+                        selectedUser.tel_emergency.data || 'Non renseigné' }}</p>
                     <!-- Ajout des champs pour modifier les dates -->
                     <div>
                         <label for="datePayment"><strong>Date de paiement:</strong></label>
@@ -253,7 +253,7 @@
                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize">
                             {{ formatDate(event.date_event) }}
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize">
+                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 uppercase">
                             {{ event.name_event }}
                         </td>
                         <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500">
@@ -283,7 +283,7 @@
                     <h2 class="text-lg font-medium text-gray-900">Modifier l'événement</h2>
 
                     <!-- Formulaire pour l'édition de l'événement -->
-                    <form @submit.prevent="saveChanges">
+                    <form @submit.prevent="saveChanges(editedEvent.id)" data-event-id="editedEvent.id">
 
                         <div class="flex flex-col">
                             <label for="title" class="font-semibold">Titre du cours</label>
@@ -731,31 +731,38 @@ export default {
             // Afficher la modale
             this.showModal = true;
         },
-        async saveChanges() {
+        async saveChanges(eventId) {
             const token = localStorage.getItem('accessToken');
             try {
-                // Effectuer une requête PATCH pour mettre à jour l'événement
-                const response = await fetch(`http://localhost:8080/events/${eventId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(this.editedEvent),
-                });
+                // Vérifier si eventId est défini et est un nombre valide
+                if (eventId && typeof eventId === 'number' && !isNaN(eventId)) {
+                    // Effectuer une requête PATCH pour mettre à jour l'événement
+                    const response = await fetch(`http://localhost:8080/events/${eventId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(this.editedEvent),
+                    });
 
-                if (response.ok) {
-                    // Mettre à jour l'événement dans la liste des événements après la modification
-                    // Vous pouvez implémenter cette partie en fonction de la logique de votre application
-                    console.log('Événement modifié avec succès');
+                    if (response.ok) {
+                        // Mettre à jour l'événement dans la liste des événements après la modification
+                        // Vous pouvez implémenter cette partie en fonction de la logique de votre application
+                        console.log('Événement modifié avec succès');
+                    } else {
+                        console.error('Erreur lors de la modification de l\'événement');
+                    }
                 } else {
-                    console.error('Erreur lors de la modification de l\'événement');
+                    // Afficher une erreur si eventId n'est pas défini ou n'est pas un nombre valide
+                    console.error('Identifiant d\'événement non valide :', eventId);
                 }
             } catch (error) {
                 console.error('Erreur lors de la modification de l\'événement :', error);
             } finally {
                 // Masquer la modale après avoir enregistré les modifications
                 this.closeModal();
+                await this.loadEvents();
             }
         },
 

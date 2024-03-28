@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen">
+    <div>
         <!-- Login Form -->
         <form @submit.prevent="signIn">
             <!-- Email input -->

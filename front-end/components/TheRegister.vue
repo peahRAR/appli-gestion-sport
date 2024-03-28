@@ -33,7 +33,7 @@
                 class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400">
         </div>
         <div class="mb-6">
-            <inputPassword @password="password = $event" :regex='regexPassword' label="Nouveau mot de passe : "
+            <inputPassword @password="user.password = $event" :regex='regexPassword' label="Nouveau mot de passe : "
                 id="password" :isValid="validerPassword" />
 
             <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
@@ -89,9 +89,9 @@ export default {
         patternRegex() {
             return this.regexPassword.toString().slice(1, -1)
         },
-        // ValiderNewPassword
+        // ValiderPassword
         validerPassword() {
-            if (!this.regexPassword.test(this.password)) {
+            if (!this.regexPassword.test(this.user.password)) {
 
                 return false
             }

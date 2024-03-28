@@ -83,6 +83,13 @@ export class UsersService {
     return decrypted;
   }
 
+  // Méthode pour vérifier si le mot de passe correspond à la regex
+  verifyPasswordRegex(password: string): boolean {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     let isActive = false;
     let role = 0;
@@ -104,7 +111,7 @@ export class UsersService {
         throw new Error('Un superAdmin existe déjà.');
       }
     }
-    
+
     // Date anniversaire
     const birthdayString = createUserDto.birthday.toString();
 
@@ -128,7 +135,9 @@ export class UsersService {
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    // Vérifier si un utilisateur avec le même identifier existe déjà
+    if (!this.verifyPasswordRegex(createUserDto.password)) {
+      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
+    }
 
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
@@ -171,7 +180,7 @@ export class UsersService {
       role: role,
       isActive: isActive,
     });
-    
+
     await this.mailerService.sendMail({
       to: decryptedEmail,
       subject: 'Confirmation de compte',
@@ -180,7 +189,6 @@ export class UsersService {
         email: decryptedEmail,
       },
     });
-    
 
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
@@ -253,7 +261,7 @@ export class UsersService {
       user.email.data = this.decryptField(user.email.data);
     }
     if (user.weight?.data) {
-      user.weight.data = this.decryptField(user.weight.data)
+      user.weight.data = this.decryptField(user.weight.data);
     }
     if (user.licence?.data) {
       user.licence.data = this.decryptField(user.licence.data);
@@ -312,44 +320,44 @@ export class UsersService {
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
-    console.log("new password :"+updateUserDto.password)
+    console.log('new password :' + updateUserDto.password);
     // Mettre à jour le mot de passe s'il est fourni
-     if (updateUserDto.password) {
-       // Vérifier si le mot de passe actuel est fourni
-       if (!updateUserDto.currentPassword) {
-         throw new BadRequestException(
-           'Le mot de passe actuel est requis pour changer le mot de passe.',
-         );
-       }
+    if (updateUserDto.password) {
+      // Vérifier si le mot de passe actuel est fourni
+      if (!updateUserDto.currentPassword) {
+        throw new BadRequestException(
+          'Le mot de passe actuel est requis pour changer le mot de passe.',
+        );
+      }
 
-       // Comparer le mot de passe actuel fourni avec le mot de passe actuel de l'utilisateur
-       const isPasswordValid = await bcrypt.compare(
-         updateUserDto.currentPassword,
-         user.password,
-       );
-       if (!isPasswordValid) {
-         throw new UnauthorizedException('Mot de passe actuel incorrect.');
-       }
+      // Comparer le mot de passe actuel fourni avec le mot de passe actuel de l'utilisateur
+      const isPasswordValid = await bcrypt.compare(
+        updateUserDto.currentPassword,
+        user.password,
+      );
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Mot de passe actuel incorrect.');
+      }
 
-       // Hasher le nouveau mot de passe
-       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+      // Hasher le nouveau mot de passe
+      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
 
-       // Mettre à jour le mot de passe de l'utilisateur
-       user.password = hashedPassword;
-     }
+      // Mettre à jour le mot de passe de l'utilisateur
+      user.password = hashedPassword;
+    }
 
     // Crypter les autres champs s'ils sont non null
     if (updateUserDto.name) {
-      const nameEncrypt = this.createEncryptedField(
-        updateUserDto.name,
-      );
+      const nameEncrypt = this.createEncryptedField(updateUserDto.name);
       user.name = {
         identifier: nameEncrypt,
         data: nameEncrypt,
       };
     }
     if (updateUserDto.firstname) {
-      const firstnameEncrypt = this.createEncryptedField(updateUserDto.firstname);
+      const firstnameEncrypt = this.createEncryptedField(
+        updateUserDto.firstname,
+      );
       user.firstname = {
         identifier: firstnameEncrypt,
         data: firstnameEncrypt,

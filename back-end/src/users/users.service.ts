@@ -104,7 +104,7 @@ export class UsersService {
         throw new Error('Un superAdmin existe déjà.');
       }
     }
-
+    
     // Date anniversaire
     const birthdayString = createUserDto.birthday.toString();
 
@@ -122,6 +122,8 @@ export class UsersService {
 
     // Créer le identifier
     const identifier = this.createidentifier(createUserDto.email);
+
+    // Verifier que mdp correspond à la regex sinon lever erreur
 
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -221,7 +223,25 @@ export class UsersService {
 
   async findOne(id: number): Promise<User | undefined> {
     // Récupérer l'utilisateur depuis la base de données
-    const user = await this.userRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'email',
+        'gender',
+        'weight',
+        'licence',
+        'name',
+        'firstname',
+        'tel_medic',
+        'tel_emergency',
+        'avatar',
+        'date_end_pay',
+        'date_payment',
+        'date_subscribe',
+        // Ne pas inclure le champ du mot de passe
+      ],
+    });
 
     // Vérifier si l'utilisateur n'existe pas
     if (!user) {
@@ -439,7 +459,7 @@ export class UsersService {
     const decryptedEmail = this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `https://localhost:3000/resetpassword/${resetToken}`;
+    const resetUrl = `http://localhost:3000/resetpassword/${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,

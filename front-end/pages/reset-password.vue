@@ -6,25 +6,32 @@
                     Réinitialiser votre mot de passe
                 </h2>
             </div>
+            <!-- Reset Password Form -->
             <form class="mt-8 space-y-6" @submit.prevent="resetPassword">
+                <!-- Input for the rest-Token -->
                 <input type="hidden" name="token" v-model="token">
                 <div class="rounded-md shadow-sm -space-y-px">
-                    <div>
-                        <label for="password" class="sr-only">Nouveau mot de passe</label>
-                        <input v-model="password" id="password" name="password" type="password"
-                            autocomplete="new-password" required
-                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                            placeholder="Nouveau mot de passe">
+                    <div class="mb-4">
+                        <!-- Input for the new password -->
+                        <inputPassword @password="password = $event" :regex='regexPassword'
+                            label="Nouveau mot de passe : " id="password" :isValid="validerPassword" />
+                        <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
+                        <p class="text-black-500 text-xs font-bold text-left mt-1">Votre mot de
+                            passe doit
+                            contenir au
+                            moins huit caractères et inclure au moins une lettre minuscule, une
+                            lettre majuscule, un chiffre et un caractère spécial parmi @$!%*?&.
+                        </p>
+
                     </div>
                     <div>
-                        <label for="confirmPassword" class="sr-only">Confirmer le mot de passe</label>
-                        <input v-model="confirmPassword" id="confirmPassword" name="confirmPassword" type="password"
-                            autocomplete="new-password" required
-                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                            placeholder="Confirmer le mot de passe">
+                        <!-- Input for the confirmation of the new password have to be === newPassword -->
+                        <inputPassword label="Confirmer votre mot de passe : " id="confirmPassword"
+                            @password="confirmPassword = $event" :isValid="validerConfirmPassword" />
                     </div>
                 </div>
                 <div>
+                    <!-- Submit button  -->
                     <button type="submit"
                         class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                         Réinitialiser le mot de passe
@@ -39,16 +46,39 @@
 export default {
     data() {
         return {
-            token: '',
-            password: '',
-            confirmPassword: ''
+            token: '', // Rest Token
+            password: '', // newPassword
+            confirmPassword: '', // Confirmation of the newPassword
+            regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
         };
     },
     created() {
-        // Récupérer le token depuis l'URL
+        // Take the rest Token from the URL
         this.token = this.$route.params.token;
     },
+    computed: {
+        // Pattern Regex
+        patternRegex() {
+            return this.regexPassword.toString().slice(1, -1)
+        },
+        // ValiderNewPassword
+        validerPassword() {
+            if (!this.regexPassword.test(this.password)) {
+
+                return false
+            }
+
+            return true
+        },
+        // Valider Confirm Password
+        validerConfirmPassword() {
+            return this.confirmPassword === this.password
+        },
+
+
+    },
     methods: {
+        // Throw the form at the API for update dataBase
         async resetPassword() {
             const userId = this.getUserIdFromToken();
             if (this.password !== this.confirmPassword) {
@@ -66,6 +96,7 @@ export default {
                 }
             });
         },
+        // Get user info from the token
         getUserIdFromToken() {
             const token = localStorage.getItem('accessToken');
             if (!token) {

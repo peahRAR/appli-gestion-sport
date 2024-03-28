@@ -13,19 +13,20 @@ export default {
         };
     },
     created() {
-        // Appeler la méthode pour vérifier si un token valide est présent dans le localStorage lors de la création du composant
+        // Call the method who verify if the user is connected
         this.checkAuthentication();
     },
     methods: {
+        // Check if the user is authentified
         checkAuthentication() {
-            // Récupérer le token d'accès depuis le localStorage
+            // Keep the token from the local storage
             const accessToken = localStorage.getItem('accessToken');
-            // Vérifier si le token d'accès est présent et s'il est valide
+            // Check if the token is Valid
             if (accessToken) {
-                // Mettre à jour la propriété isAuthenticated à true
+                // update 
                 this.isAuthenticated = true;
             } else {
-                // Si aucun token d'accès n'est présent, ou s'il n'est pas valide, mettre à jour isAuthenticated à false
+                
                 this.isAuthenticated = false;
             }
         },

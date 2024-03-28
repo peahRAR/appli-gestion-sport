@@ -1,12 +1,14 @@
 <template>
     <div class="container mx-auto px-4 py-8 min-h-screen">
         <h1 class="text-3xl font-bold mb-8">Profil Utilisateur</h1>
-
+        <!-- User Profil Infos -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-2 ">
             <div class="grid grid-cols-2 gap-x-4 gap-y-2 ">
                 <div class="col-span-2">
+                    <!-- Avatar -->
                     <img v-if="user.avatar" :src="user.avatar.data" alt="Avatar"
                         class="w-28 h-28 rounded-full mx-auto mb-4">
+                    <!-- If Avatar === null -->
                     <div v-else
                         class="w-28 h-28 mb-4 rounded-full bg-gray-300 mx-auto flex items-center justify-center">
                         <span class="text-gray-600 text-4xl"><svg xmlns="http://www.w3.org/2000/svg" width="52"
@@ -15,25 +17,30 @@
                                     d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 8.5a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8 8.5A3.5 3.5 0 0 1 11.5 5m0 1A2.5 2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6" />
                             </svg></span>
                     </div>
-
+                    <!-- Name -->
                     <p class="text-gray-600 mb-2 capitalize"><strong>Nom:</strong> {{ user.name && user.name.data ?
                         user.name.data :
                         'Non Renseigné' }}</p>
+                    <!-- FirstName -->
                     <p class="text-gray-600 mb-2 capitalize"><strong>Prénom:</strong> {{ user.firstname &&
                         user.firstname.data ?
                         user.firstname.data : 'Non Renseigné' }}</p>
+                    <!-- Email -->
                     <p class="text-gray-600 mb-2"><strong>Email:</strong> {{ user.email && user.email.data ?
                         user.email.data
                         : 'Non Renseigné' }}</p>
-
+                    <!-- Weight -->
                     <p class="text-gray-600 mb-2"><strong>Poids:</strong> {{ user.weight && user.weight.data ?
                         user.weight.data : 'Non Renseigné' }}</p>
+                    <!-- Licence -->
                     <p class="text-gray-600 mb-2"><strong>Licence:</strong> {{ user.licence && user.licence.data ?
                         user.licence.data : 'Non Renseigné' }}</p>
+                    <!-- Gender -->
                     <p class="text-gray-600 mb-2"><strong>Genre:</strong> {{ user.gender ? 'Homme' : 'Femme' }}</p>
-
+                    <!-- Tel Medic -->
                     <p class="text-gray-600 mb-2"><strong>Téléphone Médical:</strong> {{ user.tel_medic &&
                         user.tel_medic.data ? user.tel_medic.data : 'Non Renseigné' }}</p>
+                    <!-- Tel Emergency -->
                     <p class="text-gray-600 mb-2"><strong>Téléphone d'urgence:</strong> {{ user.tel_emergency &&
                         user.tel_emergency.data ? user.tel_emergency.data : 'Non Renseigné' }}</p>
                 </div>
@@ -41,106 +48,92 @@
         </div>
 
         <div class="flex flex-col">
-            <!-- Bouton Modifier le profil -->
+            <!-- Button Edit Profil -->
             <button @click="editProfile" v-if="!isEditing"
                 class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
                 Modifier le profil
             </button>
-            <!-- Bouton Supprimer le profil -->
+            <!-- Button open password change -->
+            <button @click="openModal"
+                class="bg-yellow-500 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4">
+                Changer le mot de passe
+            </button>
+            <!-- Button Delete Profil -->
             <button @click="confirmDelete" v-if="!isEditing"
                 class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4">
                 Supprimer le compte
             </button>
 
-            <!-- Bouton Annuler et Enregistrer les modifications -->
-            <div v-if="isEditing" class="bg-white rounded-lg shadow-md p-6 mt-48 mx-4 absolute top-0 left-0 right-0">
-                <p>Avatar:</p>
-                <input type="file" @change="handleAvatarUpload"
-                    class="mb-4 appearance-none bg-white border border-gray-300 rounded-md py-2 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-
-                <p>Poids:</p>
-                <input type="text" v-model="editedWeight" placeholder="Nouveau poids" class="input-field mb-4">
-                <p>Licence:</p>
-                <input type="text" v-model="editedLicence" placeholder="Nouvelle licence" class="input-field mb-4">
-                <p>Téléphone médicale:</p>
-                <input type="text" v-model="editedTelMedic" placeholder="Nouveau téléphone médical"
-                    class="input-field mb-4">
-                <p>Téléphone d'urgence:</p>
-                <input type="text" v-model="editedTelEmergency" placeholder="Nouveau téléphone d'urgence"
-                    class="input-field mb-4">
-                <div class="flex justify-center space-x-4">
-
-                    <button @click="saveChanges"
-                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded mt-4">
-                        Enregistrer les modifications
-                    </button>
-                    <button @click="cancelEdit"
-                        class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 text-center rounded mt-4">
-                        Annuler
-                    </button>
-                </div>
-            </div>
         </div>
-        <button @click="openChangePasswordModal"
-            class="bg-yellow-500 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4">
-            Changer le mot de passe
-        </button>
+        <!-- Modal Edit Profil -->
+        <TheModal :isOpen="isEditing" title="Changement de vos informations" @close="cancelEdit">
+            <!-- Modal Content -->
+            <!-- Avatar -->
+            <p>Avatar:</p>
+            <input type="file" @change="handleAvatarUpload"
+                class="mb-4 appearance-none bg-white border border-gray-300 rounded-md py-2 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+            <!-- Weight -->
+            <p>Poids:</p>
+            <input type="text" v-model="editedWeight" placeholder="Nouveau poids" class="input-field mb-4">
+            <!-- Licence -->
+            <p>Licence:</p>
+            <input type="text" v-model="editedLicence" placeholder="Nouvelle licence" class="input-field mb-4">
+            <!-- Tel Medic -->
+            <p>Téléphone médicale:</p>
+            <input type="text" v-model="editedTelMedic" placeholder="Nouveau téléphone médical"
+                class="input-field mb-4">
+            <!-- Tel Emergency -->
+            <p>Téléphone d'urgence:</p>
+            <input type="text" v-model="editedTelEmergency" placeholder="Nouveau téléphone d'urgence"
+                class="input-field mb-4">
 
-        <!-- Modal de changement de mot de passe -->
-        <div v-if="showChangePasswordModal" class="fixed z-10 inset-0 overflow-y-auto">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                </div>
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900">Changer le mot de passe</h3>
-                                <div class="mt-2">
-                                    <div class="mb-4">
-                                        <label for="currentPassword" class="block text-sm font-medium text-gray-700">Mot
-                                            de passe actuel</label>
-                                        <input type="password" v-model="currentPassword" id="currentPassword"
-                                            name="currentPassword" class="input-field">
-                                    </div>
-                                    <div class="mt-2">
-                                        <label for="newPassword" class="block text-sm font-medium text-gray-700">Nouveau
-                                            mot de passe</label>
-                                        <input type="password" v-model="newPassword" id="newPassword" name="newPassword"
-                                            class="input-field">
-                                        <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères -->
-                                        <p v-if="!validatePassword(newPassword)" class="text-red-500 text-xs mt-1">Le
-                                            mot de passe doit contenir au moins une lettre majuscule, une lettre
-                                            minuscule, un chiffre et un caractère spécial.</p>
-                                    </div>
-                                    <div>
-                                        <label for="confirmNewPassword"
-                                            class="block text-sm font-medium text-gray-700">Confirmer le nouveau mot de
-                                            passe</label>
-                                        <input type="password" v-model="confirmNewPassword" id="confirmNewPassword"
-                                            name="confirmNewPassword" class="input-field">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button @click="changePassword" type="button"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Changer
-                        </button>
-                        <button @click="closeChangePasswordModal" type="button"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Annuler
-                        </button>
-                    </div>
-                </div>
+            <div class="flex justify-center space-x-4">
+                <!-- Button For saving changes -->
+                <button @click="saveChanges"
+                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded mt-4">
+                    Enregistrer les modifications
+                </button>
+
             </div>
-        </div>
 
+
+
+        </TheModal>
+        <TheModal :isOpen="showChangePasswordModal" title="Changement du mot de passe" @close="closeModal">
+            <!-- Contenu de la modale -->
+            <!-- Modal de changement de mot de passe -->
+            <form @submit.prevent="changePassword" method="post">
+                <div class="mb-4">
+
+                    <inputPassword @password="currentPassword = $event" label="Mot de passe actuel : "
+                        id="currentPassword" :isValid="null" />
+                </div>
+                <div class="mb-4">
+
+                    <inputPassword @password="newPassword = $event" :regex='regexPassword'
+                        label="Nouveau mot de passe : " id="newPassword" :isValid="validerNewPassword" />
+
+                    <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
+                    <p class="text-black-500 text-xs font-bold text-left mt-1">Votre mot de
+                        passe doit
+                        contenir au
+                        moins huit caractères et inclure au moins une lettre minuscule, une
+                        lettre majuscule, un chiffre et un caractère spécial parmi @$!%*?&.
+                    </p>
+                </div>
+                <div class="mb-4">
+                    <inputPassword label="Confirmer votre mot de passe : " id="confirmNewPassword"
+                        @password="confirmNewPassword = $event" :isValid="validerConfirmPassword" />
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Changer
+                    </button>
+
+                </div>
+            </form>
+        </TheModal>
 
     </div>
 </template>
@@ -149,7 +142,7 @@
 export default {
     data() {
         return {
-            user: {
+            user: { // user Infos
                 name: null,
                 firstname: null,
                 date_Subscribe: null,
@@ -162,7 +155,7 @@ export default {
                 avatar: null,
                 password: null
             },
-            isEditing: false,
+            isEditing: false, // If the editing modal true
             editedName: null,
             editedEmail: null,
             editedWeight: null,
@@ -173,15 +166,40 @@ export default {
             avatar: null,
             password: null,
             currentPassword: null,
-            newPassword: null,
+            newPassword: '',
             confirmNewPassword: null,
             showChangePasswordModal: false,
+            passwordValidate: false,
+            regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
         };
     },
     async mounted() {
+        // Keep the userData when the component is mount
         await this.fetchUserData();
     },
+    computed: {
+        // Pattern Regex
+        patternRegex() {
+            return this.regexPassword.toString().slice(1, -1)
+        },
+        // ValiderNewPassword
+        validerNewPassword() {
+            if (!this.regexPassword.test(this.newPassword)) {
+
+                return false
+            }
+
+            return true
+        },
+        // Valider Confirm Password
+        validerConfirmPassword() {
+            return this.confirmNewPassword === this.newPassword
+        },
+
+
+    },
     methods: {
+        // Keep the user infos from the token
         getUserIdFromToken() {
             const token = localStorage.getItem('accessToken');
             if (!token) {
@@ -203,6 +221,7 @@ export default {
 
             return payload.sub;
         },
+        // Keep the user infos
         async fetchUserData() {
             try {
                 const token = localStorage.getItem('accessToken');
@@ -225,6 +244,7 @@ export default {
                 console.error('Erreur lors de la récupération des informations utilisateur', error);
             }
         },
+        // Editing profil
         editProfile() {
             this.isEditing = true;
             // Initialiser les champs d'entrée avec les valeurs actuelles de l'utilisateur
@@ -233,6 +253,7 @@ export default {
             this.editedTelMedic = this.user.tel_medic ? this.user.tel_medic.data : null;
             this.editedTelEmergency = this.user.tel_emergency ? this.user.tel_emergency.data : null;
         },
+        // Api request for update user data
         async saveChanges() {
             this.user.weight = this.editedWeight;
             this.user.licence = this.editedLicence;
@@ -244,7 +265,7 @@ export default {
             this.user.date_end_pay = null;
             this.user.date_payment = null;
 
-            
+
             try {
                 const token = localStorage.getItem('accessToken');
                 const userId = this.getUserIdFromToken();
@@ -252,7 +273,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                
+
                 await useFetch(`http://localhost:8080/users/${userId}`, {
                     method: 'PATCH',
                     mode: 'cors',
@@ -276,14 +297,17 @@ export default {
                 console.error('Erreur lors de la sauvegarde des modifications', error);
             }
         },
+        // Close modal
         cancelEdit() {
             this.isEditing = false;
         },
+        // Confirm Deletion
         confirmDelete() {
             if (confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")) {
                 this.deleteUser();
             }
         },
+        // Request for delete user 
         async deleteUser() {
             try {
                 const token = localStorage.getItem('accessToken');
@@ -306,6 +330,7 @@ export default {
                 console.error('Erreur lors de la suppression de l\'utilisateur', error);
             }
         },
+        // Update the avatar user
         async handleAvatarUpload(event) {
             const file = event.target.files[0];
             if (file) {
@@ -349,18 +374,28 @@ export default {
                 console.log('Aucun fichier sélectionné pour l\'avatar.');
             }
         },
-        openChangePasswordModal() {
+        // Open modal Password change
+        openModal() {
             this.showChangePasswordModal = true;
         },
-        closeChangePasswordModal() {
+        //  Close Modal Password change
+        closeModal() {
             this.showChangePasswordModal = false;
             // Réinitialiser les champs de mot de passe lorsque la modal est fermée
             this.currentPassword = '';
             this.newPassword = '';
             this.confirmNewPassword = '';
         },
+        // Update the user passswors api Key
         async changePassword() {
-            
+            // verifier que ancien mdp === correct
+            if (!this.validerNewPassword || !this.validerConfirmNewPassword) {
+                // Verifier que ancien !=== nouveau
+
+
+                return
+            }
+
             // Vérifier si les nouveaux mots de passe correspondent
             if (this.newPassword !== this.confirmNewPassword) {
                 alert("Les nouveaux mots de passe ne correspondent pas.");
@@ -389,7 +424,7 @@ export default {
                 });
                 if (response.ok) {
                     alert("Mot de passe changé avec succès.");
-                    this.closeChangePasswordModal();
+                    this.closeModal();
                 } else {
                     const errorMessage = await response.text();
                     alert(`Erreur lors du changement de mot de passe : ${errorMessage}`);
@@ -399,11 +434,8 @@ export default {
                 alert("Erreur lors du changement de mot de passe. Veuillez réessayer.");
             }
         },
-        validatePassword(password) {
-            // Expression régulière pour valider le mot de passe
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-            return passwordRegex.test(password);
-        },
+
+
 
     }
 

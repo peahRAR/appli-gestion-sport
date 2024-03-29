@@ -454,7 +454,7 @@ export default {
 
                 const token = localStorage.getItem('accessToken');
                 // Request Post for create new Event
-                const response = await fetch('http://localhost:8080/events', {
+                const response = await useFetch('http://localhost:8080/events', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -572,7 +572,7 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
                 // Get request for All users 
-                const response = await fetch('http://localhost:8080/users', {
+                const response = await useFetch('http://localhost:8080/users', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -602,7 +602,7 @@ export default {
 
 
                 // Patch Request at the api
-                const response = await fetch(`http://localhost:8080/admin/${userId}`, {
+                const response = await useFetch(`http://localhost:8080/admin/${userId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -651,7 +651,7 @@ export default {
                         if (payload.role === 2) {
                             const newRole = 1
 
-                            const response = await fetch(`http://localhost:8080/admin/${userId}/${newRole}`, {
+                            const response = await useFetch(`http://localhost:8080/admin/${userId}/${newRole}`, {
                                 method: 'PUT',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -688,7 +688,7 @@ export default {
             try {
                 const token = localStorage.getItem('accessToken');
 
-                const response = await fetch(`http://localhost:8080/events/${eventId}`, {
+                const response = await useFetch(`http://localhost:8080/events/${eventId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -729,7 +729,7 @@ export default {
 
                 if (eventId && typeof eventId === 'number' && !isNaN(eventId)) {
 
-                    const response = await fetch(`http://localhost:8080/events/${eventId}`, {
+                    const response = await useFetch(`http://localhost:8080/events/${eventId}`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',

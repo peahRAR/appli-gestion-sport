@@ -230,7 +230,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                const response = await fetch(`http://localhost:8080/users/${userId}`, {
+                const response = await useFetch(`http://localhost:8080/users/${userId}`, {
                     method: 'GET',
                     mode: 'cors',
                     headers: {
@@ -344,7 +344,7 @@ export default {
                 const formData = new FormData();
                 formData.append('avatar', file); // Ajoutez le fichier à FormData sous la clé 'avatar'
                 try {
-                    const response = await fetch(`http://localhost:8080/users/${userId}`, {
+                    const response = await useFetch(`http://localhost:8080/users/${userId}`, {
                         method: 'PATCH',
                         mode: 'cors',
                         body: formData, // Utilisez le FormData comme corps de la requête
@@ -410,7 +410,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                const response = await fetch(`http://localhost:8080/users/${userId}/`, {
+                const response = await useFetch(`http://localhost:8080/users/${userId}/`, {
                     method: 'PATCH',
                     mode: 'cors',
                     body: JSON.stringify({

@@ -110,10 +110,10 @@
         <div class="flex flex-col justify-between mt-4">
           <button
             @click="participate(event, true)"
-            :disabled="isParticipe"
-            class="bg-green-600 hover:bg-gray-700 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500"
+            :disabled="event.isParticipating"
+            class="bg-green-600 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500"
             :class="{
-              'opacity-50 cursor-not-allowed': isParticipe,
+              'opacity-50 cursor-not-allowed': event.isParticipating,
             }"
           >
             Je participe
@@ -121,10 +121,10 @@
 
           <button
             @click="participate(event, false)"
-            :disabled="!isParticipe"
-            class="bg-red-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            :disabled="!event.isParticipating"
+            class="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             :class="{
-              'opacity-50 cursor-not-allowed': !isParticipe,
+              'opacity-50 cursor-not-allowed': !event.isParticipating,
             }"
           >
             Je ne participe pas
@@ -226,14 +226,51 @@ export default {
     };
   },
   async mounted() {
-    // Charger les événements depuis votre API lors du montage du composant
-    await this.loadEvents();
-    await this.getUserIdFromToken();
-    await this.checkUserRole();
-    const userId = await this.getUserIdFromToken(); // Utilisation de await pour obtenir l'ID de l'utilisateur
+    this.initialization();
   },
 
   methods: {
+    async initialization() {
+      // Charger les événements depuis votre API lors du montage du composant
+      const userId = await this.getUserIdFromToken();
+
+      // Charger les événements
+      const eventsData = await this.loadEvents();
+      // Vérifier si eventsData est un objet avec la propriété _rawValue qui est un tableau
+      if (eventsData && Array.isArray(eventsData._rawValue)) {
+        // Récupérer le tableau d'événements depuis la propriété _rawValue
+        const eventsArray = eventsData._rawValue;
+
+        // Vérifier la participation pour chaque événement
+        const eventsWithParticipation = await Promise.all(
+          eventsArray.map(async (event) => {
+            if (event && event.id) {
+              console.log("event : " + event.id);
+              console.log("user : " + userId);
+              const isParticipating = await this.checkParticipation(
+                event.id,
+                userId
+              );
+              return { ...event, isParticipating };
+            } else {
+              console.error(
+                "L'objet event ne contient pas de propriété id :",
+                event
+              );
+              return null; // ou un autre traitement approprié
+            }
+          })
+        );
+
+        // Mettre à jour les événements avec les informations de participation
+        this.events = eventsWithParticipation.filter((event) => event !== null);
+      } else {
+        console.error(
+          "eventsData n'est pas un objet avec la propriété _rawValue qui est un tableau :",
+          eventsData
+        );
+      }
+    },
     async loadEvents() {
       try {
         const token = localStorage.getItem("accessToken");
@@ -248,7 +285,7 @@ export default {
         });
 
         // Stocker les événements dans la variable events
-        this.events = response.data;
+        return response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }
@@ -395,7 +432,6 @@ export default {
           id: user.id,
           name: `${user.firstname.data} ${user.name.data}`, // Ajouter le nom et le prénom de l'utilisateur
         }));
-        this.event = await this.loadEvents();
         this.showModal = true; // Afficher la modale une fois les données récupérées
       } catch (error) {
         console.error("Error fetching event participants:", error);
@@ -462,19 +498,19 @@ export default {
               }),
             }
           );
-          
+
           if (!response.ok) {
             alert("Désolé, il n'y a plus de place pour ce cours");
           }
 
-          this.event = await this.loadEvents();
+          this.initialization();
         }
       } catch (error) {
         console.error("Error participating in the event:", error);
         // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
       }
     },
-    
+
     calculateEndTime(startTime, duration) {
       // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
       const startDate = new Date(startTime);
@@ -497,6 +533,38 @@ export default {
         this.userRole = decodedToken.role;
       } else {
         this.userRole = 0;
+      }
+    },
+    async checkParticipation(eventId, userId) {
+      const token = localStorage.getItem("accessToken");
+      console.log("event : " + eventId);
+      console.log("user : " + userId);
+      console.log(eventId);
+
+      const response = await fetch(
+        `http://localhost:8080/lists-members/${eventId}/${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Vérifiez si l'utilisateur participe à l'événement
+        const isParticipe = data.isParticipant;
+
+        return isParticipe;
+      } else {
+        console.error(
+          "Erreur lors de la récupération des données:",
+          response.statusText
+        );
+        return false; // Par défaut, l'utilisateur ne participe pas
       }
     },
   },

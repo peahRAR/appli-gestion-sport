@@ -758,6 +758,7 @@ export default {
 
         // Check if the request throw a 200 status
         console.log("Mise à jour réussie :", response);
+        this.loadUsers();
       } catch (error) {
         console.error("Erreur lors de la mise à jour de l'utilisateur", error);
         // Show error message if it not in status 200
@@ -865,7 +866,8 @@ export default {
               if (response.ok) {
                 console.log(
                   "Le rôle de l'utilisateur a été modifié avec succès"
-                );
+                  );
+                this.loadUsers();
               } else {
                 throw new Error(
                   "Erreur lors de la modification du rôle de l'utilisateur"

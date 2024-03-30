@@ -226,6 +226,7 @@ export default {
     };
   },
   async mounted() {
+    this.checkUserRole();
     this.initialization();
   },
 

@@ -1,5 +1,6 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <TheSkeleton v-if="loading" />
+  <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <div
       v-for="(event, index) in events"
       :key="event.id"
@@ -223,6 +224,7 @@ export default {
       userDetails: {},
       userRole: 0,
       isParticipe: false,
+      loading: true,
     };
   },
   async mounted() {
@@ -252,6 +254,7 @@ export default {
                 event.id,
                 userId
               );
+              
               return { ...event, isParticipating };
             } else {
               console.error(
@@ -262,9 +265,10 @@ export default {
             }
           })
         );
-
+          
         // Mettre à jour les événements avec les informations de participation
         this.events = eventsWithParticipation.filter((event) => event !== null);
+        this.loading = false;
       } else {
         console.error(
           "eventsData n'est pas un objet avec la propriété _rawValue qui est un tableau :",

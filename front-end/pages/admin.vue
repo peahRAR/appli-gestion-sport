@@ -1,113 +1,324 @@
 <template>
-  <div class="container mx-auto py-8">
-    <h1 class="text-3xl ml-2 font-semibold mb-4">Administration</h1>
-    <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-      <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
-      <div class="overflow-x-auto">
-        <!-- Unactivate users Table  -->
-        <table class="mx-auto min-w-full divide-y divide-gray-200">
-          <!-- Unactivate users table header  -->
-          <thead class="bg-gray-50">
-            <tr>
-              <!-- Name -->
-              <th
-                scope="col"
-                class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Nom
-              </th>
-              <!-- Firstname -->
-              <th
-                scope="col"
-                class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Prénom
-              </th>
-              <!-- Action -->
-              <th
-                scope="col"
-                class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <!-- Unactivate user table value -->
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="(user, index) in inactiveUsers" :key="user.id">
-              <!-- Name -->
-              <td
-                class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-              >
-                {{ user.name.data }}
-              </td>
-              <!-- Firstname -->
-              <td
-                class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-              >
-                {{ user.firstname.data }}
-              </td>
-              <!-- Button For activate User -->
-              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                <button
-                  @click="reactivateUser(user)"
-                  class="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
+  <TheSkeleton v-if="loading" />
+  <div v-else>
+    <div class="container mx-auto py-8">
+      <h1 class="text-3xl ml-2 font-semibold mb-4">Administration</h1>
+      <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
+        <div class="overflow-x-auto">
+          <!-- Unactivate users Table  -->
+          <table class="mx-auto min-w-full divide-y divide-gray-200">
+            <!-- Unactivate users table header  -->
+            <thead class="bg-gray-50">
+              <tr>
+                <!-- Name -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Activer
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  Nom
+                </th>
+                <!-- Firstname -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Prénom
+                </th>
+                <!-- Action -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <!-- Unactivate user table value -->
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="(user, index) in inactiveUsers" :key="user.id">
+                <!-- Name -->
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
+                >
+                  {{ user.name.data }}
+                </td>
+                <!-- Firstname -->
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
+                >
+                  {{ user.firstname.data }}
+                </td>
+                <!-- Button For activate User -->
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                  <button
+                    @click="reactivateUser(user)"
+                    class="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
+                  >
+                    Activer
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- USERS List -->
+      <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
+        <div class="flex items-center space-x-4 mb-4">
+          <!-- handleSort BY -->
+          <select @change="updateSortBy(value)">
+            <option value="">Trier par...</option>
+            <option value="age">Âge</option>
+            <option value="gender">Genre</option>
+            <option value="weight">Poids</option>
+            <!-- Ajoutez d'autres options de tri ici -->
+          </select>
+          <!-- handleSort ORDER -->
+          <select @change="updateSortOrder(value)">
+            <option value="">Trier par...</option>
+            <option value="asc">Croissant</option>
+            <option value="desc">Décroissant</option>
+          </select>
+          <button @click="handleSort">Filtrer</button>
+        </div>
+        <!-- User Table -->
+        <div class="overflow-x-auto">
+          <table class="mx-auto min-w-full divide-y divide-gray-200">
+            <!-- Table user Header -->
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Statut
+                  <!-- Ajoutez l'icône pour le statut ici -->
+                </th>
+                <!-- Name -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Nom
+                </th>
+                <!-- Firstname -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Prénom
+                </th>
+                <!-- Action -->
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <!-- User Table Value -->
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr
+                v-for="(user, index) in users"
+                :key="user.id"
+                :class="{
+                  'bg-orange-600':
+                    !user.licence ||
+                    !user.date_end_pay ||
+                    new Date(user.date_end_pay) < new Date(),
+                  'bg-red-600':
+                    !user.licence &&
+                    (!user.date_end_pay ||
+                      new Date(user.date_end_pay) < new Date()),
+                  'bg-white':
+                    user.licence &&
+                    (!user.date_end_pay ||
+                      new Date(user.date_end_pay) >= new Date()),
+                }"
+              >
+                <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                  <!-- Icon Status -->
+                  <span>
+                    <!-- Cash icon if date_end_pay is null or < date of the day -->
+                    <svg
+                      v-if="
+                        !user.date_end_pay ||
+                        new Date(user.date_end_pay) < new Date()
+                      "
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 256 256"
+                    >
+                      <g fill="text-black">
+                        <path
+                          d="M160 128a32 32 0 1 1-32-32a32 32 0 0 1 32 32m40-64a48.85 48.85 0 0 0 40 40V64Zm0 128h40v-40a48.85 48.85 0 0 0-40 40M16 152v40h40a48.85 48.85 0 0 0-40-40m0-48a48.85 48.85 0 0 0 40-40H16Z"
+                          opacity=".2"
+                        />
+                        <path
+                          d="M128 88a40 40 0 1 0 40 40a40 40 0 0 0-40-40m0 64a24 24 0 1 1 24-24a24 24 0 0 1-24 24m112-96H16a8 8 0 0 0-8 8v128a8 8 0 0 0 8 8h224a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8M24 72h21.37A40.81 40.81 0 0 1 24 93.37Zm0 112v-21.37A40.81 40.81 0 0 1 45.37 184Zm208 0h-21.37A40.81 40.81 0 0 1 232 162.63Zm0-38.35A56.78 56.78 0 0 0 193.65 184H62.35A56.78 56.78 0 0 0 24 145.65v-35.3A56.78 56.78 0 0 0 62.35 72h131.3A56.78 56.78 0 0 0 232 110.35Zm0-52.28A40.81 40.81 0 0 1 210.63 72H232Z"
+                        />
+                      </g>
+                    </svg>
+                    <!-- Id Card icon if Licence is null -->
+                    <svg
+                      v-if="!user.licence"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="text-black"
+                        d="M14 13h5v-2h-5zm0-3h5V8h-5zm-9 6h8v-.55q0-1.125-1.1-1.787T9 13q-1.8 0-2.9.663T5 15.45zm4-4q.825 0 1.413-.587T11 10q0-.825-.587-1.412T9 8q-.825 0-1.412.588T7 10q0 .825.588 1.413T9 12m-5 8q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
+                      />
+                    </svg>
+                  </span>
+                </td>
+                <!-- Name -->
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
+                >
+                  {{ user.name.data }}
+                </td>
+                <!-- Firstname -->
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
+                >
+                  {{ user.firstname.data }}
+                </td>
+                <td
+                  class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
+                >
+                  <!-- Button open modal -->
+                  <button
+                    @click="openModal(user)"
+                    class="focus:outline-none text-black"
+                  >
+                    <!-- Arrow bottom -->
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5 text-black hover:text-gray-600 transition duration-300"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 12l-6-6h12l-6 6z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Create Event Form  -->
+      <div class="bg-white mx-2 rounded p-2">
+        <!-- Title Section -->
+        <h2 class="text-xl font-semibold mb-2">Créer un nouveau cours</h2>
+        <form @submit.prevent="createCourse" class="flex flex-col space-y-4">
+          <!-- Name Event -->
+          <div class="flex flex-col">
+            <label for="title" class="font-semibold">Titre du cours</label>
+            <input
+              type="text"
+              v-model="newCourse.name_event"
+              id="title"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <!-- Overview -->
+          <div class="flex flex-col">
+            <label for="description" class="font-semibold"
+              >Description du cours</label
+            >
+            <textarea
+              v-model="newCourse.overview"
+              id="description"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+              placeholder=""
+            ></textarea>
+          </div>
+          <!-- Date -->
+          <div class="flex flex-col">
+            <label for="date">Date et heure de début</label>
+            <input
+              type="datetime-local"
+              v-model="newCourse.date_event"
+              id="date"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <!-- Coach -->
+          <div class="flex flex-col">
+            <label for="coach">Nom du coach</label>
+            <input
+              type="text"
+              v-model="newCourse.coach"
+              id="coach"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <!-- Duration -->
+          <div class="flex flex-col">
+            <label for="duration">Durée du cours (en minutes)</label>
+            <input
+              type="number"
+              v-model="durationInHours"
+              id="duration"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <!-- Total places -->
+          <div class="flex flex-col">
+            <label for="totalSeats">Nombre de places total disponibles</label>
+            <input
+              type="number"
+              v-model="newCourse.totalPlaces"
+              id="totalSeats"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+            />
+          </div>
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Créer le cours
+          </button>
+        </form>
       </div>
     </div>
 
-    <!-- USERS List -->
-    <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-      <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
-      <div class="flex items-center space-x-4 mb-4">
-        <!-- handleSort BY -->
-        <select @change="updateSortBy(value)">
-          <option value="">Trier par...</option>
-          <option value="age">Âge</option>
-          <option value="gender">Genre</option>
-          <option value="weight">Poids</option>
-          <!-- Ajoutez d'autres options de tri ici -->
-        </select>
-        <!-- handleSort ORDER -->
-        <select @change="updateSortOrder(value)">
-          <option value="">Trier par...</option>
-          <option value="asc">Croissant</option>
-          <option value="desc">Décroissant</option>
-        </select>
-        <button @click="handleSort">Filtrer</button>
-      </div>
-      <!-- User Table -->
-      <div class="overflow-x-auto">
-        <table class="mx-auto min-w-full divide-y divide-gray-200">
-          <!-- Table user Header -->
+    <!-- Event Table -->
+    <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+      <!-- Section name -->
+      <h2 class="text-xl font-semibold mb-2">Liste des événements</h2>
+      <div class="max-w-screen-lg mx-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <!-- Row Table header -->
           <thead class="bg-gray-50">
             <tr>
+              <!-- Date -->
               <th
                 scope="col"
                 class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Statut
-                <!-- Ajoutez l'icône pour le statut ici -->
+                Date
               </th>
               <!-- Name -->
               <th
                 scope="col"
-                class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                class="px-3 py-1 text-left max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Nom
-              </th>
-              <!-- Firstname -->
-              <th
-                scope="col"
-                class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Prénom
+                Intitulé
               </th>
               <!-- Action -->
               <th
@@ -118,98 +329,37 @@
               </th>
             </tr>
           </thead>
-          <!-- User Table Value -->
+          <!--Row Value Database -->
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr
-              v-for="(user, index) in users"
-              :key="user.id"
-              :class="{
-                'bg-orange-600':
-                  !user.licence ||
-                  !user.date_end_pay ||
-                  new Date(user.date_end_pay) < new Date(),
-                'bg-red-600':
-                  !user.licence &&
-                  (!user.date_end_pay ||
-                    new Date(user.date_end_pay) < new Date()),
-                'bg-white':
-                  user.licence &&
-                  (!user.date_end_pay ||
-                    new Date(user.date_end_pay) >= new Date()),
-              }"
-            >
-              <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                <!-- Icon Status -->
-                <span>
-                  <!-- Cash icon if date_end_pay is null or < date of the day -->
-                  <svg
-                    v-if="
-                      !user.date_end_pay ||
-                      new Date(user.date_end_pay) < new Date()
-                    "
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 256 256"
-                  >
-                    <g fill="text-black">
-                      <path
-                        d="M160 128a32 32 0 1 1-32-32a32 32 0 0 1 32 32m40-64a48.85 48.85 0 0 0 40 40V64Zm0 128h40v-40a48.85 48.85 0 0 0-40 40M16 152v40h40a48.85 48.85 0 0 0-40-40m0-48a48.85 48.85 0 0 0 40-40H16Z"
-                        opacity=".2"
-                      />
-                      <path
-                        d="M128 88a40 40 0 1 0 40 40a40 40 0 0 0-40-40m0 64a24 24 0 1 1 24-24a24 24 0 0 1-24 24m112-96H16a8 8 0 0 0-8 8v128a8 8 0 0 0 8 8h224a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8M24 72h21.37A40.81 40.81 0 0 1 24 93.37Zm0 112v-21.37A40.81 40.81 0 0 1 45.37 184Zm208 0h-21.37A40.81 40.81 0 0 1 232 162.63Zm0-38.35A56.78 56.78 0 0 0 193.65 184H62.35A56.78 56.78 0 0 0 24 145.65v-35.3A56.78 56.78 0 0 0 62.35 72h131.3A56.78 56.78 0 0 0 232 110.35Zm0-52.28A40.81 40.81 0 0 1 210.63 72H232Z"
-                      />
-                    </g>
-                  </svg>
-                  <!-- Id Card icon if Licence is null -->
-                  <svg
-                    v-if="!user.licence"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      fill="text-black"
-                      d="M14 13h5v-2h-5zm0-3h5V8h-5zm-9 6h8v-.55q0-1.125-1.1-1.787T9 13q-1.8 0-2.9.663T5 15.45zm4-4q.825 0 1.413-.587T11 10q0-.825-.587-1.412T9 8q-.825 0-1.412.588T7 10q0 .825.588 1.413T9 12m-5 8q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
-                    />
-                  </svg>
-                </span>
-              </td>
-              <!-- Name -->
+            <tr v-for="(event, index) in events" :key="event.id">
+              <!-- Event Date -->
               <td
-                class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
+                class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
               >
-                {{ user.name.data }}
+                {{ formatDate(event.date_event) }}
               </td>
-              <!-- Firstname -->
+              <!-- Event Name -->
               <td
-                class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
+                class="px-3 py-2 max-w-20 whitespace-nowrap text-sm text-gray-500 uppercase"
               >
-                {{ user.firstname.data }}
+                {{ event.name_event }}
               </td>
               <td
-                class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
+                class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
               >
-                <!-- Button open modal -->
+                <!-- Button Modify Event -->
                 <button
-                  @click="openModal(user)"
-                  class="focus:outline-none text-black"
+                  @click="editEvent(event)"
+                  class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600"
                 >
-                  <!-- Arrow bottom -->
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-5 w-5 text-black hover:text-gray-600 transition duration-300"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 12l-6-6h12l-6 6z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
+                  Modifier
+                </button>
+                <!-- Button Delete Event -->
+                <button
+                  @click="deleteEvent(event.id)"
+                  class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
+                >
+                  Supprimer
                 </button>
               </td>
             </tr>
@@ -217,56 +367,158 @@
         </table>
       </div>
     </div>
-    <!-- Create Event Form  -->
-    <div class="bg-white mx-2 rounded p-2">
-      <!-- Title Section -->
-      <h2 class="text-xl font-semibold mb-2">Créer un nouveau cours</h2>
-      <form @submit.prevent="createCourse" class="flex flex-col space-y-4">
-        <!-- Name Event -->
-        <div class="flex flex-col">
-          <label for="title" class="font-semibold">Titre du cours</label>
+    <TheModal
+      :isOpen="showModalSelectedUser"
+      title="Informations utilisateurs"
+      @close="closeModalUser"
+    >
+      <!-- Modale Utilisateur  -->
+      <!-- Input Name -->
+      <div class="mb-2 mt-4">
+        <label for="username"><strong>Nom:</strong></label>
+        <input
+          class="border border-gray-500 p-1"
+          type="text"
+          v-model="selectedUser.name.data"
+          id="username"
+        />
+      </div>
+      <!-- Input Firstname -->
+      <div class="mb-2">
+        <label for="userfirstname"><strong>Prénom:</strong></label>
+        <input
+          class="border border-gray-500 p-1"
+          type="text"
+          v-model="selectedUser.firstname.data"
+          id="userfirstname"
+        />
+      </div>
+
+      <p class="mb-2"><strong>E-mail:</strong> {{ selectedUser.email.data }}</p>
+      <!-- Birthday -->
+      <p class="mb-2">
+        <strong>Date de naissance:</strong>
+        {{ formatDate(selectedUser.birthday.data) }}
+      </p>
+      <!-- Gender -->
+      <p class="mb-2">
+        <strong>Genre:</strong> {{ selectedUser.gender ? "Homme" : "Femme" }}
+      </p>
+      <!-- Weight -->
+      <p>
+        <strong>Poids:</strong>
+        {{
+          (selectedUser.weight && selectedUser.weight.data + "Kg") ||
+          "Non renseigné"
+        }}
+      </p>
+      <!-- Tel Medic -->
+      <p class="mb-2">
+        <strong>Téléphone médical:</strong>
+        {{
+          (selectedUser.tel_medic && selectedUser.tel_medic.data) ||
+          "Non renseigné"
+        }}
+      </p>
+      <!-- Tel emergency -->
+      <p class="mb-2">
+        <strong>Téléphone d'urgence:</strong>
+        {{
+          (selectedUser.tel_emergency && selectedUser.tel_emergency.data) ||
+          "Non renseigné"
+        }}
+      </p>
+      <!-- Add Input for change the dates -->
+      <!-- Payment input -->
+      <div class="mb-2">
+        <label for="datePayment"><strong>Date de paiement:</strong></label>
+        <input
+          class="border border-gray-500 p-1"
+          type="date"
+          v-model="selectedUser.date_payment"
+          id="datePayment"
+        />
+        <span v-if="!selectedUser.date_payment">Aucun paiement en cours</span>
+      </div>
+      <!-- End Pay input -->
+      <div class="mb-2">
+        <label for="dateEndPay"
+          ><strong> Date de fin de paiement:</strong></label
+        >
+        <input
+          class="border border-gray-500 p-1"
+          type="date"
+          v-model="selectedUser.date_end_pay"
+          id="dateEndPay"
+        />
+        <span v-if="!selectedUser.date_end_pay">Aucun paiement en cours</span>
+      </div>
+      <!-- Div For Place the buttons -->
+      <div class="flex flex-row justify-between">
+        <!-- Button For Update User -->
+        <button
+          @click="updateUser"
+          class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+        >
+          Enregistrer
+        </button>
+        <!-- Button For change role user -->
+        <div v-if="getUserRole() === 2">
+          <button
+            v-if="selectedUser.role === 0"
+            @click="changeUserRole(selectedUser.id)"
+            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Passer Admin
+          </button>
+        </div>
+      </div>
+    </TheModal>
+    <!-- Modal For Editing Event -->
+    <TheModal
+      :isOpen="showModal"
+      title="Modifier l'évenement"
+      @close="closeModal"
+    >
+      <!-- Modale pour l'édition de l'événement -->
+
+      <form
+        @submit.prevent="saveChanges(editedEvent.id)"
+        data-event-id="editedEvent.id"
+      >
+        <!-- Event Name -->
+        <div class="flex flex-col mb-4">
+          <label for="title">Titre du cours : </label>
           <input
             type="text"
-            v-model="newCourse.name_event"
+            v-model="editedEvent.name_event"
             id="title"
             class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
           />
         </div>
         <!-- Overview -->
-        <div class="flex flex-col">
-          <label for="description" class="font-semibold"
-            >Description du cours</label
-          >
+        <div class="flex flex-col mb-4">
+          <label for="description">Description du cours : </label>
           <textarea
-            v-model="newCourse.overview"
+            v-model="editedEvent.overview"
             id="description"
             class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
             placeholder=""
           ></textarea>
         </div>
-        <!-- Date -->
-        <div class="flex flex-col">
-          <label for="date">Date et heure de début</label>
-          <input
-            type="datetime-local"
-            v-model="newCourse.date_event"
-            id="date"
-            class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-          />
-        </div>
         <!-- Coach -->
-        <div class="flex flex-col">
-          <label for="coach">Nom du coach</label>
+        <div class="flex flex-col mb-4">
+          <label for="coach">Nom du coach : </label>
           <input
             type="text"
-            v-model="newCourse.coach"
+            v-model="editedEvent.coach"
             id="coach"
             class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
           />
         </div>
         <!-- Duration -->
-        <div class="flex flex-col">
-          <label for="duration">Durée du cours (en minutes)</label>
+        <div class="flex flex-col mb-4">
+          <label for="duration">Durée du cours (en minutes) : </label>
           <input
             type="number"
             v-model="durationInHours"
@@ -274,274 +526,27 @@
             class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
           />
         </div>
-        <!-- Total places -->
-        <div class="flex flex-col">
-          <label for="totalSeats">Nombre de places total disponibles</label>
+        <!-- Seats -->
+        <div class="flex flex-col mb-4">
+          <label for="totalSeats">Nombre de places total disponibles : </label>
           <input
             type="number"
-            v-model="newCourse.totalPlaces"
+            v-model="editedEvent.totalPlaces"
             id="totalSeats"
             class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
           />
         </div>
-        <!-- Submit Button -->
+
+        <!-- Button Save Changes -->
         <button
           type="submit"
-          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
-          Créer le cours
+          Sauvegarder
         </button>
       </form>
-    </div>
+    </TheModal>
   </div>
-
-  <!-- Event Table -->
-  <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-    <!-- Section name -->
-    <h2 class="text-xl font-semibold mb-2">Liste des événements</h2>
-    <div class="max-w-screen-lg mx-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <!-- Row Table header -->
-        <thead class="bg-gray-50">
-          <tr>
-            <!-- Date -->
-            <th
-              scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Date
-            </th>
-            <!-- Name -->
-            <th
-              scope="col"
-              class="px-3 py-1 text-left max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Intitulé
-            </th>
-            <!-- Action -->
-            <th
-              scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <!--Row Value Database -->
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="(event, index) in events" :key="event.id">
-            <!-- Event Date -->
-            <td
-              class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-            >
-              {{ formatDate(event.date_event) }}
-            </td>
-            <!-- Event Name -->
-            <td
-              class="px-3 py-2 max-w-20 whitespace-nowrap text-sm text-gray-500 uppercase"
-            >
-              {{ event.name_event }}
-            </td>
-            <td
-              class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
-            >
-              <!-- Button Modify Event -->
-              <button
-                @click="editEvent(event)"
-                class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600"
-              >
-                Modifier
-              </button>
-              <!-- Button Delete Event -->
-              <button
-                @click="deleteEvent(event.id)"
-                class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
-              >
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <TheModal
-    :isOpen="showModalSelectedUser"
-    title="Informations utilisateurs"
-    @close="closeModalUser"
-  >
-    <!-- Modale Utilisateur  -->
-    <!-- Input Name -->
-    <div class="mb-2 mt-4">
-      <label for="username"><strong>Nom:</strong></label>
-      <input
-        class="border border-gray-500 p-1"
-        type="text"
-        v-model="selectedUser.name.data"
-        id="username"
-      />
-    </div>
-    <!-- Input Firstname -->
-    <div class="mb-2">
-      <label for="userfirstname"><strong>Prénom:</strong></label>
-      <input
-        class="border border-gray-500 p-1"
-        type="text"
-        v-model="selectedUser.firstname.data"
-        id="userfirstname"
-      />
-    </div>
-
-    <p class="mb-2"><strong>E-mail:</strong> {{ selectedUser.email.data }}</p>
-    <!-- Birthday -->
-    <p class="mb-2">
-      <strong>Date de naissance:</strong>
-      {{ formatDate(selectedUser.birthday.data) }}
-    </p>
-    <!-- Gender -->
-    <p class="mb-2">
-      <strong>Genre:</strong> {{ selectedUser.gender ? "Homme" : "Femme" }}
-    </p>
-    <!-- Weight -->
-    <p>
-      <strong>Poids:</strong>
-      {{
-        (selectedUser.weight && selectedUser.weight.data + "Kg") ||
-        "Non renseigné"
-      }}
-    </p>
-    <!-- Tel Medic -->
-    <p class="mb-2">
-      <strong>Téléphone médical:</strong>
-      {{
-        (selectedUser.tel_medic && selectedUser.tel_medic.data) ||
-        "Non renseigné"
-      }}
-    </p>
-    <!-- Tel emergency -->
-    <p class="mb-2">
-      <strong>Téléphone d'urgence:</strong>
-      {{
-        (selectedUser.tel_emergency && selectedUser.tel_emergency.data) ||
-        "Non renseigné"
-      }}
-    </p>
-    <!-- Add Input for change the dates -->
-    <!-- Payment input -->
-    <div class="mb-2">
-      <label for="datePayment"><strong>Date de paiement:</strong></label>
-      <input
-        class="border border-gray-500 p-1"
-        type="date"
-        v-model="selectedUser.date_payment"
-        id="datePayment"
-      />
-      <span v-if="!selectedUser.date_payment">Aucun paiement en cours</span>
-    </div>
-    <!-- End Pay input -->
-    <div class="mb-2">
-      <label for="dateEndPay"><strong> Date de fin de paiement:</strong></label>
-      <input
-        class="border border-gray-500 p-1"
-        type="date"
-        v-model="selectedUser.date_end_pay"
-        id="dateEndPay"
-      />
-      <span v-if="!selectedUser.date_end_pay">Aucun paiement en cours</span>
-    </div>
-    <!-- Div For Place the buttons -->
-    <div class="flex flex-row justify-between">
-      <!-- Button For Update User -->
-      <button
-        @click="updateUser"
-        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-      >
-        Enregistrer
-      </button>
-      <!-- Button For change role user -->
-      <div v-if="getUserRole() === 2">
-        <button
-          v-if="selectedUser.role === 0"
-          @click="changeUserRole(selectedUser.id)"
-          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          Passer Admin
-        </button>
-      </div>
-    </div>
-  </TheModal>
-  <!-- Modal For Editing Event -->
-  <TheModal
-    :isOpen="showModal"
-    title="Modifier l'évenement"
-    @close="closeModal"
-  >
-    <!-- Modale pour l'édition de l'événement -->
-
-    <form
-      @submit.prevent="saveChanges(editedEvent.id)"
-      data-event-id="editedEvent.id"
-    >
-      <!-- Event Name -->
-      <div class="flex flex-col mb-4">
-        <label for="title">Titre du cours : </label>
-        <input
-          type="text"
-          v-model="editedEvent.name_event"
-          id="title"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
-      </div>
-      <!-- Overview -->
-      <div class="flex flex-col mb-4">
-        <label for="description">Description du cours : </label>
-        <textarea
-          v-model="editedEvent.overview"
-          id="description"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-          placeholder=""
-        ></textarea>
-      </div>
-      <!-- Coach -->
-      <div class="flex flex-col mb-4">
-        <label for="coach">Nom du coach : </label>
-        <input
-          type="text"
-          v-model="editedEvent.coach"
-          id="coach"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
-      </div>
-      <!-- Duration -->
-      <div class="flex flex-col mb-4">
-        <label for="duration">Durée du cours (en minutes) : </label>
-        <input
-          type="number"
-          v-model="durationInHours"
-          id="duration"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
-      </div>
-      <!-- Seats -->
-      <div class="flex flex-col mb-4">
-        <label for="totalSeats">Nombre de places total disponibles : </label>
-        <input
-          type="number"
-          v-model="editedEvent.totalPlaces"
-          id="totalSeats"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
-      </div>
-
-      <!-- Button Save Changes -->
-      <button
-        type="submit"
-        class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-      >
-        Sauvegarder
-      </button>
-    </form>
-  </TheModal>
 </template>
 <script>
 export default {
@@ -566,6 +571,7 @@ export default {
       sortBy: null, // handleSort BY
       sortOrder: null, // handleSort Order
       showModalSelectedUser: false, // Show or close Selected User
+      loading: true,
     };
   },
   async mounted() {
@@ -785,6 +791,7 @@ export default {
           this.inactiveUsers = allUsers.filter(
             (user) => user.isActive === false
           );
+          this.loading = false;
         } else {
           // In error case show error message
           throw new Error(
@@ -866,7 +873,7 @@ export default {
               if (response.ok) {
                 console.log(
                   "Le rôle de l'utilisateur a été modifié avec succès"
-                  );
+                );
                 this.loadUsers();
               } else {
                 throw new Error(

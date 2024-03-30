@@ -541,29 +541,37 @@ export default {
       console.log("user : " + userId);
       console.log(eventId);
 
-      const response = await fetch(
-        `http://localhost:8080/lists-members/${eventId}/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Vérifiez si l'utilisateur participe à l'événement
-        const isParticipe = data.isParticipant;
-
-        return isParticipe;
-      } else {
-        console.error(
-          "Erreur lors de la récupération des données:",
-          response.statusText
+      try {
+        const response = await fetch(
+          `http://localhost:8080/lists-members/${eventId}/${userId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch participation data");
+        }
+
+        // Vérifier si la réponse contient des données JSON
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          // Lire le corps de la réponse et parser les données JSON
+          const data = await response.json();
+
+          // Vérifiez si l'utilisateur participe à l'événement
+          const isParticipating = data.isParticipant;
+
+          return isParticipating;
+        } else {
+          throw new Error("Response does not contain valid JSON data");
+        }
+      } catch (error) {
+        console.error("Error checking participation:", error);
         return false; // Par défaut, l'utilisateur ne participe pas
       }
     },

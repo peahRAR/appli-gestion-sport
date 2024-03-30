@@ -26,7 +26,6 @@ export class ListsMembersController {
   @Get(':eventId/:userId')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('eventId') eventId: string, @Param('userId') userId: string) {
-    console.log('Aurevoir');
     return this.listsMembersService.findOne(+eventId, +userId);
   }
 

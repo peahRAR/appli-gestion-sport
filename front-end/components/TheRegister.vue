@@ -104,7 +104,7 @@ export default {
         // SignUp method
         async signUp() {
             try {
-                const { data } = await useFetch("http://localhost:8080/users", {
+                const { data } = await fetch("http://localhost:8080/users", {
                     method: "POST",
                     mode: "cors",
                     body: JSON.stringify(this.user),

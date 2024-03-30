@@ -131,13 +131,15 @@ export class UsersService {
     const identifier = this.createidentifier(createUserDto.email);
 
     // Verifier que mdp correspond à la regex sinon lever erreur
-
+      if (!this.verifyPasswordRegex(createUserDto.password)) {
+        throw new Error(
+          'Le mot de passe ne correspond pas aux critères requis.',
+        );
+      }
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    if (!this.verifyPasswordRegex(createUserDto.password)) {
-      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
-    }
+    
 
     const existingUser = await this.userRepository
       .createQueryBuilder('users')

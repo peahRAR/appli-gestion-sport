@@ -167,7 +167,7 @@ export default {
             password: null,
             currentPassword: null,
             newPassword: '',
-            confirmNewPassword: null,
+            confirmNewPassword: '',
             showChangePasswordModal: false,
             passwordValidate: false,
             regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
@@ -193,7 +193,10 @@ export default {
         },
         // Valider Confirm Password
         validerConfirmPassword() {
-            return this.confirmNewPassword === this.newPassword
+            if (this.confirmNewPassword === this.newPassword) {
+                return true
+            }
+            return false
         },
 
 
@@ -230,7 +233,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                const response = await useFetch(`http://localhost:8080/users/${userId}`, {
+                const response = await fetch(`http://localhost:8080/users/${userId}`, {
                     method: 'GET',
                     mode: 'cors',
                     headers: {
@@ -274,7 +277,7 @@ export default {
                     return;
                 }
 
-                await useFetch(`http://localhost:8080/users/${userId}`, {
+                await fetch(`http://localhost:8080/users/${userId}`, {
                     method: 'PATCH',
                     mode: 'cors',
                     body: JSON.stringify(this.user),
@@ -316,7 +319,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                await useFetch(`http://localhost:8080/users/${userId}`, {
+                await fetch(`http://localhost:8080/users/${userId}`, {
                     method: 'DELETE',
                     mode: 'cors',
                     headers: {
@@ -344,7 +347,7 @@ export default {
                 const formData = new FormData();
                 formData.append('avatar', file); // Ajoutez le fichier à FormData sous la clé 'avatar'
                 try {
-                    const response = await useFetch(`http://localhost:8080/users/${userId}`, {
+                    const response = await fetch(`http://localhost:8080/users/${userId}`, {
                         method: 'PATCH',
                         mode: 'cors',
                         body: formData, // Utilisez le FormData comme corps de la requête
@@ -389,12 +392,12 @@ export default {
         // Update the user passswors api Key
         async changePassword() {
             // verifier que ancien mdp === correct
-            if (!this.validerNewPassword || !this.validerConfirmNewPassword) {
-                // Verifier que ancien !=== nouveau
+            // if (!this.validerNewPassword || !this.validerConfirmNewPassword) {
+            //     // Verifier que ancien !=== nouveau
+            //     console.log('coucou')
 
-
-                return
-            }
+            //     return
+            // }
 
             // Vérifier si les nouveaux mots de passe correspondent
             if (this.newPassword !== this.confirmNewPassword) {
@@ -410,7 +413,7 @@ export default {
                     console.error('Impossible de récupérer l\'ID de l\'utilisateur.');
                     return;
                 }
-                const response = await useFetch(`http://localhost:8080/users/${userId}/`, {
+                const response = await fetch(`http://localhost:8080/users/${userId}`, {
                     method: 'PATCH',
                     mode: 'cors',
                     body: JSON.stringify({

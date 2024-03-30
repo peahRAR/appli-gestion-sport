@@ -49,7 +49,7 @@ export default {
 
             try {
                 console.log(this.user)
-                const { data } = await useFetch('http://localhost:8080/auth/login', {
+                const { data } = await fetch('http://localhost:8080/auth/login', {
                     method: 'POST',
                     mode: 'cors',
                     body: JSON.stringify(this.user),

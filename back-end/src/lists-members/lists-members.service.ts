@@ -31,11 +31,15 @@ export class ListsMembersService {
     return this.listsMemberRepository.find({ where: { eventId } });
   }
 
-  async findOne(
-    eventId: number,
-    userId: number,
-  ): Promise<ListsMember | undefined> {
-    return this.listsMemberRepository.findOne({ where: { eventId, userId } });
+  async findOne(eventId: number, userId: number): Promise<any> {
+    const listsMember = await this.listsMemberRepository.findOne({
+      where: { eventId, userId },
+    });
+    if (!listsMember) {
+      // Si aucune correspondance n'est trouvée, retourner un objet JSON vide ou un message d'erreur
+      return {}; // Ou return { error: 'Aucune correspondance trouvée' };
+    }
+    return listsMember;
   }
 
   async update(

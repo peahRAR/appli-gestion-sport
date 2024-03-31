@@ -18,17 +18,8 @@
       </div>
       <!-- Password input -->
       <div class="mb-6">
-        <label for="password" class="block text-gray-700 text-sm font-bold mb-2"
-          >Mot de passe</label
-        >
-        <input
-          v-model="user.password"
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Votre mot de passe"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-        />
+        <inputPassword @password="user.password = $event" :regex='regexPassword' label="Mot de passe : "
+                id="password" :isValid="validerPassword" />
       </div>
       <!-- Afficher le message d'erreur s'il y a lieu -->
       <p v-if="errorMessage" class="text-red-500 mt-4 text-center">
@@ -57,8 +48,24 @@ export default {
         password: null, // Variable keep password
       },
       errorMessage: null, // Variable keep error message
+      regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
     };
   },
+  computed: {
+        // Pattern Regex
+        patternRegex() {
+            return this.regexPassword.toString().slice(1, -1)
+        },
+        // ValiderPassword
+        validerPassword() {
+            if (!this.regexPassword.test(this.user.password)) {
+
+                return false
+            }
+
+            return true
+        },
+    },
 
   methods: {
     // LOGIN API method

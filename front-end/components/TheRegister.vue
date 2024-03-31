@@ -60,7 +60,6 @@
 
     <!-- TheModal -->
     <TheModal :isOpen="showModal" @close="closeModal">
-        <span class="close absolute top-0 right-0 m-4 text-2xl cursor-pointer" @click="closeModal">&times;</span>
         <p class="text-center text-2xl mb-4 z-20">Vérifiez votre email pour terminer votre inscription.</p>
     </TheModal>
 

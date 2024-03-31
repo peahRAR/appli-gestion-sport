@@ -469,7 +469,7 @@ export class UsersService {
     const decryptedEmail = this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `http://localhost:3000/resetpassword/${resetToken}`;
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,

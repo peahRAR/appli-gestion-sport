@@ -40,11 +40,50 @@
         </button>
       </div>
     </form>
+
+    <!-- Button to open modal -->
+    <button
+      @click="openResetPasswordModal"
+      class="mt-2 ml-16 underline bg-gray-300 hover:bg-gray-400 m-auto text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+    >
+      Réinitialiser le mot de passe
+    </button>
+
+    <!-- Reset Password Modal -->
     <TheModal
-      :isOpen="showErrorModal"
-      title="Message"
-      @close="closeErrorModal"
-      >{{ this.errorMessage }}</TheModal>
+      :isOpen="showResetPasswordModal"
+      title="Réinitialiser le mot de passe"
+      @close="closeResetPasswordModal"
+    >
+      <form @submit.prevent="requestPasswordReset">
+        <div class="mb-4">
+          <label
+            for="resetEmail"
+            class="block text-gray-700 text-sm font-bold mb-2"
+            >Email</label
+          >
+          <input
+            v-model="resetEmail"
+            type="email"
+            id="resetEmail"
+            name="resetEmail"
+            placeholder="Votre email"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
+          />
+        </div>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        >
+          Envoyer
+        </button>
+      </form>
+    </TheModal>
+
+    <!-- Error Modal -->
+    <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">
+      {{ errorMessage }}
+    </TheModal>
   </div>
 </template>
 
@@ -57,8 +96,10 @@ export default {
         email: null, //Variable keep email
         password: null, // Variable keep password
       },
-      showErrorModal:false,
-      errorMessage:null,
+      showErrorModal: false,
+      showResetPasswordModal: false,
+      errorMessage: null,
+      resetEmail: "",
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
@@ -121,6 +162,66 @@ export default {
       this.showErrorModal = false;
 
       this.errorMessage = "";
+    },
+    // Open modal to reset password
+    openResetPasswordModal() {
+      this.showResetPasswordModal = true;
+    },
+
+    // Close reset password modal
+    closeResetPasswordModal() {
+      this.showResetPasswordModal = false;
+      this.resetEmail = "";
+    },
+
+    // Request password reset
+    async requestPasswordReset() {
+      try {
+        const response = await fetch(
+          "http://localhost:8080/auth/resetpassword",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: this.resetEmail }),
+          }
+        );
+
+        if (response.ok) {
+          // La requête a réussi
+          // Vous pouvez gérer le succès ici, par exemple en affichant un message à l'utilisateur
+          this.openErrorModal();
+          this.errorMessage =
+            "Demande de réinitialisation du mot de passe envoyée avec succès"
+            ;
+          this.showResetPasswordModal = false
+        } else {
+          // La requête a échoué
+          // Vous pouvez gérer l'échec ici, par exemple en affichant un message d'erreur à l'utilisateur
+          this.openErrorModal();
+          this.errorMessage =
+            "Échec de la demande de réinitialisation du mot de passe :",
+            response.status
+            ;
+          this.showResetPasswordModal = false
+          throw new Error(
+            "Échec de la demande de réinitialisation du mot de passe"
+          );
+        }
+      } catch (error) {
+        // Une erreur s'est produite lors de l'envoi de la requête
+        // Vous pouvez gérer l'erreur ici, par exemple en affichant un message d'erreur à l'utilisateur
+        console.error(
+          "Erreur lors de la demande de réinitialisation du mot de passe :",
+          error
+        );
+        this.openErrorModal();
+          this.errorMessage =
+          "Erreur lors de la demande de réinitialisation du mot de passe"
+          ;
+        this.showResetPasswordModal = false
+      }
     },
   },
 };

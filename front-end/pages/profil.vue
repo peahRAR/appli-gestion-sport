@@ -521,7 +521,7 @@ export default {
       // Vérifier si les nouveaux mots de passe correspondent
       if (this.newPassword !== this.confirmNewPassword) {
         this.openErrorModal();
-        this.errorMessage ="Les nouveaux mots de passe ne correspondent pas.";
+        this.errorMessage = "Les nouveaux mots de passe ne correspondent pas.";
         return;
       }
 

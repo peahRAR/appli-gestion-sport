@@ -15,15 +15,15 @@
                 </button>
                 <!-- Contenu du menu déroulant -->
                 <div v-show="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
-                    <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/profil">
+                    <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/profil" @click="toggleMenu">
                         Profil
                     </NuxtLink>
-                    <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/">
+                    <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/" @click="toggleMenu">
                         Accueil
                     </NuxtLink>
                     <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
                     <div v-if="userRole === 1 || userRole === 2">
-                        <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/admin">
+                        <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/admin" @click="toggleMenu">
                             Administration
                         </NuxtLink>
                     </div>
@@ -74,7 +74,8 @@ export default {
         },
         toggleMenu() {
             this.isMenuOpen = !this.isMenuOpen;
-        }
+        },
+        
     }
 };
 </script>

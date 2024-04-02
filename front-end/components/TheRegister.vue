@@ -18,6 +18,7 @@
             v-model="user.gender"
             type="radio"
             name="gender"
+            
             value="false"
             class="form-radio"
           />
@@ -33,6 +34,7 @@
         v-model="user.name"
         type="name"
         id="name"
+        required
         name="name"
         placeholder="Votre Nom"
         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
@@ -46,6 +48,7 @@
         v-model="user.firstname"
         type="firstname"
         id="firstname"
+        required
         name="firstname"
         placeholder="Votre Prénom"
         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
@@ -59,6 +62,7 @@
         v-model="user.email"
         type="email"
         id="email"
+        required
         name="email"
         placeholder="Votre email"
         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
@@ -88,6 +92,7 @@
       <input
         v-model="user.birthday"
         type="date"
+        required
         id="birthdate"
         name="birthdate"
         placeholder="Votre date de naissance"

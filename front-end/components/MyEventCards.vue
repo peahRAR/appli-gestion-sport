@@ -210,6 +210,11 @@
       </li>
     </ul>
   </TheModal>
+  <TheModal
+      :isOpen="showErrorModal"
+      title="Message"
+      @close="closeErrorModal"
+      >{{ this.errorMessage }}</TheModal>
 </template>
 
 <script>
@@ -225,6 +230,8 @@ export default {
       userRole: 0,
       isParticipe: false,
       loading: true,
+      showErrorModal:false,
+      errorMessage:null,
     };
   },
   async mounted() {
@@ -248,8 +255,7 @@ export default {
         const eventsWithParticipation = await Promise.all(
           eventsArray.map(async (event) => {
             if (event && event.id) {
-              console.log("event : " + event.id);
-              console.log("user : " + userId);
+              
               const isParticipating = await this.checkParticipation(
                 event.id,
                 userId
@@ -387,7 +393,7 @@ export default {
     },
     async openModal(event) {
       const token = localStorage.getItem("accessToken");
-      console.log(event);
+      
       try {
         const response = await fetch(
           `http://localhost:8080/lists-members/by-event/${event.id}`,
@@ -403,7 +409,7 @@ export default {
           throw new Error("Failed to fetch event participants");
         }
         const data = await response.json();
-        console.log(data);
+        
 
         // Filtrer les participants ayant isParticipant = true
         const participants = data.filter(
@@ -505,7 +511,8 @@ export default {
           );
 
           if (!response.ok) {
-            alert("Désolé, il n'y a plus de place pour ce cours");
+            this.openErrorModal();
+            this.errorMessage ="Désolé, il n'y a plus de place pour ce cours";
           }
 
           this.initialization();
@@ -542,9 +549,7 @@ export default {
     },
     async checkParticipation(eventId, userId) {
       const token = localStorage.getItem("accessToken");
-      console.log("event : " + eventId);
-      console.log("user : " + userId);
-      console.log(eventId);
+      
 
       try {
         const response = await fetch(
@@ -579,6 +584,15 @@ export default {
         console.error("Error checking participation:", error);
         return false; // Par défaut, l'utilisateur ne participe pas
       }
+    },
+    openErrorModal() {
+      this.showErrorModal = true;
+    },
+    //  Close Modal Password change
+    closeErrorModal() {
+      this.showErrorModal = false;
+
+      this.errorMessage = "";
     },
   },
 };

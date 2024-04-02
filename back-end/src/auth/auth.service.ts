@@ -23,11 +23,10 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<{ access_token: string }> {
-    console.log("1")
+    
     // Rechercher l'utilisateur dans la base de données en utilisant le service UsersService
     const user = await this.usersService.findByEmail(email);
-    console.log(user)
-    console.log('2')
+    
     // Vérifier si l'utilisateur existe
     if (!user) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
@@ -37,20 +36,19 @@ export class AuthService {
     if (!user.isActive) {
       throw new UnauthorizedException("Votre compte n'est pas activé");
     }
-    console.log('3')
+    
     // Comparer le mot de passe fourni avec le mot de passe chiffré
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log(isMatch)
+    
     if (!isMatch) {
-      console.log('coucou')
+      
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
     // Générer un JWT avec les informations de l'utilisateur comme payload
     const payload = { sub: user.id, email: user.email, role: user.role }; // Utilisez les informations appropriées de l'utilisateur
-    console.log(payload)
+   
     const access_token = await this.jwtService.signAsync(payload);
-    console.log(access_token);
-    console.log('5')
+    
     // Retourner le token JWT
     return { access_token };
   }

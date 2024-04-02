@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+// import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,7 +27,8 @@ export class AdminService {
     if (!user) {
       throw new Error('Utilisateur introuvable.');
     }
-    console.log(user)
+    
+    
     // Mettre à jour le champ isActive
     user.isActive = true;
     

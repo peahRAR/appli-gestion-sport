@@ -65,7 +65,7 @@ export class EventsService {
       .select('event.id')
       .where('event.date_event < :expirationDate', { expirationDate })
       .getMany();
-    console.log(expiredEvents)
+    
     // Supprimer les entrées correspondantes dans la table ListsMembers
     for (const event of expiredEvents) {
       const lists = await this.listsMembersService.findAllByIdEvent(event.id);
@@ -74,7 +74,7 @@ export class EventsService {
       });
      
 
-     console.log(lists)
+     
    }
 
     // Supprimer les événements expirés de la table Events

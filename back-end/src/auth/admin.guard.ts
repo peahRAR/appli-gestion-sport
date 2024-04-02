@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(request.user)
+    
     const user = request.user; 
 
     // Vérifier si l'utilisateur a le rôle requis (1 ou 2 pour admin ou superAdmin)

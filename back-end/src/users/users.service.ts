@@ -322,7 +322,7 @@ export class UsersService {
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
-    console.log('new password :' + updateUserDto.password);
+    
     // Mettre à jour le mot de passe s'il est fourni
     if (updateUserDto.password) {
       // Vérifier si le mot de passe actuel est fourni

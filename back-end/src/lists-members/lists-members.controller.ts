@@ -12,13 +12,13 @@ export class ListsMembersController {
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {
-    console.log('Non');
+    
     return this.listsMembersService.findAll();
   }
 
   @Get('by-event/:eventId') // Ajoutez un chemin d'accès distinct pour findAllByIdEvent
   findAllByIdEvent(@Param('eventId') eventId: string) {
-    console.log(eventId);
+    
     
     return this.listsMembersService.findAllByIdEvent(+eventId);
   }

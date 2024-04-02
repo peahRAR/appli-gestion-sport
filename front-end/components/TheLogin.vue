@@ -18,8 +18,13 @@
       </div>
       <!-- Password input -->
       <div class="mb-6">
-        <inputPassword @password="user.password = $event" :regex='regexPassword' label="Mot de passe : "
-                id="password" :isValid="validerPassword" />
+        <inputPassword
+          @password="user.password = $event"
+          :regex="regexPassword"
+          label="Mot de passe : "
+          id="password"
+          :isValid="validerPassword"
+        />
       </div>
       <!-- Afficher le message d'erreur s'il y a lieu -->
       <p v-if="errorMessage" class="text-red-500 mt-4 text-center">
@@ -35,6 +40,11 @@
         </button>
       </div>
     </form>
+    <TheModal
+      :isOpen="showErrorModal"
+      title="Message"
+      @close="closeErrorModal"
+      >{{ this.errorMessage }}</TheModal>
   </div>
 </template>
 
@@ -47,31 +57,31 @@ export default {
         email: null, //Variable keep email
         password: null, // Variable keep password
       },
-      errorMessage: null, // Variable keep error message
-      regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+      showErrorModal:false,
+      errorMessage:null,
+      regexPassword:
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
   },
   computed: {
-        // Pattern Regex
-        patternRegex() {
-            return this.regexPassword.toString().slice(1, -1)
-        },
-        // ValiderPassword
-        validerPassword() {
-            if (!this.regexPassword.test(this.user.password)) {
-
-                return false
-            }
-
-            return true
-        },
+    // Pattern Regex
+    patternRegex() {
+      return this.regexPassword.toString().slice(1, -1);
     },
+    // ValiderPassword
+    validerPassword() {
+      if (!this.regexPassword.test(this.user.password)) {
+        return false;
+      }
+
+      return true;
+    },
+  },
 
   methods: {
     // LOGIN API method
     async signIn() {
       try {
-        console.log(this.user);
         const { data } = await useFetch("http://localhost:8080/auth/login", {
           method: "POST",
           mode: "cors",
@@ -87,20 +97,30 @@ export default {
           localStorage.setItem("accessToken", data.value.access_token);
           document.location.href = "/";
         } else {
-          console.error(
-            "Erreur lors de la connexion : données non définies ou incorrectes"
-          );
+          this.openErrorModal();
+          this.errorMessage =
+            "Erreur lors de la connexion : données non définies ou incorrectes";
         }
-    
       } catch (error) {
         // Catch if some error was raised
         console.error("Erreur lors de la connexion :", error);
         // Afficher un message d'erreur générique en cas d'erreur
+        this.openErrorModal();
         this.errorMessage =
           "Une erreur s'est produite lors de la connexion. Veuillez réessayer.";
         // Afficher un message d'erreur si le token d'accès n'est pas trouvé dans la réponse
+        this.openErrorModal();
         this.errorMessage = "Email ou mot de passe invalide.";
       }
+    },
+    openErrorModal() {
+      this.showErrorModal = true;
+    },
+    //  Close Modal Password change
+    closeErrorModal() {
+      this.showErrorModal = false;
+
+      this.errorMessage = "";
     },
   },
 };

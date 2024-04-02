@@ -69,7 +69,7 @@
         <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
         <div class="flex items-center space-x-4 mb-4">
           <!-- handleSort BY -->
-          <select @change="updateSortBy(value)">
+          <select @change="updateSortBy($event.target.value)">
             <option value="">Trier par...</option>
             <option value="age">Âge</option>
             <option value="gender">Genre</option>
@@ -77,13 +77,14 @@
             <!-- Ajoutez d'autres options de tri ici -->
           </select>
           <!-- handleSort ORDER -->
-          <select @change="updateSortOrder(value)">
+          <select @change="updateSortOrder($event.target.value)">
             <option value="">Trier par...</option>
             <option value="asc">Croissant</option>
             <option value="desc">Décroissant</option>
           </select>
           <button @click="handleSort">Filtrer</button>
         </div>
+
         <!-- User Table -->
         <div class="overflow-x-auto">
           <table class="mx-auto min-w-full divide-y divide-gray-200">
@@ -546,6 +547,11 @@
         </button>
       </form>
     </TheModal>
+    <TheModal
+      :isOpen="showErrorModal"
+      title="Message"
+      @close="closeErrorModal"
+      >{{ this.errorMessage }}</TheModal>
   </div>
 </template>
 <script>
@@ -572,6 +578,8 @@ export default {
       sortOrder: null, // handleSort Order
       showModalSelectedUser: false, // Show or close Selected User
       loading: true,
+      showErrorModal:false,
+      errorMessage:null,
     };
   },
   async mounted() {
@@ -598,7 +606,7 @@ export default {
     async checkUserRole() {
       // Récupérer le token d'accès depuis le localStorage
       const accessToken = localStorage.getItem("accessToken");
-      console.log(accessToken);
+
       if (!accessToken) {
         // Gérer le cas où il n'y a pas de token d'accès, par exemple, déconnecter l'utilisateur ou le rediriger vers la page de connexion
         document.location.href = "/";
@@ -668,15 +676,18 @@ export default {
             duration: "",
           };
           // Return a success message at the user
-          alert("Le cours a été créé avec succès!");
+          this.openErrorModal();
+            this.errorMessage ="Le cours a été créé avec succès!";
           //refresh the evnts list
           this.loadEvents();
         } else {
           // In the Error case
-          throw new Error("Erreur lors de la création du cours");
+         this.openErrorModal();
+            this.errorMessage ="Erreur lors de la création du cours";
         }
       } catch (error) {
-        console.error("Erreur lors de la création du cours:", error);
+        this.openErrorModal();
+            this.errorMessage ="Erreur lors de la création du cours:", error;
       }
     },
     async loadUsers() {
@@ -763,10 +774,14 @@ export default {
         });
 
         // Check if the request throw a 200 status
-        console.log("Mise à jour réussie :", response);
+        this.openErrorModal();
+        this.errorMessage = "Mise à jour réussie :", response;
         this.loadUsers();
+        this.closeModal();
       } catch (error) {
-        console.error("Erreur lors de la mise à jour de l'utilisateur", error);
+        this.openErrorModal();
+        (this.errorMessage = "Erreur lors de la mise à jour de l'utilisateur"),
+          error;
         // Show error message if it not in status 200
       }
     },
@@ -824,9 +839,12 @@ export default {
         await this.loadInactiveUsers();
 
         // Check the response and showw error message if it's not ok
-        console.log("Utilisateur réactivé avec succès :", response);
+        this.openErrorModal();
+        (this.errorMessage = "Utilisateur réactivé avec succès :"), response;
       } catch (error) {
-        console.error("Erreur lors de la réactivation de l'utilisateur", error);
+        this.openErrorModal();
+        (this.errorMessage = "Erreur lors de la réactivation de l'utilisateur"),
+          error;
         // Show error message
       }
     },
@@ -871,19 +889,20 @@ export default {
                 }
               );
               if (response.ok) {
-                console.log(
-                  "Le rôle de l'utilisateur a été modifié avec succès"
-                );
+                this.openErrorModal();
+                this.errorMessage =
+                  "Le rôle de l'utilisateur a été modifié avec succès";
                 this.loadUsers();
+                this.closeModal();
               } else {
-                throw new Error(
-                  "Erreur lors de la modification du rôle de l'utilisateur"
-                );
+                this.openErrorModal();
+                this.errorMessage =
+                  "Erreur lors de la modification du rôle de l'utilisateur";
               }
             } else {
-              throw new Error(
-                "Vous n'avez pas les permissions nécessaires pour effectuer cette action"
-              );
+              this.openErrorModal();
+              this.errorMessage =
+                "Vous n'avez pas les permissions nécessaires pour effectuer cette action";
             }
           } else {
             throw new Error("Token JWT invalide");
@@ -892,10 +911,10 @@ export default {
           throw new Error("Token JWT introuvable dans le localStorage");
         }
       } catch (error) {
-        console.error(
-          "Erreur lors de la modification du rôle de l'utilisateur :",
-          error
-        );
+        this.openErrorModal();
+        (this.errorMessage =
+          "Erreur lors de la modification du rôle de l'utilisateur :"),
+          error;
       }
     },
     // Delete Event
@@ -916,12 +935,16 @@ export default {
         if (response.ok) {
           this.loadEvents();
 
-          alert("L'événement a été supprimé avec succès!");
+          this.openErrorModal();
+          this.errorMessage = "L'événement a été supprimé avec succès!";
         } else {
-          throw new Error("Erreur lors de la suppression de l'événement");
+          this.openErrorModal();
+          this.errorMessage = "Erreur lors de la suppression de l'événement";
         }
       } catch (error) {
-        console.error("Erreur lors de la suppression de l'événement:", error);
+        this.openErrorModal();
+        (this.errorMessage = "Erreur lors de la suppression de l'événement:"),
+          error;
       }
     },
     // Close the modal Event Modify
@@ -954,21 +977,35 @@ export default {
           );
 
           if (response.ok) {
-            console.log("Événement modifié avec succès");
+            this.openErrorModal();
+            this.errorMessage = "Événement modifié avec succès";
             //refresh the evnts list
             this.loadEvents();
           } else {
-            console.error("Erreur lors de la modification de l'événement");
+            this.openErrorModal();
+            this.errorMessage = "Erreur lors de la modification de l'événement";
           }
         } else {
-          console.error("Identifiant d'événement non valide :", eventId);
+          this.openErrorModal();
+          (this.errorMessage = "Identifiant d'événement non valide :"), eventId;
         }
       } catch (error) {
-        console.error("Erreur lors de la modification de l'événement :", error);
+        this.openErrorModal();
+        (this.errorMessage = "Erreur lors de la modification de l'événement :"),
+          error;
       } finally {
         this.closeModal();
         await this.loadEvents();
       }
+    },
+    openErrorModal() {
+      this.showErrorModal = true;
+    },
+    //  Close Modal Password change
+    closeErrorModal() {
+      this.showErrorModal = false;
+
+      this.errorMessage = "";
     },
   },
   // Update Sort By

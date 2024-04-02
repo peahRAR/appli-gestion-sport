@@ -228,6 +228,12 @@
         </div>
       </form>
     </TheModal>
+    <TheModal
+      :isOpen="showErrorModal"
+      title="Message"
+      @close="closeErrorModal"
+      >{{ this.errorMessage }}</TheModal
+    >
   </div>
 </template>
 
@@ -267,6 +273,8 @@ export default {
       loading: true,
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      showErrorModal: false,
+      errorMessage: null,
     };
   },
   async mounted() {
@@ -397,7 +405,8 @@ export default {
 
         document.location.href = "/profil";
       } catch (error) {
-        console.error("Erreur lors de la sauvegarde des modifications", error);
+        this.openErrorModal();
+        this.errorMessage = "Erreur lors de la sauvegarde des modifications";
       }
     },
     // Close modal
@@ -430,7 +439,8 @@ export default {
         // Rediriger l'utilisateur vers la page d'accueil après la suppression si nécessaire
         this.$router.push("/");
       } catch (error) {
-        console.error("Erreur lors de la suppression de l'utilisateur", error);
+        this.openErrorModal();
+        this.errorMessage = "Erreur lors de la suppression de l'utilisateur";
       }
     },
     // Update the avatar user
@@ -470,10 +480,10 @@ export default {
             // Stockez également le fichier pour le télécharger plus tard si nécessaire
             this.avatar = file;
           } else {
-            console.error(
-              "Erreur lors du téléchargement de la photo de profil:",
-              response.status
-            );
+            this.openErrorModal();
+            (this.errorMessage =
+              "Erreur lors du téléchargement de la photo de profil:"),
+              response.status;
           }
         } catch (error) {
           console.error(
@@ -503,14 +513,15 @@ export default {
       // verifier que ancien mdp === correct
       // if (!this.validerNewPassword || !this.validerConfirmNewPassword) {
       //     // Verifier que ancien !=== nouveau
-      //     console.log('coucou')
+      //
 
       //     return
       // }
 
       // Vérifier si les nouveaux mots de passe correspondent
       if (this.newPassword !== this.confirmNewPassword) {
-        alert("Les nouveaux mots de passe ne correspondent pas.");
+        this.openErrorModal();
+        this.errorMessage ="Les nouveaux mots de passe ne correspondent pas.";
         return;
       }
 
@@ -535,7 +546,8 @@ export default {
           },
         });
         if (response.ok) {
-          alert("Mot de passe changé avec succès.");
+          this.openErrorModal();
+          this.errorMessage = "Mot de passe changé avec succès.";
           this.closeModal();
         } else {
           const errorMessage = await response.text();
@@ -545,6 +557,15 @@ export default {
         console.error("Erreur lors du changement de mot de passe", error);
         alert("Erreur lors du changement de mot de passe. Veuillez réessayer.");
       }
+    },
+    openErrorModal() {
+      this.showErrorModal = true;
+    },
+    //  Close Modal Password change
+    closeErrorModal() {
+      this.showErrorModal = false;
+
+      this.errorMessage = "";
     },
   },
 };

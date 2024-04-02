@@ -34,7 +34,7 @@
       <div class="flex justify-center">
         <button
           type="submit"
-          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Se connecter
         </button>
@@ -73,7 +73,7 @@
         </div>
         <button
           type="submit"
-          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Envoyer
         </button>
@@ -193,18 +193,16 @@ export default {
           // Vous pouvez gérer le succès ici, par exemple en affichant un message à l'utilisateur
           this.openErrorModal();
           this.errorMessage =
-            "Demande de réinitialisation du mot de passe envoyée avec succès"
-            ;
-          this.showResetPasswordModal = false
+            "Demande de réinitialisation du mot de passe envoyée avec succès";
+          this.showResetPasswordModal = false;
         } else {
           // La requête a échoué
           // Vous pouvez gérer l'échec ici, par exemple en affichant un message d'erreur à l'utilisateur
           this.openErrorModal();
-          this.errorMessage =
-            "Échec de la demande de réinitialisation du mot de passe :",
-            response.status
-            ;
-          this.showResetPasswordModal = false
+          (this.errorMessage =
+            "Échec de la demande de réinitialisation du mot de passe :"),
+            response.status;
+          this.showResetPasswordModal = false;
           throw new Error(
             "Échec de la demande de réinitialisation du mot de passe"
           );
@@ -217,10 +215,9 @@ export default {
           error
         );
         this.openErrorModal();
-          this.errorMessage =
-          "Erreur lors de la demande de réinitialisation du mot de passe"
-          ;
-        this.showResetPasswordModal = false
+        this.errorMessage =
+          "Erreur lors de la demande de réinitialisation du mot de passe";
+        this.showResetPasswordModal = false;
       }
     },
   },

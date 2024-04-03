@@ -180,6 +180,36 @@
     @close="closeDetailsModal"
   >
     <ul>
+      <li>
+        <img
+          v-if="userDetails.avatar"
+          :src="userDetails.avatar.data"
+          alt="Avatar"
+          class="w-28 h-28 rounded-full mx-auto mb-4"
+        />
+        <!-- If Avatar === null -->
+        <div
+          v-else
+          class="w-28 h-28 mb-4 rounded-full bg-gray-300 mx-auto flex items-center justify-center"
+        >
+          <span class="text-gray-600 text-4xl"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="50"
+              height="50"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
+    3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 
+    8.5a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8 8.5A3.5 3.5 0 0 1 11.5 5m0 1A2.5 
+    2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6"
+              />
+            </svg>
+          </span>
+        </div>
+      </li>
       <li class="capitalize">
         <strong>Nom:</strong> {{ userDetails.name.data }}
       </li>
@@ -210,11 +240,9 @@
       </li>
     </ul>
   </TheModal>
-  <TheModal
-      :isOpen="showErrorModal"
-      title="Message"
-      @close="closeErrorModal"
-      >{{ this.errorMessage }}</TheModal>
+  <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{
+    this.errorMessage
+  }}</TheModal>
 </template>
 
 <script>
@@ -230,8 +258,8 @@ export default {
       userRole: 0,
       isParticipe: false,
       loading: true,
-      showErrorModal:false,
-      errorMessage:null,
+      showErrorModal: false,
+      errorMessage: null,
     };
   },
   async mounted() {
@@ -255,12 +283,11 @@ export default {
         const eventsWithParticipation = await Promise.all(
           eventsArray.map(async (event) => {
             if (event && event.id) {
-              
               const isParticipating = await this.checkParticipation(
                 event.id,
                 userId
               );
-              
+
               return { ...event, isParticipating };
             } else {
               console.error(
@@ -271,7 +298,7 @@ export default {
             }
           })
         );
-          
+
         // Mettre à jour les événements avec les informations de participation
         this.events = eventsWithParticipation.filter((event) => event !== null);
         this.loading = false;
@@ -393,7 +420,7 @@ export default {
     },
     async openModal(event) {
       const token = localStorage.getItem("accessToken");
-      
+
       try {
         const response = await fetch(
           `http://localhost:8080/lists-members/by-event/${event.id}`,
@@ -409,7 +436,6 @@ export default {
           throw new Error("Failed to fetch event participants");
         }
         const data = await response.json();
-        
 
         // Filtrer les participants ayant isParticipant = true
         const participants = data.filter(
@@ -512,7 +538,7 @@ export default {
 
           if (!response.ok) {
             this.openErrorModal();
-            this.errorMessage ="Désolé, il n'y a plus de place pour ce cours";
+            this.errorMessage = "Désolé, il n'y a plus de place pour ce cours";
           }
 
           this.initialization();
@@ -549,7 +575,6 @@ export default {
     },
     async checkParticipation(eventId, userId) {
       const token = localStorage.getItem("accessToken");
-      
 
       try {
         const response = await fetch(

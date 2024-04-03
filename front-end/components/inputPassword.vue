@@ -1,6 +1,6 @@
 <template>
     <div class="passwordInput ">
-        <label :for="id" class="block text-sm font-bold text-gray-700">{{ label }}</label>
+        <label :for="id" class="block text-sm font-bold text-gray-700 mb-2">{{ label }}</label>
         <div class="border rounded border-gray-500 p-2 flex flex-row justify-between bg-white"
             :class="passwordInputClasses">
             <input :id="id" @input="emitPassword" v-model="password" :type="showPassword ? 'text' : 'password'"

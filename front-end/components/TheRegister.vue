@@ -18,7 +18,6 @@
             v-model="user.gender"
             type="radio"
             name="gender"
-            
             value="false"
             class="form-radio"
           />
@@ -78,12 +77,21 @@
       />
 
       <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
-      <p class="text-black-500 text-xs font-bold text-left mt-1">
-        Votre mot de passe doit contenir au moins huit caractères et inclure au
-        moins une lettre minuscule, une lettre majuscule, un chiffre et un
-        caractère spécial parmi @$!%*?&.
-      </p>
+      <check-password
+        :isLength="isLength"
+        :isSpecial="isSpecial"
+        :isMaj="isMaj"
+        :isMin="isMin"
+        :isNumber="isNumber"
+      />
     </div>
+    <inputPassword
+            label="Confirmer votre mot de passe : "
+            id="confirmNewPassword"
+            @password="confirmNewPassword = $event"
+            :isValid="validerConfirmPassword"
+            class="mb-4"
+          />
 
     <div class="mb-4">
       <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2"
@@ -128,7 +136,7 @@ export default {
     return {
       user: {
         email: null,
-        password: null,
+        password: "",
         name: null,
         firstname: null,
         birthday: null,
@@ -136,9 +144,10 @@ export default {
       },
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-        showModal: false, // Ajouter une propriété pour contrôler l'affichage de la modal
-      showErrorModal:false,
-      errorMessage:null,
+      showModal: false, // Ajouter une propriété pour contrôler l'affichage de la modal
+      showErrorModal: false,
+      errorMessage: null,
+      confirmNewPassword: "",
     };
   },
   computed: {
@@ -154,11 +163,43 @@ export default {
 
       return true;
     },
+     // Valider Confirm Password
+    validerConfirmPassword() {
+      if (this.confirmNewPassword === this.user.password) {
+        return true;
+      }
+      return false;
+    },
+    isLength() {
+      return this.user.password.length >= 8;
+    },
+    isMaj() {
+      const regex = /[A-Z]/;
+      return regex.test(this.user.password);
+    },
+    isMin() {
+      const regex = /[a-z]/;
+      return regex.test(this.user.password);
+    },
+    isSpecial() {
+      const regex = /[@$!%*?&]/;
+      return regex.test(this.user.password);
+    },
+    isNumber() {
+      const regex = /[0-9]/;
+      return regex.test(this.user.password);
+    },
   },
 
   methods: {
     // SignUp method
     async signUp() {
+      if (!this.validerConfirmPassword) {
+        this.showErrorModal();
+        this.errorMessage = "Les mots de passes ne correspondent pas !"
+        return
+      }
+
       try {
         const { data } = await fetch("http://localhost:8080/users", {
           method: "POST",
@@ -172,10 +213,11 @@ export default {
         // Si l'inscription réussit, vider les champs du formulaire et afficher la modal
         this.clearForm();
         this.openErrorModal();
-        this.errorMessage = "Vérifiez vos emails afin de vous tenir informer de la suite"
+        this.errorMessage =
+          "Vérifiez vos emails afin de vous tenir informer de la suite";
       } catch (error) {
         this.openErrorModal();
-        this.errorMessage ="Erreur lors de la création du compte :", error;
+        (this.errorMessage = "Erreur lors de la création du compte :"), error;
       }
     },
     // Close The modal
@@ -200,8 +242,8 @@ export default {
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       return passwordRegex.test(password);
-      },
-     openErrorModal() {
+    },
+    openErrorModal() {
       this.showErrorModal = true;
     },
     //  Close Modal Password change

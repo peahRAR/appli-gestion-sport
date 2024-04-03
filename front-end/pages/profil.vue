@@ -242,7 +242,6 @@ export default {
   data() {
     return {
       user: {
-        // user Infos
         name: null,
         firstname: null,
         date_Subscribe: null,
@@ -348,7 +347,7 @@ export default {
       } catch (error) {
         console.error(
           "Erreur lors de la récupération des informations utilisateur",
-          error
+          error,
         );
       }
     },
@@ -466,7 +465,7 @@ export default {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
           if (response.ok) {
             // Convertir le fichier en URL de données (data URL)
@@ -488,7 +487,7 @@ export default {
         } catch (error) {
           console.error(
             "Erreur lors du téléchargement de la photo de profil:",
-            error
+            error,
           );
         }
       } else {
@@ -510,14 +509,6 @@ export default {
     },
     // Update the user passswors api Key
     async changePassword() {
-      // verifier que ancien mdp === correct
-      // if (!this.validerNewPassword || !this.validerConfirmNewPassword) {
-      //     // Verifier que ancien !=== nouveau
-      //
-
-      //     return
-      // }
-
       // Vérifier si les nouveaux mots de passe correspondent
       if (this.newPassword !== this.confirmNewPassword) {
         this.openErrorModal();

@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxt/image": "^1.4.0",
     "@pinia/nuxt": "^0.5.1",
+    "html2canvas": "^1.4.1",
     "nuxt": "^3.11.1",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",

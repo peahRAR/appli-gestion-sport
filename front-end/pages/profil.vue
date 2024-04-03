@@ -139,11 +139,7 @@
         <!-- Modal Content -->
         <!-- Avatar -->
         <p>Avatar:</p>
-        <input
-          type="file"
-          @change="handleAvatarUpload"
-          class="mb-4 appearance-none bg-white border border-gray-300 rounded-md py-2 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-        />
+        <TheAvatar @avatarSaved="avatar = $event" class="mb-4" />
         <!-- Weight -->
         <p>Poids:</p>
         <input
@@ -214,12 +210,12 @@
 
             <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
             <check-password
-        :isLength="isLength"
-        :isSpecial="isSpecial"
-        :isMaj="isMaj"
-        :isMin="isMin"
-        :isNumber="isNumber"
-      />
+              :isLength="isLength"
+              :isSpecial="isSpecial"
+              :isMaj="isMaj"
+              :isMin="isMin"
+              :isNumber="isNumber"
+            />
           </div>
           <div class="mb-4">
             <inputPassword
@@ -311,7 +307,7 @@ export default {
         return true;
       }
       return false;
-      },
+    },
     isLength() {
       return this.newPassword.length >= 8;
     },
@@ -394,6 +390,7 @@ export default {
       this.editedTelEmergency = this.user.tel_emergency
         ? this.user.tel_emergency.data
         : null;
+      
     },
     // Api request for update user data
     async saveChanges() {
@@ -401,6 +398,7 @@ export default {
       this.user.licence = this.editedLicence;
       this.user.tel_medic = this.editedTelMedic;
       this.user.tel_emergency = this.editedTelEmergency;
+      this.user.avatar = this.avatar;
       this.user.password = null;
       this.user.name = null;
       this.user.firstname = null;
@@ -432,6 +430,7 @@ export default {
         this.editedGender = null;
         this.editedTelMedic = null;
         this.editedTelEmergency = null;
+        this.avatar = null;
 
         document.location.href = "/profil";
       } catch (error) {

@@ -70,7 +70,7 @@ export default {
         const image = canvas.toDataURL("image/png");
 
         // Émettre l'événement avec l'URL de l'image en tant que payload
-        this.$emit("avatarSaved", this.imageUrl);
+        this.$emit("avatarSaved", image);
       });
     },
   },

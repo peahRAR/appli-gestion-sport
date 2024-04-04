@@ -10,7 +10,7 @@
       </div>
       <!-- Reset Password Form -->
       <form class="mt-8 space-y-6" @submit.prevent="resetPassword">
-        <!-- Input for the rest-Token -->
+        <!-- Input for the reset-Token -->
         <input type="hidden" name="token" v-model="token" />
         <div class="rounded-md shadow-sm -space-y-px">
           <div class="mb-4">
@@ -24,12 +24,12 @@
             />
             <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
             <check-password
-        :isLength="isLength"
-        :isSpecial="isSpecial"
-        :isMaj="isMaj"
-        :isMin="isMin"
-        :isNumber="isNumber"
-      />
+              :isLength="isLength"
+              :isSpecial="isSpecial"
+              :isMaj="isMaj"
+              :isMin="isMin"
+              :isNumber="isNumber"
+            />
           </div>
           <div>
             <!-- Input for the confirmation of the new password have to be === newPassword -->
@@ -56,34 +56,32 @@
 </template>
 
 <script>
+import dotenv from 'dotenv';
 export default {
   data() {
     return {
-      token: "", // Rest Token
-      password: "", // newPassword
-      confirmPassword: "", // Confirmation of the newPassword
+      token: "", // Reset Token
+      password: "", // New password
+      confirmPassword: "", // Confirmation of the new password
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
   },
   created() {
-    // Take the rest Token from the URL
-    this.token = this.$route.params.token;
+    // Take the reset Token from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    this.token = urlParams.get("token");
   },
   computed: {
     // Pattern Regex
     patternRegex() {
       return this.regexPassword.toString().slice(1, -1);
     },
-    // ValiderNewPassword
+    // Validate New Password
     validerPassword() {
-      if (!this.regexPassword.test(this.password)) {
-        return false;
-      }
-
-      return true;
+      return this.regexPassword.test(this.password);
     },
-    // Valider Confirm Password
+    // Validate Confirm Password
     validerConfirmPassword() {
       return this.confirmPassword === this.password;
     },
@@ -103,46 +101,80 @@ export default {
       return regex.test(this.password);
     },
     isNumber() {
-      const regex = /[0-9]/;
+      const regex = /\d/;
       return regex.test(this.password);
     },
   },
   methods: {
-    // Throw the form at the API for update dataBase
+    // Submit the form to update the database via API
     async resetPassword() {
-      const userId = this.getUserIdFromToken();
       if (this.password !== this.confirmPassword) {
         alert("Les mots de passe ne correspondent pas.");
         return;
       }
 
-      await useFetch(`http://localhost:8080/users/${userId}`, {
-        method: "PATCH",
-        mode: "cors",
-        body: JSON.stringify(this.user),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // Extract user ID from JWT token
+      const userId = this.getUserIdFromToken();
+      if (!userId) {
+        console.error("Impossible de récupérer l'ID de l'utilisateur.");
+        return;
+      }
+
+      // Build the PATCH request URL with user ID
+      const url = `http://localhost:8080/users/${userId}`;
+      
+
+      try {
+        // Perform the PATCH request to update user password
+        const response = await fetch(url, {
+          method: "PATCH",
+          mode: "cors",
+          body: JSON.stringify({
+            currentPassword: "vY5TzA@ZjP5^D8!qLr2bE%m3*F6&sG9",
+            password: this.password,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+
+        // Check if the request was successful
+        if (response.ok) {
+          alert("Mot de passe réinitialisé avec succès !");
+        } else {
+          alert(
+            "Une erreur s'est produite lors de la réinitialisation du mot de passe."
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Erreur lors de la réinitialisation du mot de passe :",
+          error
+        );
+      }
     },
-    // Get user info from the token
+
+    // Function to extract user ID from JWT token
     getUserIdFromToken() {
-      const token = localStorage.getItem("accessToken");
+      const token = this.token;
+      console.log("Token:", token); // Vérifier le contenu du token
       if (!token) {
-        console.error("Aucun token trouvé dans le localStorage.");
+        console.error("Aucun token trouvé.");
         return null;
       }
 
       const tokenParts = token.split(".");
+      console.log("Token Parts:", tokenParts); // Vérifier les parties du token
       if (tokenParts.length !== 3) {
         console.error("Le token JWT est invalide.");
         return null;
       }
 
       const payload = JSON.parse(atob(tokenParts[1]));
+      console.log("Payload:", payload); // Vérifier le contenu du payload
       if (!payload || !payload.sub) {
-        console.error('Impossible de trouver le champ "sub" dans le token.');
+        console.error("Impossible de trouver le champ 'sub' dans le token.");
         return null;
       }
 

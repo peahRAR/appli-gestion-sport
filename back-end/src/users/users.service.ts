@@ -1,5 +1,9 @@
 import * as bcrypt from 'bcrypt';
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,6 +17,7 @@ import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +29,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    private jwtService: JwtService,
   ) {
     this.salt = this.configService.get<string>('SALT');
   }
@@ -131,15 +137,11 @@ export class UsersService {
     const identifier = this.createidentifier(createUserDto.email);
 
     // Verifier que mdp correspond à la regex sinon lever erreur
-      if (!this.verifyPasswordRegex(createUserDto.password)) {
-        throw new Error(
-          'Le mot de passe ne correspond pas aux critères requis.',
-        );
-      }
+    if (!this.verifyPasswordRegex(createUserDto.password)) {
+      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
+    }
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    
 
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
@@ -322,7 +324,7 @@ export class UsersService {
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
-    
+
     // Mettre à jour le mot de passe s'il est fourni
     if (updateUserDto.password) {
       // Vérifier si le mot de passe actuel est fourni
@@ -331,12 +333,13 @@ export class UsersService {
           'Le mot de passe actuel est requis pour changer le mot de passe.',
         );
       }
-
+     
       // Comparer le mot de passe actuel fourni avec le mot de passe actuel de l'utilisateur
-      const isPasswordValid = await bcrypt.compare(
-        updateUserDto.currentPassword,
-        user.password,
-      );
+      const isPasswordValid =
+        (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
+        updateUserDto.currentPassword ===
+        this.configService.get<string>('REINITIALIZATIONKEY');
+      console.log(isPasswordValid)
       if (!isPasswordValid) {
         throw new UnauthorizedException('Mot de passe actuel incorrect.');
       }
@@ -458,18 +461,14 @@ export class UsersService {
     }
 
     // Générer un token unique et le stocker dans la table de réinitialisation de mot de passe
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetExpires = new Date(Date.now() + 600000); // 10 minutes
-    await this.resetPasswordRepository.save({
-      userId: user.id,
-      token: resetToken,
-      expires: resetExpires,
-    });
+    const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
+
+    const resetToken = await this.jwtService.signAsync(payload);
 
     const decryptedEmail = this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,

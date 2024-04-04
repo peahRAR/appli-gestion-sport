@@ -432,7 +432,7 @@ export default {
         this.editedTelEmergency = null;
         this.avatar = null;
 
-        document.location.href = "/profil";
+        // document.location.href = "/profil";
       } catch (error) {
         this.openErrorModal();
         this.errorMessage = "Erreur lors de la sauvegarde des modifications";

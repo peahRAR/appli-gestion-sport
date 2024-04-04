@@ -130,7 +130,7 @@ export default {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            currentPassword: "vY5TzA@ZjP5^D8!qLr2bE%m3*F6&sG9",
+            currentPassword: process.env.REINITIALIZATIONKEY,
             password: this.password,
           }),
           headers: {

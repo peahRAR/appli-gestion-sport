@@ -287,6 +287,7 @@ export default {
   async mounted() {
     // Keep the userData when the component is mount
     await this.fetchUserData();
+    this.checkAccessToken()
   },
   computed: {
     // Pattern Regex
@@ -329,6 +330,13 @@ export default {
     },
   },
   methods: {
+    checkAccessToken() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+        // Redirection vers la page d'accueil si aucun accessToken n'est présent
+        document.location.href = "/";;
+    }
+},
     // Keep the user infos from the token
     getUserIdFromToken() {
       const token = localStorage.getItem("accessToken");
@@ -473,6 +481,7 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
+        localStorage.removeItem('accessToken');
         // Rediriger l'utilisateur vers la page d'accueil après la suppression si nécessaire
         this.$router.push("/");
       } catch (error) {

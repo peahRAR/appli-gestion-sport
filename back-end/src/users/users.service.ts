@@ -441,14 +441,12 @@ export class UsersService {
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
 
-    const decryptedEmail = this.decryptField(user.email.data);
-
     await this.mailerService.sendMail({
-      to: decryptedEmail,
+      to: user.email.data,
       subject: 'Suppression de compte',
       template: 'suppression',
       context: {
-        email: decryptedEmail,
+        email: user.email.data,
       },
     });
     await this.userRepository.delete(id);

@@ -9,6 +9,7 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -112,7 +113,28 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(UsersGuard)
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
+    // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image
+    const user = await this.usersService.findOne(+id);
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    // Vérifier si l'utilisateur a une photo avant de tenter de la supprimer
+    if (user.avatar) {
+      const avatarPath = `avatars/${id}/avatar`; // Chemin de l'image sur GCS
+      await this.deleteFileFromGCS(avatarPath);
+    }
+
+    // Supprimer l'utilisateur de la base de données
     return this.usersService.remove(+id);
+  }
+
+  private async deleteFileFromGCS(filePath: string): Promise<void> {
+    const bucket = this.storage.bucket(this.bucketName);
+    const file = bucket.file(filePath);
+
+    // Supprimer le fichier sur GCS et attendre la résolution de la promesse
+    await file.delete();
   }
 }

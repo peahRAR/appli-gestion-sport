@@ -390,20 +390,29 @@ export default {
       this.editedTelEmergency = this.user.tel_emergency
         ? this.user.tel_emergency.data
         : null;
-      
     },
     // Api request for update user data
     async saveChanges() {
-      this.user.weight = this.editedWeight;
-      this.user.licence = this.editedLicence;
-      this.user.tel_medic = this.editedTelMedic;
-      this.user.tel_emergency = this.editedTelEmergency;
-      this.user.avatar = this.avatar;
-      this.user.password = null;
-      this.user.name = null;
-      this.user.firstname = null;
-      this.user.date_end_pay = null;
-      this.user.date_payment = null;
+      const formData = new FormData();
+      formData.append(
+        "user",
+        JSON.stringify({
+          password: null,
+          name: null,
+          firstname: null,
+          date_end_pay: null,
+          date_payment: null,
+          weight: this.editedWeight,
+          licence: this.editedLicence,
+          tel_medic: this.editedTelMedic,
+          tel_emergency: this.editedTelEmergency,
+        })
+      );
+      console.log(this.avatar);
+      formData.append("file", this.avatar);
+      for (const value of formData.values()) {
+        console.log(value);
+      }
 
       try {
         const token = localStorage.getItem("accessToken");
@@ -416,9 +425,8 @@ export default {
         await fetch(`http://localhost:8080/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
-          body: JSON.stringify(this.user),
+          body: formData,
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
@@ -432,7 +440,7 @@ export default {
         this.editedTelEmergency = null;
         this.avatar = null;
 
-        // document.location.href = "/profil";
+        document.location.href = "/profil";
       } catch (error) {
         this.openErrorModal();
         this.errorMessage = "Erreur lors de la sauvegarde des modifications";
@@ -470,59 +478,6 @@ export default {
       } catch (error) {
         this.openErrorModal();
         this.errorMessage = "Erreur lors de la suppression de l'utilisateur";
-      }
-    },
-    // Update the avatar user
-    async handleAvatarUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        // Si un fichier est sélectionné, procédez comme d'habitude pour mettre à jour l'avatar
-        const token = localStorage.getItem("accessToken");
-        const userId = this.getUserIdFromToken();
-        if (!userId) {
-          console.error("Impossible de récupérer l'ID de l'utilisateur.");
-          return;
-        }
-        const formData = new FormData();
-        formData.append("avatar", file); // Ajoutez le fichier à FormData sous la clé 'avatar'
-        try {
-          const response = await fetch(
-            `http://localhost:8080/users/${userId}`,
-            {
-              method: "PATCH",
-              mode: "cors",
-              body: formData, // Utilisez le FormData comme corps de la requête
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (response.ok) {
-            // Convertir le fichier en URL de données (data URL)
-            const reader = new FileReader();
-            reader.onload = () => {
-              // Mettre à jour l'URL de l'avatar dans l'interface utilisateur
-              this.user.avatar = reader.result;
-            };
-            reader.readAsDataURL(file);
-
-            // Stockez également le fichier pour le télécharger plus tard si nécessaire
-            this.avatar = file;
-          } else {
-            this.openErrorModal();
-            (this.errorMessage =
-              "Erreur lors du téléchargement de la photo de profil:"),
-              response.status;
-          }
-        } catch (error) {
-          console.error(
-            "Erreur lors du téléchargement de la photo de profil:",
-            error
-          );
-        }
-      } else {
-        // Si aucun fichier n'est sélectionné, ne rien faire
-        console.log("Aucun fichier sélectionné pour l'avatar.");
       }
     },
     // Open modal Password change

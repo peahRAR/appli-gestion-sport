@@ -1,6 +1,6 @@
 <template>
-  <div class="avatar-picker">
-    <div v-if="imageUrl" class="image-container" ref="imageContainer">
+  <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center mt-4 px-6">
+    <div class="image-container " ref="imageContainer">
       <img
         :src="imageUrl"
         :style="imageStyles"
@@ -12,16 +12,13 @@
         @mousemove="onDrag"
         @mouseup="stopDrag"
       />
-      
     </div>
-    <input type="file" @change="onFileChange" />
+    <input type="file" @change="onFileChange" class="mb-4 mt-4"/>
     <input type="range" min="1" max="3" scale="0.1" v-model="zoom">
-    
   </div>
 </template>
 
 <script>
-import html2canvas from "html2canvas";
 export default {
   data() {
     return {
@@ -42,10 +39,10 @@ export default {
     },
   },
   methods: {
-    onFileChange(event) {
+    async onFileChange(event) {
       const file = event.target.files[0];
       this.imageUrl = URL.createObjectURL(file);
-      this.$emit("avatarSaved", this.imageUrl);
+      await this.capturedAndEmit();
     },
     startDrag(event) {
       event.preventDefault(); // Empêche le défilement de la page sur les smartphones
@@ -63,15 +60,26 @@ export default {
     },
     async stopDrag() {
       this.dragging = false;
-      const container = this.$refs.imageContainer; // Assurez-vous d'ajouter une référence au conteneur de l'image dans le template
-      const html2canvas = (await import("html2canvas")).default;
-      html2canvas(container).then((canvas) => {
-        // Convertir le canvas en une URL d'image
-        const image = canvas.toDataURL("image/png");
+      this.capturedAndEmit();
+    },
+    async capturedAndEmit() {
+      try {
+        const container = this.$refs.imageContainer;
+        const html2canvas = (await import("html2canvas")).default;
 
-        // Émettre l'événement avec l'URL de l'image en tant que payload
-        this.$emit("avatarSaved", image);
-      });
+        html2canvas(container).then((canvas) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              // Créer un objet Blob à partir de l'image
+              this.$emit("avatarSaved", blob);
+            } else {
+              console.error("Conversion de l'image en blob a échoué.");
+            }
+          }, "image/png"); // Spécifiez le type MIME de l'image
+        });
+      } catch (error) {
+        console.error("Erreur lors de l'importation de html2canvas :", error);
+      }
     },
   },
 };
@@ -80,9 +88,14 @@ export default {
 <style>
 .avatar-picker .image-container {
   overflow: hidden;
+  margin: auto;
   width: 200px;
   height: 200px;
   border-radius: 50%;
+  padding: 1%;
+  border: 2px;
+  border-style: ridge;
+  border-color: black;
 }
 .avatar-image {
   cursor: grab;

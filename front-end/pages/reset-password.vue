@@ -56,7 +56,6 @@
 </template>
 
 <script>
-import dotenv from 'dotenv';
 export default {
   data() {
     return {

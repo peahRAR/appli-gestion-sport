@@ -82,7 +82,12 @@
             <option value="asc">Croissant</option>
             <option value="desc">Décroissant</option>
           </select>
-          <button @click="handleSort">Filtrer</button>
+          <button
+            @click="handleSort"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Filtrer
+          </button>
         </div>
 
         <!-- User Table -->
@@ -1046,46 +1051,46 @@ export default {
 
       this.errorMessage = "";
     },
-  },
-  // Update Sort By
-  updateSortBy(value) {
-    this.sortBy = value; // Mettre à jour la variable sortBy avec la valeur sélectionnée
-    this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
-  },
-  // Update Sort Order
-  updateSortOrder(value) {
-    this.sortOrder = value; // Mettre à jour la variable sortOrder avec la valeur sélectionnée
-    this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
-  },
-  // Handle Sort
-  async handleSort() {
-    if (this.sortBy && this.sortOrder) {
-      let sortedUsers = [...this.users];
+    // Update Sort By
+    updateSortBy(value) {
+      this.sortBy = value; // Mettre à jour la variable sortBy avec la valeur sélectionnée
+      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
+    },
+    // Update Sort Order
+    updateSortOrder(value) {
+      this.sortOrder = value; // Mettre à jour la variable sortOrder avec la valeur sélectionnée
+      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
+    },
+    // Handle Sort
+    async handleSort() {
+      if (this.sortBy && this.sortOrder) {
+        let sortedUsers = [...this.users];
 
-      switch (this.sortBy) {
-        case "age":
-          sortedUsers.sort((a, b) => {
-            return this.sortOrder === "asc" ? a.age - b.age : b.age - a.age;
-          });
-          break;
-        case "gender":
-          sortedUsers.sort((a, b) => {
-            return this.sortOrder === "asc"
-              ? a.gender.localeCompare(b.gender)
-              : b.gender.localeCompare(a.gender);
-          });
-          break;
-        case "weight":
-          sortedUsers.sort((a, b) => {
-            return this.sortOrder === "asc"
-              ? a.weight - b.weight
-              : b.weight - a.weight;
-          });
-          break;
+        switch (this.sortBy) {
+          case "age":
+            sortedUsers.sort((a, b) => {
+              return this.sortOrder === "asc" ? a.user.birthday.data - b.user.birthday.data : b.user.birthday.data - a.user.birthday.data;
+            });
+            break;
+          case "gender":
+            sortedUsers.sort((a, b) => {
+              return this.sortOrder === "asc"
+                ? a.user.gender.localeCompare(b.gender)
+                : b.user.gender.localeCompare(a.gender);
+            });
+            break;
+          case "weight":
+            sortedUsers.sort((a, b) => {
+              return this.sortOrder === "asc"
+                ? a.user.weight - b.user.weight
+                : b.user.weight - a.user.weight;
+            });
+            break;
+        }
+
+        this.users = sortedUsers;
       }
-
-      this.users = sortedUsers;
-    }
+    },
   },
 };
 </script>

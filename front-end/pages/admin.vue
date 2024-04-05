@@ -372,7 +372,6 @@
       :isOpen="showModalSelectedUser"
       title="Informations utilisateurs"
       @close="closeModalUser"
-      
     >
       <!-- Modale Utilisateur  -->
       <!-- Input Name -->
@@ -580,7 +579,8 @@
       :isOpen="showErrorModal"
       title="Message"
       @close="closeErrorModal"
-      >{{ this.errorMessage }}</TheModal>
+      >{{ this.errorMessage }}</TheModal
+    >
   </div>
 </template>
 <script>
@@ -607,8 +607,8 @@ export default {
       sortOrder: null, // handleSort Order
       showModalSelectedUser: false, // Show or close Selected User
       loading: true,
-      showErrorModal:false,
-      errorMessage:null,
+      showErrorModal: false,
+      errorMessage: null,
     };
   },
   async mounted() {
@@ -639,6 +639,16 @@ export default {
       if (!accessToken) {
         // Gérer le cas où il n'y a pas de token d'accès, par exemple, déconnecter l'utilisateur ou le rediriger vers la page de connexion
         document.location.href = "/";
+        return;
+      }
+
+      // Vérifiez si le token est encore valide
+      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+      const expirationDate = new Date(decodedToken.exp * 1000); // Convertir la date d'expiration en millisecondes
+      if (expirationDate < new Date()) {
+        // Redirection vers la page d'accueil si la date d'expiration est dépassée
+        document.location.href = "/";
+        return;
       }
 
       try {
@@ -706,17 +716,17 @@ export default {
           };
           // Return a success message at the user
           this.openErrorModal();
-            this.errorMessage ="Le cours a été créé avec succès!";
+          this.errorMessage = "Le cours a été créé avec succès!";
           //refresh the evnts list
           this.loadEvents();
         } else {
           // In the Error case
-         this.openErrorModal();
-            this.errorMessage ="Erreur lors de la création du cours";
+          this.openErrorModal();
+          this.errorMessage = "Erreur lors de la création du cours";
         }
       } catch (error) {
         this.openErrorModal();
-            this.errorMessage ="Erreur lors de la création du cours:", error;
+        (this.errorMessage = "Erreur lors de la création du cours:"), error;
       }
     },
     async loadUsers() {
@@ -804,7 +814,7 @@ export default {
 
         // Check if the request throw a 200 status
         this.openErrorModal();
-        this.errorMessage = "Mise à jour réussie :", response;
+        (this.errorMessage = "Mise à jour réussie :"), response;
         this.loadUsers();
         this.closeModal();
       } catch (error) {

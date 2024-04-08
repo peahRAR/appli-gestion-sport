@@ -16,7 +16,7 @@
           <div class="mb-4">
             <!-- Input for the new password -->
             <inputPassword
-              @password="password = $event"
+              v-model="password"
               :regex="regexPassword"
               label="Nouveau mot de passe : "
               id="password"
@@ -36,7 +36,7 @@
             <inputPassword
               label="Confirmer votre mot de passe : "
               id="confirmPassword"
-              @password="confirmPassword = $event"
+              v-model="confirmPassword"
               :isValid="validerConfirmPassword"
             />
           </div>
@@ -70,6 +70,7 @@ export default {
     // Take the reset Token from the URL
     const urlParams = new URLSearchParams(window.location.search);
     this.token = urlParams.get("token");
+    
   },
   computed: {
     // Pattern Regex
@@ -105,6 +106,16 @@ export default {
     },
   },
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url
+    },
+    getKey() {
+      const config = useRuntimeConfig();
+      const key = config.public.resetKey;
+      return key
+    },
     // Submit the form to update the database via API
     async resetPassword() {
       if (this.password !== this.confirmPassword) {
@@ -120,16 +131,17 @@ export default {
       }
 
       // Build the PATCH request URL with user ID
-      const url = `http://localhost:8080/users/${userId}`;
+      const url = this.getUrl();
+      const resetKey = this.getKey();
       
 
       try {
         // Perform the PATCH request to update user password
-        const response = await fetch(url, {
+        const response = await fetch(`${url}/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            currentPassword: process.env.REINITIALIZATIONKEY,
+            currentPassword: resetKey,
             password: this.password,
           }),
           headers: {

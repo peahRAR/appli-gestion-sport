@@ -69,7 +69,7 @@
     </div>
     <div class="mb-6">
       <inputPassword
-        @password="user.password = $event"
+        v-model="user.password"
         :regex="regexPassword"
         label="Nouveau mot de passe : "
         id="password"
@@ -88,8 +88,9 @@
     <inputPassword
             label="Confirmer votre mot de passe : "
             id="confirmNewPassword"
-            @password="confirmNewPassword = $event"
+            v-model="confirmNewPassword"
             :isValid="validerConfirmPassword"
+            ref="confirmPassword"
             class="mb-4"
           />
 
@@ -165,13 +166,16 @@ export default {
     },
      // Valider Confirm Password
     validerConfirmPassword() {
+      console.log(this.confirmNewPassword)
       if (this.confirmNewPassword === this.user.password) {
         return true;
       }
       return false;
     },
     isLength() {
+      console.log(this.user)
       return this.user.password.length >= 8;
+
     },
     isMaj() {
       const regex = /[A-Z]/;
@@ -192,8 +196,14 @@ export default {
   },
 
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url
+    },
     // SignUp method
     async signUp() {
+      const url = this.getUrl();
       if (!this.validerConfirmPassword) {
         this.showErrorModal();
         this.errorMessage = "Les mots de passes ne correspondent pas !"
@@ -201,7 +211,7 @@ export default {
       }
 
       try {
-        const { data } = await fetch("http://localhost:8080/users", {
+        const { data } = await fetch(`${url}/users`, {
           method: "POST",
           mode: "cors",
           body: JSON.stringify(this.user),
@@ -230,11 +240,12 @@ export default {
     clearForm() {
       // Réinitialiser les valeurs des champs du formulaire
       this.user.email = null;
-      this.user.password = null;
+      this.user.password = "";
       this.user.name = null;
       this.user.firstname = null;
       this.user.birthday = null;
       this.user.gender = null;
+      this.confirmNewPassword = "";
     },
     // Regex
     validatePassword(password) {

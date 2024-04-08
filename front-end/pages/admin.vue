@@ -637,6 +637,11 @@ export default {
     },
   },
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url;
+    },
     async checkUserRole() {
       // Récupérer le token d'accès depuis le localStorage
       const accessToken = localStorage.getItem("accessToken");
@@ -674,10 +679,11 @@ export default {
       }
     },
     async loadEvents() {
+      const url = this.getUrl();
       try {
         const token = localStorage.getItem("accessToken");
         // Make a get request at the api for events
-        const response = await useFetch("http://localhost:8080/events", {
+        const response = await useFetch(`${url}/events`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -696,10 +702,10 @@ export default {
       try {
         this.newCourse.places = this.newCourse.totalPlaces;
         const duration = this.newCourse.duration * 60;
-
+        const url = this.getUrl();
         const token = localStorage.getItem("accessToken");
         // Request Post for create new Event
-        const response = await fetch("http://localhost:8080/events", {
+        const response = await fetch(`${url}/events`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -738,7 +744,8 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         // Get Request at the Api for users
-        const response = await useFetch("http://localhost:8080/users", {
+        const url = this.getUrl();
+        const response = await useFetch(`${url}/users`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -800,9 +807,9 @@ export default {
         const token = localStorage.getItem("accessToken");
         const userId = this.selectedUser.id; // Keep the Selected user Id
         this.selectedUser.password = null;
-
+        const url = this.getUrl();
         // Request patch to update the user
-        const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        const response = await fetch(`${url}/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
@@ -834,7 +841,8 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         // Get request for All users
-        const response = await fetch("http://localhost:8080/users", {
+        const url = this.getUrl();
+        const response = await fetch(`${url}/users`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -869,9 +877,9 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = user.id;
-
+        const url = this.getUrl();
         // Patch Request at the api
-        const response = await fetch(`http://localhost:8080/admin/${userId}`, {
+        const response = await fetch(`${url}/admin/${userId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -921,9 +929,9 @@ export default {
 
             if (payload.role === 2) {
               const newRole = 1;
-
+              const url = this.getUrl();
               const response = await fetch(
-                `http://localhost:8080/admin/${userId}/${newRole}`,
+                `${url}/admin/${userId}/${newRole}`,
                 {
                   method: "PUT",
                   headers: {
@@ -965,9 +973,9 @@ export default {
     async deleteEvent(eventId) {
       try {
         const token = localStorage.getItem("accessToken");
-
+        const url = this.getUrl();
         const response = await fetch(
-          `http://localhost:8080/events/${eventId}`,
+          `${url}/events/${eventId}`,
           {
             method: "DELETE",
             headers: {
@@ -1006,10 +1014,11 @@ export default {
     // Update Event
     async saveChanges(eventId) {
       const token = localStorage.getItem("accessToken");
+      const url = this.getUrl();
       try {
         if (eventId && typeof eventId === "number" && !isNaN(eventId)) {
           const response = await fetch(
-            `http://localhost:8080/events/${eventId}`,
+            `${url}/events/${eventId}`,
             {
               method: "PATCH",
               headers: {
@@ -1069,7 +1078,9 @@ export default {
         switch (this.sortBy) {
           case "age":
             sortedUsers.sort((a, b) => {
-              return this.sortOrder === "asc" ? a.user.birthday.data - b.user.birthday.data : b.user.birthday.data - a.user.birthday.data;
+              return this.sortOrder === "asc"
+                ? a.user.birthday.data - b.user.birthday.data
+                : b.user.birthday.data - a.user.birthday.data;
             });
             break;
           case "gender":

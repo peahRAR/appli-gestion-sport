@@ -19,7 +19,7 @@
       <!-- Password input -->
       <div class="mb-6">
         <inputPassword
-          @password="user.password = $event"
+          v-model="user.password"
           :regex="regexPassword"
           label="Mot de passe : "
           id="password"
@@ -94,7 +94,7 @@ export default {
     return {
       user: {
         email: null, //Variable keep email
-        password: null, // Variable keep password
+        password: "", // Variable keep password
       },
       showErrorModal: false,
       showResetPasswordModal: false,
@@ -120,10 +120,16 @@ export default {
   },
 
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url
+    },
     // LOGIN API method
     async signIn() {
+      const url = this.getUrl();
       try {
-        const { data } = await useFetch("http://localhost:8080/auth/login", {
+        const { data } = await useFetch(`${url}/auth/login`, {
           method: "POST",
           mode: "cors",
           body: JSON.stringify(this.user),
@@ -176,9 +182,10 @@ export default {
 
     // Request password reset
     async requestPasswordReset() {
+      const url = this.getUrl();
       try {
         const response = await fetch(
-          "http://localhost:8080/auth/resetpassword",
+          `${url}/auth/resetpassword`,
           {
             method: "POST",
             headers: {

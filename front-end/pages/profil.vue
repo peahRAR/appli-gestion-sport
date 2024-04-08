@@ -193,7 +193,7 @@
         <form @submit.prevent="changePassword" method="post">
           <div class="mb-4">
             <inputPassword
-              @password="currentPassword = $event"
+              v-model="currentPassword"
               label="Mot de passe actuel : "
               id="currentPassword"
               :isValid="null"
@@ -201,7 +201,7 @@
           </div>
           <div class="mb-4">
             <inputPassword
-              @password="newPassword = $event"
+              v-model="newPassword"
               :regex="regexPassword"
               label="Nouveau mot de passe : "
               id="newPassword"
@@ -221,7 +221,7 @@
             <inputPassword
               label="Confirmer votre mot de passe : "
               id="confirmNewPassword"
-              @password="confirmNewPassword = $event"
+              v-model="confirmNewPassword"
               :isValid="validerConfirmPassword"
             />
           </div>
@@ -271,8 +271,8 @@ export default {
       editedTelMedic: null,
       editedTelEmergency: null,
       avatar: null,
-      password: null,
-      currentPassword: null,
+      password: "",
+      currentPassword: "",
       newPassword: "",
       confirmNewPassword: "",
       showChangePasswordModal: false,
@@ -330,6 +330,11 @@ export default {
     },
   },
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url
+    },
     checkAccessToken() {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
@@ -375,11 +380,12 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = this.getUserIdFromToken();
+        const url = this.getUrl();
         if (!userId) {
           console.error("Impossible de récupérer l'ID de l'utilisateur.");
           return;
         }
-        const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        const response = await fetch(`${url}/users/${userId}`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -436,12 +442,13 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = this.getUserIdFromToken();
+        const url = this.getUrl();
         if (!userId) {
           console.error("Impossible de récupérer l'ID de l'utilisateur.");
           return;
         }
 
-        await fetch(`http://localhost:8080/users/${userId}`, {
+        await fetch(`${url}/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
           body: formData,
@@ -480,11 +487,12 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = this.getUserIdFromToken();
+        const url = this.getUrl();
         if (!userId) {
           console.error("Impossible de récupérer l'ID de l'utilisateur.");
           return;
         }
-        await fetch(`http://localhost:8080/users/${userId}`, {
+        await fetch(`${url}/users/${userId}`, {
           method: "DELETE",
           mode: "cors",
           headers: {
@@ -525,11 +533,12 @@ export default {
         // Envoyer une requête au serveur pour changer le mot de passe
         const token = localStorage.getItem("accessToken");
         const userId = this.getUserIdFromToken();
+        const url = this.getUrl();
         if (!userId) {
           console.error("Impossible de récupérer l'ID de l'utilisateur.");
           return;
         }
-        const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        const response = await fetch(`${url}/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({

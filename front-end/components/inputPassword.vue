@@ -3,8 +3,8 @@
         <label :for="id" class="block text-sm font-bold text-gray-700 mb-2">{{ label }}</label>
         <div class="border rounded border-gray-500 p-2 flex flex-row justify-between bg-white"
             :class="passwordInputClasses">
-            <input :id="id" @input="emitPassword" v-model="password" :type="showPassword ? 'text' : 'password'"
-                class="outline-0 w-84d" required>
+            <input :id="id" @input="emitPassword" :value="modelValue" :type="showPassword ? 'text' : 'password'"
+                class="outline-0 w-full" required>
             <button @click="toggleShowPassword">
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path fill="currentColor"
@@ -25,17 +25,15 @@
 
 export default {
     props: {
+        modelValue: {type:String, default: ''},
         regex: RegExp,
         label: String,
         id: String,
-        isValid: Boolean
-
+        isValid: Boolean,
     },
     data() {
         return {
-            password: '',
             showPassword: false,
-
         }
     },
     computed: {
@@ -43,7 +41,7 @@ export default {
             return [
                 {
                     'is-valid': this.isValid === true,
-                    'is-invalid': this.isValid === false && this.password.length > 0,
+                    'is-invalid': this.isValid === false && this.modelValue.length > 0,
                     'no-color': this.isValid === null
                 }
             ];
@@ -51,8 +49,8 @@ export default {
 
     },
     methods: {
-        emitPassword() {
-            this.$emit('password', this.password)
+        emitPassword(event) {
+            this.$emit('update:modelValue', event.target.value)
         },
         toggleShowPassword() {
             this.showPassword = !this.showPassword

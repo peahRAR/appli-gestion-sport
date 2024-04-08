@@ -268,6 +268,11 @@ export default {
   },
 
   methods: {
+    getUrl() {
+      const config = useRuntimeConfig();
+      const url = config.public.siteUrl;
+      return url
+    },
     async initialization() {
       // Charger les événements depuis votre API lors du montage du composant
       const userId = await this.getUserIdFromToken();
@@ -312,8 +317,9 @@ export default {
     async loadEvents() {
       try {
         const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
         // Faire une requête GET à votre API pour récupérer les événements
-        const response = await useFetch("http://localhost:8080/events", {
+        const response = await useFetch(`${url}/events`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -420,10 +426,10 @@ export default {
     },
     async openModal(event) {
       const token = localStorage.getItem("accessToken");
-
+      const url = this.getUrl();
       try {
         const response = await fetch(
-          `http://localhost:8080/lists-members/by-event/${event.id}`,
+          `${url}/lists-members/by-event/${event.id}`,
           {
             method: "GET",
             headers: {
@@ -445,7 +451,7 @@ export default {
         // Récupérer les utilisateurs correspondant aux IDs des participants
         const usersPromises = participants.map(async (participant) => {
           const userResponse = await fetch(
-            `http://localhost:8080/users/${participant.userId}`,
+            `${url}/users/${participant.userId}`,
             {
               method: "GET",
               headers: {
@@ -478,9 +484,10 @@ export default {
 
     async openDetailsModal(participant) {
       const token = localStorage.getItem("accessToken");
+      const url = this.getUrl();
       try {
         const response = await fetch(
-          `http://localhost:8080/users/${participant.id}`,
+          `${url}/users/${participant.id}`,
           {
             method: "GET",
             headers: {
@@ -512,7 +519,7 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = await this.getUserIdFromToken();
-
+        const url = this.getUrl();
         // Vérifie si l'utilisateur est déjà inscrit à l'événement
         if (
           !this.eventParticipants.some(
@@ -521,7 +528,7 @@ export default {
         ) {
           // Si l'utilisateur n'est pas inscrit, ajoutez son ID à la liste des participants
           const response = await fetch(
-            `http://localhost:8080/lists-members/${event.id}/${userId}`,
+            `${url}/lists-members/${event.id}/${userId}`,
             {
               method: "PATCH",
               headers: {
@@ -575,10 +582,10 @@ export default {
     },
     async checkParticipation(eventId, userId) {
       const token = localStorage.getItem("accessToken");
-
+      const url = this.getUrl();
       try {
         const response = await fetch(
-          `http://localhost:8080/lists-members/${eventId}/${userId}`,
+          `${url}/lists-members/${eventId}/${userId}`,
           {
             method: "GET",
             headers: {

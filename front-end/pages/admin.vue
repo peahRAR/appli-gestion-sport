@@ -2,7 +2,9 @@
   <TheSkeleton v-if="loading" />
   <div v-else>
     <div class="container mx-auto py-8">
-      <h1 class="text-3xl ml-2 font-semibold mb-4">Administration</h1>
+      <h1 class="text-3xl ml-2 font-semibold mb-4">
+        Administration de l'application
+      </h1>
       <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
         <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
         <div class="overflow-x-auto">
@@ -25,7 +27,7 @@
                 >
                   Prénom
                 </th>
-                <!-- Action -->
+                <!-- Actions -->
                 <th
                   scope="col"
                   class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -57,6 +59,12 @@
                   >
                     Activer
                   </button>
+                  <button
+                    @click="deleteUser(user)"
+                    class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600 ml-2"
+                  >
+                    Supprimer
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -74,7 +82,8 @@
             <option value="age">Âge</option>
             <option value="gender">Genre</option>
             <option value="weight">Poids</option>
-            <!-- Ajoutez d'autres options de tri ici -->
+            <option value="name">Nom</option>
+            <!-- Ajout du tri par nom -->
           </select>
           <!-- handleSort ORDER -->
           <select @change="updateSortOrder($event.target.value)">
@@ -218,6 +227,102 @@
                         clip-rule="evenodd"
                       />
                     </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Add Alert Form -->
+      <div class="bg-white mx-2 rounded p-2 mb-10">
+        <!-- Title Section -->
+        <h2 class="text-xl font-semibold mb-2">Ajouter une alerte</h2>
+        <form @submit.prevent="submitAlert" class="flex flex-col space-y-4">
+          <!-- Titre -->
+          <div class="flex flex-col">
+            <label for="titre" class="font-semibold">Titre :</label>
+            <input
+              type="text"
+              v-model="newAlert.titre"
+              id="titre"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+              required
+            />
+          </div>
+          <!-- Contenu -->
+          <div class="flex flex-col">
+            <label for="contenu" class="font-semibold">Contenu :</label>
+            <textarea
+              v-model="newAlert.contenu"
+              id="contenu"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+              required
+            ></textarea>
+          </div>
+          <!-- Date de fin -->
+          <div class="flex flex-col">
+            <label for="dateFin" class="font-semibold"
+              >Date de fin de validité :</label
+            >
+            <input
+              type="date"
+              v-model="newAlert.dateFin"
+              id="dateFin"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
+              required
+            />
+          </div>
+          <!-- Bouton de soumission -->
+          <button
+            type="submit"
+            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Ajouter l'alerte
+          </button>
+        </form>
+      </div>
+      <!-- Liste des alertes -->
+      <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <h2 class="text-xl font-semibold mb-2">Liste des alertes</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <!-- Table alert Header -->
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Titre
+                </th>
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Date de fin
+                </th>
+                <th
+                  scope="col"
+                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <!-- Alert Table Value -->
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="(alert, index) in alerts" :key="alert.id">
+                <td class="px-3 py-4 whitespace-nowrap">{{ alert.titre }}</td>
+                <td class="px-3 py-4 whitespace-nowrap">
+                  {{ formatDate(alert.dateFin) }}
+                </td>
+                <td class="px-3 py-4 whitespace-nowrap flex flex-col">
+                  <button
+                    @click="deleteAlert(alert.id)"
+                    class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
+                  >
+                    Supprimer
                   </button>
                 </td>
               </tr>
@@ -496,6 +601,13 @@
         >
           Enregistrer
         </button>
+        <!-- Button fro delete user -->
+        <button
+          @click="deleteUser(selectedUser)"
+          class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+        >
+          Supprimer Utilisateur
+        </button>
         <!-- Button For change role user -->
         <div v-if="getUserRole() === 2">
           <button
@@ -603,6 +715,11 @@ export default {
         totalPlaces: null,
         places: null,
       },
+      newAlert: {
+        titre: "",
+        contenu: "",
+        dateFin: "", // Champ pour la date de fin de validité de l'alerte
+      },
       selectedUser: null, // user selected
       inactiveUsers: [], // Unactivate User
       events: [], // Events List
@@ -614,14 +731,16 @@ export default {
       loading: true,
       showErrorModal: false,
       errorMessage: null,
+      alerts: [],
     };
   },
   async mounted() {
     // Get The element from the Api At the composant Mounted
-    await this.checkUserRole(); //check UserRole
-    await this.loadEvents(); //Events
+    await this.checkUserRole(); // check UserRole
+    await this.loadEvents(); // Events
     await this.loadUsers(); // Users
-    await this.loadInactiveUsers(); //Inactive Users
+    await this.loadInactiveUsers(); // Inactive Users
+    await this.fetchAlerts(); // Alerts
   },
   computed: {
     // Duration In Hours from minutes
@@ -900,6 +1019,40 @@ export default {
         // Show error message
       }
     },
+    async deleteUser(user) {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const userId = user.id;
+        const url = this.getUrl();
+
+        // Supprimer la demande à l'API
+        const response = await fetch(`${url}/users/${userId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Si la réponse est réussie, supprimez l'utilisateur de la liste inactiveUsers
+        if (response.ok) {
+          this.openErrorModal();
+          this.errorMessage = "L'utilisateur a été supprimé !";
+          this.closeModalUser();
+          this.loadUsers();
+          this.loadInactiveUsers();
+        } else {
+          this.openErrorModal();
+          this.errorMessage = "Erreur lors de la suppression de l'utilisateur";
+        }
+      } catch (error) {
+        // En cas d'erreur, afficher un message d'erreur ou gérer l'erreur en conséquence
+        console.error(
+          "Erreur lors de la suppression de l'utilisateur :",
+          error
+        );
+        // Afficher un message d'erreur ou effectuer d'autres actions en cas d'erreur
+      }
+    },
     // Extract the user role from the token in localStorage
     getUserRole() {
       const token = localStorage.getItem("accessToken");
@@ -974,15 +1127,12 @@ export default {
       try {
         const token = localStorage.getItem("accessToken");
         const url = this.getUrl();
-        const response = await fetch(
-          `${url}/events/${eventId}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${url}/events/${eventId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (response.ok) {
           this.loadEvents();
@@ -1017,17 +1167,14 @@ export default {
       const url = this.getUrl();
       try {
         if (eventId && typeof eventId === "number" && !isNaN(eventId)) {
-          const response = await fetch(
-            `${url}/events/${eventId}`,
-            {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify(this.editedEvent),
-            }
-          );
+          const response = await fetch(`${url}/events/${eventId}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(this.editedEvent),
+          });
 
           if (response.ok) {
             this.openErrorModal();
@@ -1078,28 +1225,126 @@ export default {
         switch (this.sortBy) {
           case "age":
             sortedUsers.sort((a, b) => {
-              return this.sortOrder === "asc"
-                ? a.user.birthday.data - b.user.birthday.data
-                : b.user.birthday.data - a.user.birthday.data;
+              const dateA = new Date(a.birthday.data);
+              const dateB = new Date(b.birthday.data);
+              return this.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
             });
             break;
           case "gender":
             sortedUsers.sort((a, b) => {
-              return this.sortOrder === "asc"
-                ? a.user.gender.localeCompare(b.gender)
-                : b.user.gender.localeCompare(a.gender);
+              if (a.gender === b.gender) {
+                return 0;
+              } else if (this.sortOrder === "asc") {
+                return a.gender ? -1 : 1;
+              } else {
+                return a.gender ? 1 : -1;
+              }
             });
             break;
           case "weight":
             sortedUsers.sort((a, b) => {
+              const weightA = a.weight !== null ? a.weight : 0;
+              const weightB = b.weight !== null ? b.weight : 0;
               return this.sortOrder === "asc"
-                ? a.user.weight - b.user.weight
-                : b.user.weight - a.user.weight;
+                ? weightA - weightB
+                : weightB - weightA;
+            });
+            break;
+          case "name":
+            sortedUsers.sort((a, b) => {
+              const nameA = a.name.data.toLowerCase();
+              const nameB = b.name.data.toLowerCase();
+              return this.sortOrder === "asc"
+                ? nameA.localeCompare(nameB)
+                : nameB.localeCompare(nameA);
             });
             break;
         }
 
         this.users = sortedUsers;
+      }
+    },
+    async submitAlert() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+        // Envoyer les données au backend pour créer une nouvelle alerte
+        const response = await fetch(`${url}/alerts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(this.newAlert),
+        });
+
+        if (!response.ok) {
+          this.openErrorModal();
+          this.errorMessage = "Erreur lors de la création de l'alerte";
+        }
+
+        // Réinitialiser le formulaire
+        this.newAlert.titre = "";
+        this.newAlert.contenu = "";
+        this.newAlert.dateFin = "";
+        this.openErrorModal();
+        this.errorMessage = "L'alerte à été ajoutée !";
+      } catch (error) {
+        console.error("Error adding alert:", error);
+      }
+    },
+    async fetchAlerts() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+
+        const response = await fetch(`${url}/alerts`, {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          console.error("Une Erreur est survenue durant la récupération des alertes");
+        }
+        const data = await response.json();
+        this.alerts = data;
+      } catch (error) {
+        console.error("Error fetching alerts:", error);
+      }
+    },
+    async deleteAlert(alertId) {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+
+        const response = await fetch(`${url}/alerts/${alertId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          this.openErrorModal();
+          this.errorMessage =
+            "Une erreur s'est produite lors de la supression de l'alerte";
+        }
+
+        // Si la suppression réussit, vous pouvez mettre à jour vos données ou afficher un message de succès
+        this.openErrorModal();
+        this.errorMessage = "L'alerte à été suprimée avec succés !";
+
+        // Mettre à jour les données, par exemple :
+        this.fetchAlerts();
+      } catch (error) {
+        console.error(
+          "Erreur lors de la suppression de l'alerte :",
+          error.message
+        );
       }
     },
   },

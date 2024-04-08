@@ -1,6 +1,7 @@
 <template>
   <TheSkeleton v-if="loading" />
   <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <TheAlert class="mx-2 rounded" :alerts="alerts" />
     <div
       v-for="(event, index) in events"
       :key="event.id"
@@ -243,6 +244,16 @@
   <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{
     this.errorMessage
   }}</TheModal>
+  <!-- Bulle d'alerte -->
+  <div class="alert-bubble" v-if="showAlertBubble" @click="openAlertModal">
+    <span class="exclamation-mark">!</span>
+  </div>
+
+  <!-- Modale d'alerte -->
+  <TheModal :isOpen="showAlertModal" title="Avertissement" @close="closeAlertModal">
+    <!-- Contenu de la modale -->
+    <p>{{ alertMessage }}</p>
+  </TheModal>
 </template>
 
 <script>
@@ -259,19 +270,46 @@ export default {
       isParticipe: false,
       loading: true,
       showErrorModal: false,
+      showAlertModal: false,
       errorMessage: null,
+      showAlertBubble: false,
+      alerts: [],
     };
   },
   async mounted() {
     this.checkUserRole();
     this.initialization();
+    this.checkUserAlert();
+    this.fetchAlerts();
   },
 
   methods: {
+    async fetchAlerts() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+
+        const response = await fetch(`${url}/alerts`, {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch alerts');
+        }
+        const data = await response.json();
+        this.alerts = data;
+      } catch (error) {
+        console.error('Error fetching alerts:', error);
+      }
+    },
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
-      return url
+      return url;
     },
     async initialization() {
       // Charger les événements depuis votre API lors du montage du composant
@@ -486,16 +524,13 @@ export default {
       const token = localStorage.getItem("accessToken");
       const url = this.getUrl();
       try {
-        const response = await fetch(
-          `${url}/users/${participant.id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${url}/users/${participant.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch user details");
         }
@@ -626,6 +661,63 @@ export default {
 
       this.errorMessage = "";
     },
+    async checkUserAlert() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const userId = await this.getUserIdFromToken();
+        const url = this.getUrl();
+
+        // Faire une requête pour récupérer les informations de l'utilisateur
+        const response = await fetch(`${url}/users/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const userData = await response.json();
+
+        // Vérifier les conditions nécessaires pour afficher l'alerte
+        const hasExpiredLicence =
+          !userData.licence || new Date(userData.date_end_pay) < new Date();
+        const isMissingLicence = !userData.licence;
+        const isExpiredDateEndPay =
+          userData.date_end_pay && new Date(userData.date_end_pay) < new Date();
+
+        // Afficher la bulle d'alerte si nécessaire
+        this.showAlertBubble = hasExpiredLicence || isExpiredDateEndPay;
+
+        // Ouvrir la modal d'alerte avec le bon message
+        this.openAlertModal(isMissingLicence, isExpiredDateEndPay);
+      } catch (error) {
+        console.error("Error checking user alert:", error);
+      }
+    },
+
+    openAlertModal(isMissingLicence, isExpiredDateEndPay) {
+      this.showAlertModal = true;
+
+      // Définir le message d'alerte en fonction des conditions
+      if (isMissingLicence && isExpiredDateEndPay) {
+        this.alertMessage =
+          "Votre Paiment a expiré et votre licence est manquante. Veuillez les mettre à jour.";
+      } else if (isMissingLicence) {
+        this.alertMessage =
+          "Votre licence est manquante. Veuillez la mettre à jour.";
+      } else if (isExpiredDateEndPay) {
+        this.alertMessage =
+          "Votre paiment a expiré. Veuillez le mettre à jour.";
+      }
+    },
+
+    closeAlertModal() {
+      this.showAlertModal = false;
+    },
   },
 };
 </script>
@@ -638,5 +730,33 @@ export default {
   text-overflow: ellipsis;
   -webkit-line-clamp: 3;
   /* Nombre maximum de lignes à afficher */
+}
+.alert-bubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #ff6347; /* Couleur rouge */
+  color: #fff; /* Texte en blanc */
+  border-radius: 50%; /* Pour donner une forme de cercle */
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Ombre légère */
+}
+
+.alert-bubble:hover {
+  transform: scale(1.1); /* Effet de zoom au survol */
+}
+
+.exclamation-mark {
+  font-size: 24px;
+}
+
+.alert-text {
+  font-size: 12px;
+  margin-left: 5px;
 }
 </style>

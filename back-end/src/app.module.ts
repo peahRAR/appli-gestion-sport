@@ -14,6 +14,7 @@ import { ListsMembersModule } from './lists-members/lists-members.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { AlertModule } from './alert/alert.module';
 import { mailerConfig } from './mailer.config';
 
 import { ScheduleModule } from '@nestjs/schedule';
@@ -50,6 +51,7 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
     ListsMembersModule,
     AuthModule,
     AdminModule,
+    AlertModule,
     CronjobsModule
   ],
   controllers: [AppController],

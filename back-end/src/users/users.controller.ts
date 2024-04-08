@@ -59,9 +59,17 @@ export class UsersController {
         reject(err);
       });
 
-      stream.on('finish', () => {
-        const publicUrl = `https://${this.configService.get('PUBLIC_URL')}/${this.bucketName}/${destination}`;
-        resolve(publicUrl);
+      stream.on('finish', async () => {
+        // Générer une URL signée pour l'objet téléchargé
+        try {
+          const [signedUrl] = await fileUpload.getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 365 * 24 * 60 * 60 * 1000, // Expire dans un an
+          });
+          resolve(signedUrl);
+        } catch (error) {
+          reject(error);
+        }
       });
 
       stream.end(file.buffer); // Envoie les données du fichier dans le stream
@@ -95,7 +103,6 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    console.log(file);
     console.log(body);
 
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur

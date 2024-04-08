@@ -6,8 +6,6 @@ import { Repository, FindManyOptions } from 'typeorm';
 import { Event } from './events.entity';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
-
-
 @Injectable()
 export class EventsService {
   constructor(
@@ -65,17 +63,14 @@ export class EventsService {
       .select('event.id')
       .where('event.date_event < :expirationDate', { expirationDate })
       .getMany();
-    
+
     // Supprimer les entrées correspondantes dans la table ListsMembers
     for (const event of expiredEvents) {
       const lists = await this.listsMembersService.findAllByIdEvent(event.id);
       lists.forEach((element) => {
         this.listsMembersService.remove(element.eventId, element.userId);
       });
-     
-
-     
-   }
+    }
 
     // Supprimer les événements expirés de la table Events
     await this.eventRepository

@@ -3,7 +3,7 @@
     class="flex justify-between items-center p-4 bg-white text-white border-b-2 border-gray-400"
   >
     <img
-      src="..\assets\MMABsxLogo.png"
+      src="..\static\MMABsxLogo.png"
       alt="MMA Baisieux"
       class="text-2xl text-black font-bold h-16 w-16"
     />
@@ -15,8 +15,8 @@
           <!-- Icône de menu (à remplacer par votre propre icône) -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="44"
+            height="44"
             viewBox="0 0 24 24"
           >
             <path

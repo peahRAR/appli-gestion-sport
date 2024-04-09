@@ -2,7 +2,11 @@
   <div
     class="flex justify-between items-center p-4 bg-white text-white border-b-2 border-gray-400"
   >
-    <h1 class="text-2xl text-black font-bold">MMA Baisieux</h1>
+    <img
+      src="..\assets\MMABsxLogo.png"
+      alt="MMA Baisieux"
+      class="text-2xl text-black font-bold h-16 w-16"
+    />
 
     <div v-if="isAuthenticated">
       <!-- Menu déroulant -->

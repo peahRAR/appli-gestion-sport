@@ -1,10 +1,11 @@
-import * as bcrypt from 'bcrypt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/users.entity';
-import * as crypto from 'crypto';
+import { UsersService } from '../users/users.service';
+import * as bcrypt from 'bcrypt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { User } from '../users/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -14,54 +15,41 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  private createidentifier(email: string): string {
-    const secretKey = this.configService.get<string>('PASSWORDMAIL');
-    return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
-  }
-
   async signIn(
     email: string,
     password: string,
   ): Promise<{ access_token: string }> {
-    
-    // Rechercher l'utilisateur dans la base de données en utilisant le service UsersService
-    const user = await this.usersService.findByEmail(email);
-    
-    // Vérifier si l'utilisateur existe
-    if (!user) {
-      throw new UnauthorizedException('Email ou mot de passe incorrect');
-    }
-
-    // Vérifier si l'utilisateur est activé
-    if (!user.isActive) {
-      throw new UnauthorizedException("Votre compte n'est pas activé");
-    }
-    
-    // Comparer le mot de passe fourni avec le mot de passe chiffré
-    const isMatch = await bcrypt.compare(password, user.password);
-    
-    if (!isMatch) {
-      
-      throw new UnauthorizedException('Email ou mot de passe incorrect');
-    }
-    // Générer un JWT avec les informations de l'utilisateur comme payload
-    const payload = { sub: user.id, email: user.email, role: user.role }; // Utilisez les informations appropriées de l'utilisateur
-   
-    const access_token = await this.jwtService.signAsync(payload);
-    
-    // Retourner le token JWT
-    return { access_token };
+    const user = await this.validateUser(email, password);
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    return { access_token: this.jwtService.sign(payload) };
   }
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersService.findByEmail(email);
-    if (user) {
-      // Comparer le mot de passe fourni avec le mot de passe chiffré
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        return user; // Retourner l'utilisateur complet
-      }
+    if (user && (await bcrypt.compare(password, user.password))) {
+      return user;
     }
-    throw new UnauthorizedException('Email ou mot de passe incorrect');
+    throw new UnauthorizedException('Invalid credentials');
+  }
+}
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: configService.get<string>('JWT_SECRET'),
+    });
+  }
+
+  async validate(payload: any) {
+    const user = await this.usersService.findOne(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
   }
 }

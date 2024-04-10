@@ -21,6 +21,7 @@ import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
 
 
+
 @Controller('users')
 export class UsersController {
   // Créez une instance de Storage avec vos informations d'authentification
@@ -59,17 +60,9 @@ export class UsersController {
         reject(err);
       });
 
-      stream.on('finish', async () => {
-        // Générer une URL signée pour l'objet téléchargé
-        try {
-          const [signedUrl] = await fileUpload.getSignedUrl({
-            action: 'read',
-            expires: Date.now() + 365 * 24 * 60 * 60 * 1000, // Expire dans un an
-          });
-          resolve(signedUrl);
-        } catch (error) {
-          reject(error);
-        }
+      stream.on('finish', () => {
+        const publicUrl = `https://${this.configService.get('PUBLIC_URL')}/${this.bucketName}/${destination}`;
+        resolve(publicUrl);
       });
 
       stream.end(file.buffer); // Envoie les données du fichier dans le stream
@@ -112,7 +105,7 @@ export class UsersController {
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       body.avatar = avatarUrl;
     }
-
+    console.log(body)
     // Mettez à jour l'utilisateur dans la base de données
     return this.usersService.update(+id, body);
   }

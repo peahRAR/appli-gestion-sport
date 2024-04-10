@@ -8,7 +8,7 @@
         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
           <div class="col-span-2">
             <!-- Avatar -->
-            <img
+            <NuxtImg
               v-if="user.avatar"
               :src="user.avatar.data"
               alt="Avatar"
@@ -98,6 +98,15 @@
               {{
                 user.tel_emergency && user.tel_emergency.data
                   ? user.tel_emergency.data
+                  : "Non Renseigné"
+              }}
+            </p>
+            <!-- Date Fin de paiment -->
+            <p class="text-gray-600 mb-2">
+              <strong>Date fin de paiment:</strong>
+              {{
+                user.date_End_Pay && user.date_End_Pay.data
+                  ? user.date_End_Pay.data
                   : "Non Renseigné"
               }}
             </p>
@@ -333,7 +342,7 @@ export default {
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
-      return url
+      return url;
     },
     checkAccessToken() {
       const accessToken = localStorage.getItem("accessToken");
@@ -433,7 +442,6 @@ export default {
           tel_emergency: this.editedTelEmergency,
         })
       );
-      console.log(this.avatar);
       formData.append("file", this.avatar);
       for (const value of formData.values()) {
         console.log(value);

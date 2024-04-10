@@ -16,6 +16,7 @@ import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AlertModule } from './alert/alert.module';
 import { mailerConfig } from './mailer.config';
+import { PassportModule } from '@nestjs/passport';
 
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobsModule } from './cronjobs/cronjobs.module';
@@ -28,12 +29,12 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
       isGlobal: true,
     }),
     MailerModule.forRoot(mailerConfig),
-    ScheduleModule .forRoot(),
-    
+    ScheduleModule.forRoot(),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      
+
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('DATABASE_HOST'),
@@ -52,7 +53,7 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
     AuthModule,
     AdminModule,
     AlertModule,
-    CronjobsModule
+    CronjobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

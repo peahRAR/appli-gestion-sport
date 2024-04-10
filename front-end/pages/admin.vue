@@ -486,7 +486,7 @@
       <!-- Modale Utilisateur  -->
       <!-- Input Name -->
       <div class="mb-2 mt-4">
-        <img
+        <NuxtImg
           v-if="selectedUser.avatar"
           :src="selectedUser.avatar.data"
           alt="Avatar"

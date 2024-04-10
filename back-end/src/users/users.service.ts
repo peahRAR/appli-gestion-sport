@@ -320,7 +320,7 @@ export class UsersService {
   ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
-
+    console.log(updateUserDto)
     // Vérifier si l'utilisateur existe
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
@@ -430,7 +430,8 @@ export class UsersService {
         data: avatarEncrypt,
       };
     }
-
+    console.log(user.licence)
+    console.log("coucou")
     // Enregistrer les modifications
     await this.userRepository.save(user);
 

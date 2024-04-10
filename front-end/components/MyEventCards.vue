@@ -182,7 +182,7 @@
   >
     <ul>
       <li>
-        <img
+        <NuxtImg
           v-if="userDetails.avatar"
           :src="userDetails.avatar.data"
           alt="Avatar"

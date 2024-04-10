@@ -96,15 +96,17 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
+    // On parse le body user pour récuperer un objet
+    const data = JSON.parse(body.user)
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
       const destination = `avatars/${id}/avatar`;
 
       const avatarUrl = await this.uploadFileToGCS(file, destination);
-      body.avatar = avatarUrl;
+      data.avatar = avatarUrl;
     }
     // Mettez à jour l'utilisateur dans la base de données
-    return this.usersService.update(+id, body);
+    return this.usersService.update(+id, data);
   }
 
   @Delete(':id')

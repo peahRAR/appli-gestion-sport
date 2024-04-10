@@ -320,10 +320,8 @@ export class UsersService {
   ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
-    console.log(updateUserDto.user)
-    console.log(typeof (updateUserDto.user))
-    
-    
+
+
     // Vérifier si l'utilisateur existe
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
@@ -337,7 +335,7 @@ export class UsersService {
           'Le mot de passe actuel est requis pour changer le mot de passe.',
         );
       }
-     
+
       // Comparer le mot de passe actuel fourni avec le mot de passe actuel de l'utilisateur
       const isPasswordValid =
         (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
@@ -372,7 +370,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_medic) {
-      console.log('coucou')
+      console.log('tel medic change')
       const telMedicEncrypt = this.createEncryptedField(
         updateUserDto.tel_medic,
       );
@@ -380,8 +378,9 @@ export class UsersService {
         identifier: telMedicEncrypt,
         data: telMedicEncrypt,
       };
-    } 
+    }
     if (updateUserDto.tel_emergency) {
+      console.log('tel emergency change')
       const telEmergencyEncrypt = this.createEncryptedField(
         updateUserDto.tel_emergency,
       );
@@ -391,6 +390,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.weight) {
+      console.log('weight change')
       const weightEncrypt = this.createEncryptedField(
         updateUserDto.weight.toString(),
       );
@@ -400,6 +400,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.licence) {
+      console.log('licence')
       const licenceEncrypt = this.createEncryptedField(
         updateUserDto.licence.toString(),
       );

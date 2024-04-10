@@ -96,8 +96,6 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    console.log(body);
-
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
       const destination = `avatars/${id}/avatar`;
@@ -105,7 +103,6 @@ export class UsersController {
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       body.avatar = avatarUrl;
     }
-    console.log(body)
     // Mettez à jour l'utilisateur dans la base de données
     return this.usersService.update(+id, body);
   }

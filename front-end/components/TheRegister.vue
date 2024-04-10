@@ -166,14 +166,12 @@ export default {
     },
      // Valider Confirm Password
     validerConfirmPassword() {
-      console.log(this.confirmNewPassword)
       if (this.confirmNewPassword === this.user.password) {
         return true;
       }
       return false;
     },
     isLength() {
-      console.log(this.user)
       return this.user.password.length >= 8;
 
     },

@@ -350,16 +350,16 @@ export default {
         // Redirection vers la page d'accueil si aucun accessToken n'est présent
         document.location.href = "/";
         return;
-      }
+      } else if (accessToken) {
+        // Décodez le token pour obtenir la date d'expiration
+        const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
+        const expirationDate = new Date(decodedToken.exp * 1000); // Convertir la date d'expiration en millisecondes
 
-      // Décodez le token pour obtenir la date d'expiration
-      const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
-      const expirationDate = new Date(decodedToken.exp * 1000); // Convertir la date d'expiration en millisecondes
-
-      // Vérifiez si la date d'expiration est dépassée
-      if (expirationDate < new Date()) {
-        // Redirection vers la page d'accueil si la date d'expiration est dépassée
-        document.location.href = "/";
+        // Vérifiez si la date d'expiration est dépassée
+        if (expirationDate < new Date()) {
+          localStorage.removeItem("accessToken");
+          document.location.href = "/";
+        }
       }
     },
     // Keep the user infos from the token

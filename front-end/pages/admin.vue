@@ -775,6 +775,7 @@ export default {
       const decodedToken = JSON.parse(atob(accessToken.split(".")[1]));
       const expirationDate = new Date(decodedToken.exp * 1000); // Convertir la date d'expiration en millisecondes
       if (expirationDate < new Date()) {
+        localStorage.removeItem("accessToken");
         // Redirection vers la page d'accueil si la date d'expiration est dépassée
         document.location.href = "/";
         return;

@@ -169,21 +169,18 @@ export default {
     // Function to extract user ID from JWT token
     getUserIdFromToken() {
       const token = this.token;
-      console.log("Token:", token); // Vérifier le contenu du token
       if (!token) {
         console.error("Aucun token trouvé.");
         return null;
       }
 
       const tokenParts = token.split(".");
-      console.log("Token Parts:", tokenParts); // Vérifier les parties du token
       if (tokenParts.length !== 3) {
         console.error("Le token JWT est invalide.");
         return null;
       }
 
       const payload = JSON.parse(atob(tokenParts[1]));
-      console.log("Payload:", payload); // Vérifier le contenu du payload
       if (!payload || !payload.sub) {
         console.error("Impossible de trouver le champ 'sub' dans le token.");
         return null;

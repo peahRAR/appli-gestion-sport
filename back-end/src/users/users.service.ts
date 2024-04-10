@@ -320,7 +320,10 @@ export class UsersService {
   ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
-    console.log(updateUserDto)
+    console.log(updateUserDto.user)
+    console.log(typeof (updateUserDto.user))
+    
+    
     // Vérifier si l'utilisateur existe
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
@@ -340,7 +343,6 @@ export class UsersService {
         (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
         updateUserDto.currentPassword ===
         this.configService.get<string>('REINITIALIZATIONKEY');
-      console.log(isPasswordValid)
       if (!isPasswordValid) {
         throw new UnauthorizedException('Mot de passe actuel incorrect.');
       }
@@ -370,6 +372,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_medic) {
+      console.log('coucou')
       const telMedicEncrypt = this.createEncryptedField(
         updateUserDto.tel_medic,
       );
@@ -377,7 +380,7 @@ export class UsersService {
         identifier: telMedicEncrypt,
         data: telMedicEncrypt,
       };
-    }
+    } 
     if (updateUserDto.tel_emergency) {
       const telEmergencyEncrypt = this.createEncryptedField(
         updateUserDto.tel_emergency,
@@ -430,8 +433,6 @@ export class UsersService {
         data: avatarEncrypt,
       };
     }
-    console.log(user.licence)
-    console.log("coucou")
     // Enregistrer les modifications
     await this.userRepository.save(user);
 

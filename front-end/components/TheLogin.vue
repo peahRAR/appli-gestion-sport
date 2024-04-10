@@ -4,27 +4,14 @@
     <form @submit.prevent="signIn">
       <!-- Email input -->
       <div class="mb-4">
-        <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
-          >Email</label
-        >
-        <input
-          v-model="user.email"
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Votre email"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-        />
+        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+        <input v-model="user.email" type="email" id="email" name="email" placeholder="Votre email"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
       </div>
       <!-- Password input -->
       <div class="mb-6">
-        <inputPassword
-          v-model="user.password"
-          :regex="regexPassword"
-          label="Mot de passe : "
-          id="password"
-          :isValid="validerPassword"
-        />
+        <inputPassword v-model="user.password" :regex="regexPassword" label="Mot de passe : " id="password"
+          :isValid="validerPassword" />
       </div>
       <!-- Afficher le message d'erreur s'il y a lieu -->
       <p v-if="errorMessage" class="text-red-500 mt-4 text-center">
@@ -32,49 +19,29 @@
       </p>
       <!-- Submit Button -->
       <div class="flex justify-center">
-        <button
-          type="submit"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
+        <button type="submit"
+          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
           Se connecter
         </button>
       </div>
     </form>
 
     <!-- Button to open modal -->
-    <button
-      @click="openResetPasswordModal"
-      class="mt-2 ml-16 underline bg-gray-300 hover:bg-gray-400 m-auto text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-    >
+    <button @click="openResetPasswordModal"
+      class="mt-2 ml-16 underline bg-gray-300 hover:bg-gray-400 m-auto text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
       Réinitialiser le mot de passe
     </button>
 
     <!-- Reset Password Modal -->
-    <TheModal
-      :isOpen="showResetPasswordModal"
-      title="Réinitialiser le mot de passe"
-      @close="closeResetPasswordModal"
-    >
+    <TheModal :isOpen="showResetPasswordModal" title="Réinitialiser le mot de passe" @close="closeResetPasswordModal">
       <form @submit.prevent="requestPasswordReset">
         <div class="mb-4">
-          <label
-            for="resetEmail"
-            class="block text-gray-700 text-sm font-bold mb-2"
-            >Email</label
-          >
-          <input
-            v-model="resetEmail"
-            type="email"
-            id="resetEmail"
-            name="resetEmail"
-            placeholder="Votre email"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-          />
+          <label for="resetEmail" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+          <input v-model="resetEmail" type="email" id="resetEmail" name="resetEmail" placeholder="Votre email"
+            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
         </div>
-        <button
-          type="submit"
-          class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
+        <button type="submit"
+          class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
           Envoyer
         </button>
       </form>
@@ -127,6 +94,7 @@ export default {
     },
     // LOGIN API method
     async signIn() {
+      console.log("Sign In")
       const url = this.getUrl();
       try {
         const { data } = await useFetch(`${url}/auth/login`, {

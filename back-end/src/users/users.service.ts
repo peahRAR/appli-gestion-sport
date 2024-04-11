@@ -17,7 +17,7 @@ import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
-import { JwtService } from '@nestjs/jwt';
+// import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
@@ -29,7 +29,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
-    private jwtService: JwtService,
+    // private jwtService: JwtService,
   ) {
     this.salt = this.configService.get<string>('SALT');
   }
@@ -462,13 +462,13 @@ export class UsersService {
 
     // Générer un token unique et le stocker dans la table de réinitialisation de mot de passe
     const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
-
-    const resetToken = await this.jwtService.signAsync(payload);
+    console.log(payload);
+    // const resetToken = await this.jwtService.signAsync(payload);
 
     const decryptedEmail = this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    // const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,
@@ -476,7 +476,7 @@ export class UsersService {
       template: 'reset-password',
       context: {
         email: decryptedEmail,
-        resetUrl: resetUrl,
+        // resetUrl: resetUrl,
       },
     });
   }

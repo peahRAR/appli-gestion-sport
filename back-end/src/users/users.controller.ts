@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { UsersGuard } from './users.guard';
 import { Storage } from '@google-cloud/storage';
@@ -90,13 +89,11 @@ export class UsersController {
 
   @Get()
   @UseGuards(AdminGuard)
-  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
@@ -104,7 +101,6 @@ export class UsersController {
   @Patch(':id')
   @UseInterceptors(multerOptions.interceptor)
   @UseGuards(UsersGuard)
-  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
@@ -141,7 +137,6 @@ export class UsersController {
 
   @Delete(':id')
   @UseGuards(UsersGuard)
-  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string) {
     // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image
     const user = await this.usersService.findOne(+id);

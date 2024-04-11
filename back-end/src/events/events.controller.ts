@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
+// import { Public } from 'src/decorators/public.decorator';
 
 
 
@@ -11,35 +11,31 @@ import { AdminGuard } from '../auth/admin.guard';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+
   @Post()
   @UseGuards(AdminGuard)
-  @UseGuards(JwtAuthGuard)
   create(@Body() createEventDto: CreateEventDto) {
     return this.eventsService.create(createEventDto);
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.eventsService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.eventsService.findOne(+id);
   }
 
   @Patch(':id')
   @UseGuards(AdminGuard)
-  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(+id, updateEventDto);
   }
 
   @Delete(':id')
   @UseGuards(AdminGuard)
-  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.eventsService.remove(+id);
   }

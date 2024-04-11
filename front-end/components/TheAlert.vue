@@ -3,7 +3,7 @@
     <div class="alert-header flex items-center cursor-pointer" @click="toggleExpand">
       <div class="flex items-center">
         <div class="exclamation-mark-container flex items-center justify-center rounded-full bg-orange-500 text-white text-xl w-10 h-10 mr-2">
-          <span class="exclamation-mark">!</span>
+          <Icon class="-rotate-12 text-2xl" name="fluent-emoji-high-contrast:loudspeaker" />
         </div>
         <h3 class="text-lg font-bold">Informations ({{ alerts.length }})</h3> <!-- Ajout du nombre d'alertes -->
       </div>

@@ -21,6 +21,7 @@ export class AuthController {
     @Body('email') email: string,
     @Body('password') password: string,
   ) {
+    console.log('SignIn')
     return this.authService.signIn(email, password);
   }
 

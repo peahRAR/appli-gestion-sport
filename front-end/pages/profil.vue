@@ -70,12 +70,12 @@
                   : "Non Renseigné"
               }}
             </p>
-            <!-- Licence -->
+            <!-- license -->
             <p class="text-gray-600 mb-2">
-              <strong>Licence:</strong>
+              <strong>license:</strong>
               {{
-                user.licence && user.licence.data
-                  ? user.licence.data
+                user.license && user.license.data
+                  ? user.license.data
                   : "Non Renseigné"
               }}
             </p>
@@ -105,8 +105,8 @@
             <p class="text-gray-600 mb-2">
               <strong>Date fin de paiment:</strong>
               {{
-                user.date_End_Pay && user.date_End_Pay.data
-                  ? user.date_End_Pay.data
+                user.date_end_pay && user.date_end_pay.data
+                  ? user.date_end_pay.data
                   : "Non Renseigné"
               }}
             </p>
@@ -157,12 +157,12 @@
           placeholder="Nouveau poids"
           class="input-field mb-4"
         />
-        <!-- Licence -->
-        <p>Licence:</p>
+        <!-- license -->
+        <p>license:</p>
         <input
           type="text"
-          v-model="editedLicence"
-          placeholder="Nouvelle licence"
+          v-model="editedlicense"
+          placeholder="Nouvelle license"
           class="input-field mb-4"
         />
         <!-- Tel Medic -->
@@ -264,7 +264,7 @@ export default {
         date_Subscribe: null,
         email: null,
         weight: null,
-        licence: null,
+        license: null,
         gender: null,
         tel_medic: null,
         tel_emergency: null,
@@ -275,7 +275,7 @@ export default {
       editedName: null,
       editedEmail: null,
       editedWeight: null,
-      editedLicence: null,
+      editedlicense: null,
       editedGender: null,
       editedTelMedic: null,
       editedTelEmergency: null,
@@ -417,7 +417,7 @@ export default {
       this.isEditing = true;
       // Initialiser les champs d'entrée avec les valeurs actuelles de l'utilisateur
       this.editedWeight = this.user.weight ? this.user.weight.data : null;
-      this.editedLicence = this.user.licence ? this.user.licence.data : null;
+      this.editedlicense = this.user.license ? this.user.license.data : null;
       this.editedTelMedic = this.user.tel_medic
         ? this.user.tel_medic.data
         : null;
@@ -437,7 +437,7 @@ export default {
           date_end_pay: null,
           date_payment: null,
           weight: this.editedWeight,
-          licence: this.editedLicence,
+          license: this.editedlicense,
           tel_medic: this.editedTelMedic,
           tel_emergency: this.editedTelEmergency,
         })
@@ -468,13 +468,13 @@ export default {
         this.editedName = null;
         this.editedEmail = null;
         this.editedWeight = null;
-        this.editedLicence = null;
+        this.editedlicense = null;
         this.editedGender = null;
         this.editedTelMedic = null;
         this.editedTelEmergency = null;
         this.avatar = null;
 
-        document.location.href = "/profil";
+        // document.location.href = "/profil";
       } catch (error) {
         this.openErrorModal();
         this.errorMessage = "Erreur lors de la sauvegarde des modifications";

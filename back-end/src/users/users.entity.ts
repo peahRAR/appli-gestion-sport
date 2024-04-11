@@ -1,5 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import {Event} from '../events/events.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Event } from '../events/events.entity';
 
 @Entity()
 export class User {
@@ -8,21 +14,21 @@ export class User {
 
   @Column('json')
   email: {
-    identifier:string;
-    data:string;
-  }; 
+    identifier: string;
+    data: string;
+  };
 
   @Column('json')
   firstname: {
-    identifier:string;
-    data:string;
-  }; 
+    identifier: string;
+    data: string;
+  };
 
   @Column('json')
   name: {
-    identifier:string;
-    data:string;
-  }; 
+    identifier: string;
+    data: string;
+  };
 
   @Column()
   password: string;
@@ -55,7 +61,7 @@ export class User {
   };
 
   @Column('json', { nullable: true })
-  licence: {
+  license: {
     identifier: string;
     data: string;
   };
@@ -84,18 +90,15 @@ export class User {
     data: string;
   };
 
-
   @Column({ default: false })
   isActive: boolean;
 
-  @Column({type:'int', default: 0 })
+  @Column({ type: 'int', default: 0 })
   role: number;
-
 
   @ManyToMany(() => Event)
   @JoinTable()
   events: Event[];
   listsMembers: any;
-    useremail: any;
-
+  useremail: any;
 }

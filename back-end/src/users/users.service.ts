@@ -212,7 +212,7 @@ export class UsersService {
       'date_subscribe',
       'date_payment',
       'date_end_pay',
-      'licence',
+      'license',
       'weight',
       'tel_medic',
       'tel_emergency',
@@ -242,7 +242,7 @@ export class UsersService {
         'email',
         'gender',
         'weight',
-        'licence',
+        'license',
         'name',
         'firstname',
         'tel_medic',
@@ -267,8 +267,8 @@ export class UsersService {
     if (user.weight?.data) {
       user.weight.data = this.decryptField(user.weight.data);
     }
-    if (user.licence?.data) {
-      user.licence.data = this.decryptField(user.licence.data);
+    if (user.license?.data) {
+      user.license.data = this.decryptField(user.license.data);
     }
     if (user.name?.data) {
       user.name.data = this.decryptField(user.name.data);
@@ -316,11 +316,9 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-
   ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
-
 
     // Vérifier si l'utilisateur existe
     if (!user) {
@@ -340,7 +338,7 @@ export class UsersService {
       const isPasswordValid =
         (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
         updateUserDto.currentPassword ===
-        this.configService.get<string>('REINITIALIZATIONKEY');
+          this.configService.get<string>('REINITIALIZATIONKEY');
       if (!isPasswordValid) {
         throw new UnauthorizedException('Mot de passe actuel incorrect.');
       }
@@ -370,7 +368,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_medic) {
-      console.log('tel medic change')
+      console.log('tel medic change');
       const telMedicEncrypt = this.createEncryptedField(
         updateUserDto.tel_medic,
       );
@@ -380,7 +378,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_emergency) {
-      console.log('tel emergency change')
+      console.log('tel emergency change');
       const telEmergencyEncrypt = this.createEncryptedField(
         updateUserDto.tel_emergency,
       );
@@ -390,7 +388,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.weight) {
-      console.log('weight change')
+      console.log('weight change');
       const weightEncrypt = this.createEncryptedField(
         updateUserDto.weight.toString(),
       );
@@ -399,14 +397,14 @@ export class UsersService {
         data: weightEncrypt,
       };
     }
-    if (updateUserDto.licence) {
-      console.log('licence')
-      const licenceEncrypt = this.createEncryptedField(
-        updateUserDto.licence.toString(),
+    if (updateUserDto.license) {
+      console.log('license');
+      const licenseEncrypt = this.createEncryptedField(
+        updateUserDto.license.toString(),
       );
-      user.licence = {
-        identifier: licenceEncrypt,
-        data: licenceEncrypt,
+      user.license = {
+        identifier: licenseEncrypt,
+        data: licenseEncrypt,
       };
     }
     if (updateUserDto.date_payment) {

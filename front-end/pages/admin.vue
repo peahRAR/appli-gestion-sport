@@ -142,15 +142,15 @@
                 :key="user.id"
                 :class="{
                   'bg-orange-600':
-                    !user.licence ||
+                    !user.license ||
                     !user.date_end_pay ||
                     new Date(user.date_end_pay) < new Date(),
                   'bg-red-600':
-                    !user.licence &&
+                    !user.license &&
                     (!user.date_end_pay ||
                       new Date(user.date_end_pay) < new Date()),
                   'bg-white':
-                    user.licence &&
+                    user.license &&
                     (!user.date_end_pay ||
                       new Date(user.date_end_pay) >= new Date()),
                 }"
@@ -179,9 +179,9 @@
                         />
                       </g>
                     </svg>
-                    <!-- Id Card icon if Licence is null -->
+                    <!-- Id Card icon if license is null -->
                     <svg
-                      v-if="!user.licence"
+                      v-if="!user.license"
                       xmlns="http://www.w3.org/2000/svg"
                       width="32"
                       height="32"
@@ -1308,7 +1308,9 @@ export default {
           },
         });
         if (!response.ok) {
-          console.error("Une Erreur est survenue durant la récupération des alertes");
+          console.error(
+            "Une Erreur est survenue durant la récupération des alertes"
+          );
         }
         const data = await response.json();
         this.alerts = data;

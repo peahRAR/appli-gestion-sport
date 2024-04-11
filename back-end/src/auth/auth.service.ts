@@ -2,8 +2,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../users/users.entity';
 
@@ -21,37 +19,23 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     const user = await this.validateUser(email, password);
     const payload = { sub: user.id, email: user.email, role: user.role };
-    console.log(payload)
-    console.log(this.jwtService.sign(payload))
+    console.log(payload);
+    console.log(this.jwtService.sign(payload));
+    console.log('TOKEN');
     return { access_token: this.jwtService.sign(payload) };
   }
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersService.findByEmail(email);
-    if (user && (await bcrypt.compare(password, user.password))) {
-      return user;
+    if (user) {
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (isMatch) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...result } = user;
+        return user;
+      }
     }
     throw new UnauthorizedException('Invalid credentials');
   }
 }
 
-@Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
-  ) {
-    super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_SECRET'),
-    });
-  }
-
-  async validate(payload: any) {
-    const user = await this.usersService.findOne(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    return user;
-  }
-}

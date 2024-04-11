@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsNotEmpty,
   IsEmail,
-  IsDateString
+  IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -48,7 +48,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  licence: string;
+  license: string;
 
   @IsOptional()
   @IsDateString()

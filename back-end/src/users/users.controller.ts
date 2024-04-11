@@ -16,10 +16,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../auth/admin.guard';
 import { UsersGuard } from './users.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
-
+import { multerOptions } from '../multer/multer.config';
 
 
 @Controller('users')
@@ -69,6 +68,21 @@ export class UsersController {
     });
   }
 
+  async emptyGCSFolder(folderPath: string) {
+    const storage = new Storage();
+    const bucketName = this.configService.get('BUCKET_NAME');
+
+    const options = {
+      prefix: folderPath,
+    };
+
+    // Récupérez tous les fichiers dans le dossier
+    const [files] = await storage.bucket(bucketName).getFiles(options);
+
+    // Supprimez chaque fichier dans le dossier
+    await Promise.all(files.map((file) => file.delete()));
+  }
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -88,7 +102,7 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(multerOptions.interceptor)
   @UseGuards(UsersGuard)
   @UseGuards(JwtAuthGuard)
   async update(
@@ -96,11 +110,27 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
+    console.log(body);
+    console.log(typeof body);
+    console.log(body.user);
+    console.log(typeof body.user);
+    let data;
     // On parse le body user pour récuperer un objet
-    const data = JSON.parse(body.user)
+    if (body.user) {
+      data = JSON.parse(body.user);
+    } else {
+      data = body;
+    }
+
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
-      const destination = `avatars/${id}/avatar`;
+      console.log(file);
+      const timestamp = Date.now(); // Obtenez le timestamp actuel
+      const destination = `avatars/${id}/${timestamp}`;
+
+      // Vider le dossier de l'utilisateur avant d'uploader la nouvelle image
+      const userFolder = `avatars/${id}`;
+      await this.emptyGCSFolder(userFolder);
 
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       data.avatar = avatarUrl;

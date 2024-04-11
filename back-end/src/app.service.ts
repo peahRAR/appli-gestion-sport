@@ -5,22 +5,19 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppService {
-  constructor(private usersService: UsersService,
-    private readonly configService: ConfigService) {}
+  constructor(
+    private usersService: UsersService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async initApp(): Promise<User> {
     const users = await this.usersService.findAll();
 
-    
-
     if (users.length < 1) {
-      
       const dateSubscribeString = new Date();
 
       // Convertir la chaîne de caractères de la date en un objet Date
       const birthday = new Date(this.configService.get('BIRTHDAYSUPERADMIN'));
-
-      
 
       const superAdmin = {
         email: this.configService.get('EMAILSUPERADMIN'),
@@ -32,7 +29,7 @@ export class AppService {
         gender: this.configService.get('GENDERSUPERADMIN'),
         role: this.configService.get('ROLESUPERADMIN'),
         isActive: true,
-        licence: null,
+        license: null,
         tel_medic: null,
         tel_emergency: null,
         weight: null,

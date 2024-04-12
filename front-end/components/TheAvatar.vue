@@ -14,7 +14,7 @@
       />
     </div>
     <input type="file" @change="onFileChange" class="mb-4 mt-4"/>
-    <input type="range" min="1" max="3" scale="0.1" v-model="zoom">
+    <input step="0.1" type="range" min="1" max="3" scale="0.1" v-model="zoom">
   </div>
 </template>
 

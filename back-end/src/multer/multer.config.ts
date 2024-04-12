@@ -1,23 +1,17 @@
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 
 export const multerOptions = {
   interceptor: FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
-      },
-    }),
+    storage: memoryStorage(), // Utilisez memoryStorage ici
     limits: {
-      fileSize: 3 * 1024 * 1024,
+      fileSize: 3 * 1024 * 1024, // Limite de 3MB pour la taille du fichier
     },
     fileFilter: (req, file, cb) => {
-      if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      const allowedMimeTypes = ['image/jpeg', 'image/png'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
         return cb(
-          new Error('Seuls les fichiers jpeg, jpg ou png sont autorisés!'),
+          new Error('Seuls les fichiers jpeg ou png sont autorisés!'),
           false,
         );
       }

@@ -1,7 +1,7 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
-import { AdminGuard } from '../auth/admin.guard';
+
 
 
 @Controller('lists-members')
@@ -40,7 +40,6 @@ export class ListsMembersController {
   }
 
   @Delete(':eventId/:userId')
-  @UseGuards(AdminGuard)
   remove(@Param('eventId') eventId: string, @Param('userId') userId: string) {
     return this.listsMembersService.remove(+eventId, +userId);
   }

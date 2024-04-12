@@ -6,15 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
   UploadedFile,
   UseInterceptors,
   NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { AdminGuard } from '../auth/admin.guard';
-import { UsersGuard } from './users.guard';
 import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
 import { multerOptions } from '../multer/multer.config';
@@ -41,6 +38,9 @@ export class UsersController {
     file: Express.Multer.File,
     destination: string,
   ): Promise<string> {
+    console.log('UPLOAD');
+    console.log(file);
+    console.log(destination);
     const bucket = this.storage.bucket(this.bucketName);
     const fileUpload = bucket.file(destination);
 
@@ -51,11 +51,12 @@ export class UsersController {
       },
       resumable: false,
     });
-
+    console.log(file)
     // Retourne une promesse pour suivre le succès ou l'échec de l'upload
     return new Promise<string>((resolve, reject) => {
       stream.on('error', (err) => {
         reject(err);
+        console.log(err)
       });
 
       stream.on('finish', () => {
@@ -63,7 +64,11 @@ export class UsersController {
         resolve(publicUrl);
       });
 
-      stream.end(file.buffer); // Envoie les données du fichier dans le stream
+      if (file.buffer) {
+        stream.end(file.buffer);
+      } else {
+        reject(new Error('Le buffer du fichier est vide.'));
+      }
     });
   }
 
@@ -88,7 +93,6 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(AdminGuard)
   findAll() {
     return this.usersService.findAll();
   }
@@ -100,16 +104,18 @@ export class UsersController {
 
   @Patch(':id')
   @UseInterceptors(multerOptions.interceptor)
-  @UseGuards(UsersGuard)
   async update(
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    console.log(body);
-    console.log(typeof body);
-    console.log(body.user);
-    console.log(typeof body.user);
+    console.log('Fichier reçu:', file);
+    if (!file) {
+      console.log('Aucun fichier reçu.');
+    } else {
+      console.log('Type MIME du fichier:', file.mimetype);
+      console.log('Taille du buffer:', file.buffer?.length);
+    }
     let data;
     // On parse le body user pour récuperer un objet
     if (body.user) {
@@ -120,7 +126,8 @@ export class UsersController {
 
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
-      console.log(file);
+      console.log('Fichier');
+      console.log(file)
       const timestamp = Date.now(); // Obtenez le timestamp actuel
       const destination = `avatars/${id}/${timestamp}`;
 
@@ -131,12 +138,12 @@ export class UsersController {
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       data.avatar = avatarUrl;
     }
+    console.log(file)
     // Mettez à jour l'utilisateur dans la base de données
     return this.usersService.update(+id, data);
   }
 
   @Delete(':id')
-  @UseGuards(UsersGuard)
   async remove(@Param('id') id: string) {
     // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image
     const user = await this.usersService.findOne(+id);

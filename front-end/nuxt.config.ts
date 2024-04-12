@@ -1,4 +1,3 @@
-
 export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: false,
@@ -14,6 +13,8 @@ export default defineNuxtConfig({
     public: {
       siteUrl: process.env.API_URL,
       resetKey: process.env.REINITIALIZATIONKEY,
+      frontVersion: process.env.FRONTEND_VERSION,
+      backVersion: process.env.BACKEND_VERSION,
     },
   },
 });

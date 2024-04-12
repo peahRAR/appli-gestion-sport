@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center mt-4 px-6">
+  <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center">
     <div class="image-container " ref="imageContainer">
       <img
         :src="imageUrl"
@@ -89,8 +89,8 @@ export default {
 .avatar-picker .image-container {
   overflow: hidden;
   margin: auto;
-  width: 200px;
-  height: 200px;
+  width: 125px;
+  height: 125px;
   border-radius: 50%;
   padding: 1%;
   border: 2px;

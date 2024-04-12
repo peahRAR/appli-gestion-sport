@@ -7,7 +7,7 @@
       class="fixed p-2 inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black bg-opacity-50"
     >
       <div
-        class="relative p-8 mx-2 max-w-lg mx-auto bg-white rounded-lg shadow-lg"
+        class="relative p-8 mx-2 max-w-lg mx-auto bg-white rounded-lg shadow-lg mt-20"
       >
         <button
           @click="closeModal"

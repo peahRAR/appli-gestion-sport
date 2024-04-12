@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="min-h-80">
     <!-- Login Form -->
     <form @submit.prevent="signIn">
       <!-- Email input -->
@@ -11,7 +11,7 @@
       <!-- Password input -->
       <div class="mb-6">
         <inputPassword v-model="user.password" :regex="regexPassword" label="Mot de passe : " id="password"
-          :isValid="validerPassword" />
+          :isValid=null />
       </div>
       <!-- Afficher le message d'erreur s'il y a lieu -->
       <p v-if="errorMessage" class="text-red-500 mt-4 text-center">
@@ -76,14 +76,7 @@ export default {
     patternRegex() {
       return this.regexPassword.toString().slice(1, -1);
     },
-    // ValiderPassword
-    validerPassword() {
-      if (!this.regexPassword.test(this.user.password)) {
-        return false;
-      }
-
-      return true;
-    },
+    
   },
 
   methods: {

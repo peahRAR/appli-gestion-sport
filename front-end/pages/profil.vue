@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mb-6">
     <TheSkeleton v-if="loading" />
     <div v-else class="container mx-auto px-4 py-8 min-h-screen">
       <h1 class="text-3xl font-bold mb-8">Profil Utilisateur</h1>

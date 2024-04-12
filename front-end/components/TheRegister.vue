@@ -86,13 +86,13 @@
       />
     </div>
     <inputPassword
-            label="Confirmer votre mot de passe : "
-            id="confirmNewPassword"
-            v-model="confirmNewPassword"
-            :isValid="validerConfirmPassword"
-            ref="confirmPassword"
-            class="mb-4"
-          />
+      label="Confirmer votre mot de passe : "
+      id="confirmNewPassword"
+      v-model="confirmNewPassword"
+      :isValid="validerConfirmPassword"
+      ref="confirmPassword"
+      class="mb-4"
+    />
 
     <div class="mb-4">
       <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2"
@@ -107,6 +107,18 @@
         placeholder="Votre date de naissance"
         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
       />
+    </div>
+    <div class="mb-4">
+      <label for="acceptConditions">
+        <input
+          type="checkbox"
+          id="acceptConditions"
+          name="acceptConditions"
+          required
+        />
+        J'accepte les
+        <NuxtLink href="/terms" target="_blank" class="underline text-blue">Conditions d'Utilisation</NuxtLink>
+      </label>
     </div>
 
     <div class="flex justify-center">
@@ -164,7 +176,7 @@ export default {
 
       return true;
     },
-     // Valider Confirm Password
+    // Valider Confirm Password
     validerConfirmPassword() {
       if (this.confirmNewPassword === this.user.password) {
         return true;
@@ -173,7 +185,6 @@ export default {
     },
     isLength() {
       return this.user.password.length >= 8;
-
     },
     isMaj() {
       const regex = /[A-Z]/;
@@ -197,15 +208,15 @@ export default {
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
-      return url
+      return url;
     },
     // SignUp method
     async signUp() {
       const url = this.getUrl();
       if (!this.validerConfirmPassword) {
         this.showErrorModal();
-        this.errorMessage = "Les mots de passes ne correspondent pas !"
-        return
+        this.errorMessage = "Les mots de passes ne correspondent pas !";
+        return;
       }
 
       try {

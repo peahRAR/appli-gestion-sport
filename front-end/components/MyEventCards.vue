@@ -145,6 +145,7 @@
         <li
           v-for="participant in eventParticipants"
           :key="participant.id"
+          class="flex flex-row items-center p-1 mb-2"
           :class="{
             'bg-orange-600':
               (!participant.license ||
@@ -163,14 +164,43 @@
               (userRole === 1 || userRole === 2),
           }"
         >
+          <NuxtImg
+            v-if="participant.avatar"
+            :src="participant.avatar"
+            alt="Avatar"
+            class="w-10 h-10 rounded-full mr-2"
+          />
+          <!-- If Avatar === null -->
+          <div
+            v-else
+            class="w-10 h-10 mr-2 rounded-full bg-gray-300 flex items-center justify-center"
+          >
+            <span class="text-gray-600 text-4xl"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="currentColor"
+                  d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
+    3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 
+    8.5a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8 8.5A3.5 3.5 0 0 1 11.5 5m0 1A2.5 
+    2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6"
+                />
+              </svg>
+            </span>
+          </div>
+
           <div>
             <span
               v-if="userRole === 1 || userRole === 2"
               @click="openDetailsModal(participant)"
-              class="cursor-pointer capitalize"
+              class="cursor-pointer font-bold capitalize"
               >{{ participant.name }}</span
             >
-            <span v-else class="capitalize">{{ participant.name }}</span>
+            <span v-else class="font-bold capitalize">{{ participant.name }}</span>
           </div>
         </li>
       </ul>
@@ -221,6 +251,24 @@
 
         <li><strong>E-mail:</strong> {{ userDetails.email.data }}</li>
         <li>
+          <strong>Numéro de téléphone:</strong>
+          {{
+            (userDetails.tel_num && userDetails.tel_num.data) || "Non renseigné"
+          }}
+        </li>
+        <li>
+          <strong>Numéro médical:</strong>
+          {{
+            (userDetails.tel_medic && userDetails.tel_medic.data) || "Non renseigné"
+          }}
+        </li>
+        <li>
+          <strong>Numéro d'urgence:</strong>
+          {{
+            (userDetails.tel_emergency && userDetails.tel_emergency.data) || "Non renseigné"
+          }}
+        </li>
+        <li>
           <strong>Poids:</strong>
           {{
             (userDetails.weight && userDetails.weight.data) || "Non renseigné"
@@ -251,7 +299,7 @@
       >{{ this.errorMessage }}</TheModal
     >
     <!-- Bulle d'alerte -->
-    <div class="alert-bubble" v-if="showAlertBubble" @click="openAlertModal">
+    <div class="alert-bubble mb-8" v-if="showAlertBubble" @click="openAlertModal">
       <span class="exclamation-mark">!</span>
     </div>
 
@@ -524,6 +572,7 @@ export default {
         // Mettez à jour la liste des participants avec les données récupérées des utilisateurs
         this.eventParticipants = users.map((user) => ({
           id: user.id,
+          avatar: `${user.avatar.data}`,
           name: `${user.firstname.data} ${user.name.data}`, // Ajouter le nom et le prénom de l'utilisateur
         }));
         this.showModal = true; // Afficher la modale une fois les données récupérées

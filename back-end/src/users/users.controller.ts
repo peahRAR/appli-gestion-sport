@@ -15,6 +15,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
 import { multerOptions } from '../multer/multer.config';
+import { Public } from 'src/decorators/public.decorator';
+
 
 
 @Controller('users')
@@ -51,12 +53,12 @@ export class UsersController {
       },
       resumable: false,
     });
-    console.log(file)
+    console.log(file);
     // Retourne une promesse pour suivre le succès ou l'échec de l'upload
     return new Promise<string>((resolve, reject) => {
       stream.on('error', (err) => {
         reject(err);
-        console.log(err)
+        console.log(err);
       });
 
       stream.on('finish', () => {
@@ -87,10 +89,12 @@ export class UsersController {
     await Promise.all(files.map((file) => file.delete()));
   }
 
+  @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
+
 
   @Get()
   findAll() {
@@ -101,6 +105,7 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
+
 
   @Patch(':id')
   @UseInterceptors(multerOptions.interceptor)
@@ -127,7 +132,7 @@ export class UsersController {
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
       console.log('Fichier');
-      console.log(file)
+      console.log(file);
       const timestamp = Date.now(); // Obtenez le timestamp actuel
       const destination = `avatars/${id}/${timestamp}`;
 
@@ -138,7 +143,7 @@ export class UsersController {
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       data.avatar = avatarUrl;
     }
-    console.log(file)
+    console.log(file);
     // Mettez à jour l'utilisateur dans la base de données
     return this.usersService.update(+id, data);
   }

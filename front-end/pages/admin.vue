@@ -574,6 +574,13 @@
             "Non renseigné"
           }}
         </p>
+        <p class="mb-2">
+          <strong>Numéro de téléphone:</strong>
+          {{
+            (selectedUser.tel_num && selectedUser.tel_num.data) ||
+            "Non renseigné"
+          }}
+        </p>
         <!-- Tel Medic -->
         <p class="mb-2">
           <strong>Téléphone médical:</strong>

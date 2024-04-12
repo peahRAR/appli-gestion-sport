@@ -30,6 +30,7 @@ export class AppService {
         role: this.configService.get('ROLESUPERADMIN'),
         isActive: true,
         license: null,
+        tel_num: null,
         tel_medic: null,
         tel_emergency: null,
         weight: null,

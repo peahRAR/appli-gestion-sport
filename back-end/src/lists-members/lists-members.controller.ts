@@ -1,6 +1,7 @@
-import { Controller, Get, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete} from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
+
 
 
 
@@ -13,6 +14,7 @@ export class ListsMembersController {
     
     return this.listsMembersService.findAll();
   }
+
 
   @Get('by-event/:eventId') // Ajoutez un chemin d'accès distinct pour findAllByIdEvent
   findAllByIdEvent(@Param('eventId') eventId: string) {

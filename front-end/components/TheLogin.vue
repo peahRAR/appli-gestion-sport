@@ -107,7 +107,7 @@ export default {
         } else {
           this.openErrorModal();
           this.errorMessage =
-            "Erreur lors de la connexion : données non définies ou incorrectes";
+            "Erreur lors de la connexion, mot de passe ou email incorrect";
         }
       } catch (error) {
         // Catch if some error was raised

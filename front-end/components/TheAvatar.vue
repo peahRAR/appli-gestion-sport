@@ -89,8 +89,8 @@ export default {
 .avatar-picker .image-container {
   overflow: hidden;
   margin: auto;
-  width: 125px;
-  height: 125px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   padding: 1%;
   border: 2px;

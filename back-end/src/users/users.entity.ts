@@ -43,6 +43,12 @@ export class User {
   gender: boolean;
 
   @Column('json', { nullable: true })
+  tel_num: {
+    identifier: string;
+    data: string;
+  };
+
+  @Column('json', { nullable: true })
   tel_medic: {
     identifier: string;
     data: string;

@@ -83,6 +83,15 @@
             <p class="text-gray-600 mb-2">
               <strong>Genre:</strong> {{ user.gender ? "Homme" : "Femme" }}
             </p>
+            <!-- Phone number -->
+            <p class="text-gray-600 mb-2">
+              <strong>Numéro de téléphone:</strong>
+              {{
+                user.tel_num && user.tel_num.data
+                  ? user.tel_num.data
+                  : "Non Renseigné"
+              }}
+            </p>
             <!-- Tel Medic -->
             <p class="text-gray-600 mb-2">
               <strong>Téléphone Médical:</strong>
@@ -142,7 +151,7 @@
       <!-- Modal Edit Profil -->
       <TheModal
         :isOpen="isEditing"
-        title="Changement de vos informations"
+        title="Modifications"
         @close="cancelEdit"
       >
         <!-- Modal Content -->
@@ -163,6 +172,14 @@
           type="text"
           v-model="editedlicense"
           placeholder="Nouvelle license"
+          class="input-field mb-4"
+        />
+        <!-- Phone Number -->
+        <p>Téléphone portable:</p>
+        <input
+          type="text"
+          v-model="editedTelNum"
+          placeholder="Nouveau numéro"
           class="input-field mb-4"
         />
         <!-- Tel Medic -->
@@ -266,6 +283,7 @@ export default {
         weight: null,
         license: null,
         gender: null,
+        tel_num:null,
         tel_medic: null,
         tel_emergency: null,
         avatar: null,
@@ -277,6 +295,7 @@ export default {
       editedWeight: null,
       editedlicense: null,
       editedGender: null,
+      editedTelNum: null,
       editedTelMedic: null,
       editedTelEmergency: null,
       avatar: null,
@@ -418,6 +437,9 @@ export default {
       // Initialiser les champs d'entrée avec les valeurs actuelles de l'utilisateur
       this.editedWeight = this.user.weight ? this.user.weight.data : null;
       this.editedlicense = this.user.license ? this.user.license.data : null;
+      this.editedTelNum = this.user.tel_num
+        ? this.user.tel_num.data
+        : null;
       this.editedTelMedic = this.user.tel_medic
         ? this.user.tel_medic.data
         : null;
@@ -438,6 +460,7 @@ export default {
           date_payment: null,
           weight: this.editedWeight,
           license: this.editedlicense,
+          tel_num: this.editedTelNum,
           tel_medic: this.editedTelMedic,
           tel_emergency: this.editedTelEmergency,
         })
@@ -470,6 +493,7 @@ export default {
         this.editedWeight = null;
         this.editedlicense = null;
         this.editedGender = null;
+        this.editedTelNum = null;
         this.editedTelMedic = null;
         this.editedTelEmergency = null;
         this.avatar = null;

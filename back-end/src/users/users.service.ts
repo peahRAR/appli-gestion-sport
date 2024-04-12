@@ -137,9 +137,9 @@ export class UsersService {
     const identifier = this.createidentifier(createUserDto.email);
 
     // Verifier que mdp correspond à la regex sinon lever erreur
-    if (!this.verifyPasswordRegex(createUserDto.password)) {
-      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
-    }
+    // if (!this.verifyPasswordRegex(createUserDto.password)) {
+    //   throw new Error('Le mot de passe ne correspond pas aux critères requis.');
+    // }
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
@@ -214,6 +214,7 @@ export class UsersService {
       'date_end_pay',
       'license',
       'weight',
+      'tel_num',
       'tel_medic',
       'tel_emergency',
     ];
@@ -245,6 +246,7 @@ export class UsersService {
         'license',
         'name',
         'firstname',
+        'tel_num',
         'tel_medic',
         'tel_emergency',
         'avatar',
@@ -275,6 +277,9 @@ export class UsersService {
     }
     if (user.firstname?.data) {
       user.firstname.data = this.decryptField(user.firstname.data);
+    }
+    if (user.tel_num?.data) {
+      user.tel_num.data = this.decryptField(user.tel_num.data);
     }
     if (user.tel_medic?.data) {
       user.tel_medic.data = this.decryptField(user.tel_medic.data);
@@ -365,6 +370,16 @@ export class UsersService {
       user.firstname = {
         identifier: firstnameEncrypt,
         data: firstnameEncrypt,
+      };
+    }
+    if (updateUserDto.tel_num) {
+      console.log('tel num change');
+      const telNumEncrypt = this.createEncryptedField(
+        updateUserDto.tel_num,
+      );
+      user.tel_num = {
+        identifier: telNumEncrypt,
+        data: telNumEncrypt,
       };
     }
     if (updateUserDto.tel_medic) {

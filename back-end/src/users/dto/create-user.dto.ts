@@ -37,6 +37,10 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
+  tel_num: string;
+
+  @IsOptional()
+  @IsString()
   tel_medic: string;
 
   @IsOptional()

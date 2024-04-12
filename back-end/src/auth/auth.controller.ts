@@ -16,8 +16,8 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private usersService: UsersService,
-  ) { }
-  
+  ) {}
+
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -30,14 +30,13 @@ export class AuthController {
     return this.authService.signIn(email, password);
   }
 
- 
   @Get('profile')
   getProfile(@Request() req) {
     // Récupérer les informations de l'utilisateur à partir du token JWT
     return req.user;
   }
 
-
+  @Public()
   @Post('resetpassword')
   async requestPasswordReset(@Body('email') email: string) {
     return this.usersService.requestPasswordReset(email);

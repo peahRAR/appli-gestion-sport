@@ -1,5 +1,5 @@
 <template>
-  <div class="background container mx-auto">
+  <div class="background container mx-auto mb-12">
 
     <div class="border rounded-lg p-4 ">
 

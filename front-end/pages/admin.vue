@@ -692,16 +692,6 @@
               class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
             />
           </div>
-          <!-- Duration -->
-          <div class="flex flex-col mb-4">
-            <label for="duration">Durée du cours (en minutes) : </label>
-            <input
-              type="number"
-              v-model="durationInHours"
-              id="duration"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-            />
-          </div>
           <!-- Seats -->
           <div class="flex flex-col mb-4">
             <label for="totalSeats"
@@ -1194,6 +1184,7 @@ export default {
     editEvent(event) {
       this.editedEvent = { ...event };
       this.showModal = true;
+      
     },
     // Update Event
     async saveChanges(eventId) {

@@ -253,7 +253,7 @@ export class UsersService {
         'date_end_pay',
         'date_payment',
         'date_subscribe',
-        // Ne pas inclure le champ du mot de passe
+        'role'
       ],
     });
 

@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,6 +17,7 @@ import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
 import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/decorators/public.decorator';
+import { UserIdOradminRoleGuard } from './users.guard';
 
 
 
@@ -95,7 +97,6 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -106,7 +107,7 @@ export class UsersController {
     return this.usersService.findOne(+id);
   }
 
-
+  @UseGuards(UserIdOradminRoleGuard)
   @Patch(':id')
   @UseInterceptors(multerOptions.interceptor)
   async update(
@@ -148,6 +149,7 @@ export class UsersController {
     return this.usersService.update(+id, data);
   }
 
+  @UseGuards(UserIdOradminRoleGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image

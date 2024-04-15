@@ -157,7 +157,7 @@
         <!-- Modal Content -->
         <!-- Avatar -->
         <p>Avatar:</p>
-        <TheAvatar @avatarSaved="avatar = $event" class="mb-4" />
+        <TheAvatar @avatarSaved="avatar = $event"  />
         <!-- Weight -->
         <p>Poids:</p>
         <input

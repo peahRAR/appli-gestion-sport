@@ -31,6 +31,10 @@ export class ListsMembersService {
     return this.listsMemberRepository.find({ where: { eventId } });
   }
 
+  async findAllByIdUser(userId): Promise<ListsMember[]> {
+    return this.listsMemberRepository.find({ where: { userId } });
+  }
+
   async findOne(eventId: number, userId: number): Promise<any> {
     const listsMember = await this.listsMemberRepository.findOne({
       where: { eventId, userId },

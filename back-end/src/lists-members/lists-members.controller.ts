@@ -30,7 +30,6 @@ export class ListsMembersController {
     return this.listsMembersService.findOne(+eventId, +userId);
   }
 
-  @UseGuards(AdminRoleGuard)
   @Patch(':eventId/:userId')
   update(
     @Param('eventId') eventId: string,

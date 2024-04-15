@@ -10,6 +10,8 @@ import {
   UseInterceptors,
   NotFoundException,
   UseGuards,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +20,7 @@ import { ConfigService } from '@nestjs/config';
 import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from './users.guard';
+import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
 
 
@@ -35,6 +38,8 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => ListsMembersService))
+    private listsMembersService: ListsMembersService,
   ) {}
 
   // Utilisez cette fonction pour uploader un fichier sur GCS
@@ -158,21 +163,35 @@ export class UsersController {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
+    const lists = await this.listsMembersService.findAllByIdUser(id);
+    lists.forEach((element) => {
+      this.listsMembersService.remove(element.eventId, element.userId);
+    });
+
     // Vérifier si l'utilisateur a une photo avant de tenter de la supprimer
     if (user.avatar) {
-      const avatarPath = `avatars/${id}/avatar`; // Chemin de l'image sur GCS
-      await this.deleteFileFromGCS(avatarPath);
+      const avatarPath = `avatars/${id}`; // Chemin de l'image sur GCS
+      await this.deleteFolderFromGCS(avatarPath);
     }
 
     // Supprimer l'utilisateur de la base de données
     return this.usersService.remove(+id);
   }
 
-  private async deleteFileFromGCS(filePath: string): Promise<void> {
+  private async deleteFolderFromGCS(folderPath: string): Promise<void> {
     const bucket = this.storage.bucket(this.bucketName);
-    const file = bucket.file(filePath);
 
-    // Supprimer le fichier sur GCS et attendre la résolution de la promesse
-    await file.delete();
+    // Récupérer la liste des fichiers dans le dossier
+    const [files] = await bucket.getFiles({
+      prefix: folderPath,
+    });
+
+    // Supprimer chaque fichier dans le dossier
+    await Promise.all(files.map((file) => file.delete()));
+
+    // Supprimer le dossier lui-même
+    await bucket.deleteFiles({
+      prefix: folderPath,
+    });
   }
 }

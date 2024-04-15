@@ -8,7 +8,7 @@
         </h1>
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
           <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
-          <div class="overflow-x-auto">
+          <div class="overflow-x-hidden">
             <!-- Unactivate users Table  -->
             <table class="mx-auto min-w-full divide-y divide-gray-200">
               <!-- Unactivate users table header  -->
@@ -56,15 +56,44 @@
                   <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                     <button
                       @click="reactivateUser(user)"
-                      class="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
+                      class="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
                     >
-                      Activer
+                      <svg
+                        class="h-4 w-4 inline-block"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        ></path>
+                      </svg>
+                      <!-- Icône de check -->
                     </button>
+
                     <button
                       @click="deleteUser(user)"
                       class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600 ml-2"
                     >
-                      Supprimer
+                      <svg
+                        class="h-4 w-4 inline-block"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
+                      <!-- Icône de croix -->
                     </button>
                   </td>
                 </tr>
@@ -162,17 +191,17 @@
                   v-for="(user, index) in users"
                   :key="user.id"
                   :class="{
-                    'bg-orange-600':
+                    'bg-orange-500':
                       !user.license ||
                       !user.date_end_pay ||
                       new Date(user.date_end_pay) < new Date(),
-                    'bg-red-600':
+                    'bg-red-500':
                       !user.license &&
                       (!user.date_end_pay ||
                         new Date(user.date_end_pay) < new Date()),
                     'bg-white':
                       user.license &&
-                      (!user.date_end_pay ||
+                      (user.date_end_pay ||
                         new Date(user.date_end_pay) >= new Date()),
                   }"
                 >
@@ -304,7 +333,7 @@
           </form>
         </div>
         <!-- Liste des alertes -->
-        <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden">
           <h2 class="text-xl font-semibold mb-2">Liste des alertes</h2>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -334,16 +363,29 @@
               <!-- Alert Table Value -->
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr v-for="(alert, index) in alerts" :key="alert.id">
-                  <td class="px-3 py-4 whitespace-nowrap">{{ alert.titre }}</td>
-                  <td class="px-3 py-4 whitespace-nowrap">
+                  <td class="w-3 px-3 py-4">{{ alert.titre }}</td>
+                  <td class="w-3 px-3 py-4 whitespace-nowrap">
                     {{ formatDate(alert.dateFin) }}
                   </td>
                   <td class="px-3 py-4 whitespace-nowrap flex flex-col">
                     <button
                       @click="deleteAlert(alert.id)"
-                      class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
+                      class="bg-red-500 text-white p-1 rounded-md hover:bg-red-600"
                     >
-                      Supprimer
+                      <svg
+                        class="h-4 w-4 inline-block"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        ></path>
+                      </svg>
                     </button>
                   </td>
                 </tr>
@@ -472,7 +514,7 @@
                 </td>
                 <!-- Event Name -->
                 <td
-                  class="px-3 py-2 max-w-20 whitespace-nowrap text-sm text-gray-500 uppercase"
+                  class="px-3 py-2 max-w-20  text-sm text-gray-500 uppercase"
                 >
                   {{ event.name_event }}
                 </td>
@@ -915,23 +957,24 @@ export default {
     },
     // Format date
     formatDate(dateString) {
-      // Convert string in object
+      // Convertir la chaîne en objet Date
       const date = new Date(dateString);
 
-      // Format
+      // Options de formatage
       const options = {
-        weekday: "long",
+        weekday: "short", // Utiliser les trois premières lettres du jour
         year: "numeric",
-        month: "long",
+        month: "short", // Utiliser les trois premières lettres du mois
         day: "numeric",
       };
 
+      // Formater la date en utilisant les options
       let formattedDate = date.toLocaleDateString("fr-FR", options);
 
-      // Extract the two last number of year
+      // Extraire les deux derniers chiffres de l'année
       const lastTwoDigitsOfYear = formattedDate.slice(-2);
 
-      // Remove the year et ad the 2 last numbers of year
+      // Remplacer l'année par les deux derniers chiffres de l'année
       formattedDate = formattedDate.replace(
         date.getFullYear(),
         lastTwoDigitsOfYear
@@ -1030,12 +1073,10 @@ export default {
           },
         });
 
-        // Refresh the list after an user were activate
-        await this.loadInactiveUsers();
-
         // Check the response and showw error message if it's not ok
         this.openErrorModal();
         (this.errorMessage = "Utilisateur réactivé avec succès :"), response;
+        await this.loadInactiveUsers();
       } catch (error) {
         this.openErrorModal();
         (this.errorMessage = "Erreur lors de la réactivation de l'utilisateur"),
@@ -1184,7 +1225,6 @@ export default {
     editEvent(event) {
       this.editedEvent = { ...event };
       this.showModal = true;
-      
     },
     // Update Event
     async saveChanges(eventId) {
@@ -1314,6 +1354,7 @@ export default {
         this.newAlert.dateFin = "";
         this.openErrorModal();
         this.errorMessage = "L'alerte à été ajoutée !";
+        this.fetchAlerts();
       } catch (error) {
         console.error("Error adding alert:", error);
       }

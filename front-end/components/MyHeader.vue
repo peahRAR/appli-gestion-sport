@@ -19,7 +19,7 @@
             Profil
           </NuxtLink>
           <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/" @click="toggleMenu">
-            Accueil
+            Cours
           </NuxtLink>
           <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
           <div v-if="userRole === 1 || userRole === 2">

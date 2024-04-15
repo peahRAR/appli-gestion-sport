@@ -8,6 +8,7 @@ export const multerOptions = {
       fileSize: 3 * 1024 * 1024, // Limite de 3MB pour la taille du fichier
     },
     fileFilter: (req, file, cb) => {
+      console.log(file.mimetype)
       const allowedMimeTypes = ['image/jpeg', 'image/png'];
       if (!allowedMimeTypes.includes(file.mimetype)) {
         return cb(

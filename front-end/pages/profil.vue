@@ -135,7 +135,7 @@
         <!-- Button open password change -->
         <button
           @click="openModal"
-          class="bg-yellow-500 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4"
+          class="bg-yellow-600 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4"
         >
           Changer le mot de passe
         </button>

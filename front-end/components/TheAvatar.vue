@@ -1,6 +1,6 @@
 <template>
   <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center">
-    <div class="image-container " ref="imageContainer">
+    <div class="image-container" ref="imageContainer">
       <img
         :src="imageUrl"
         :style="imageStyles"
@@ -13,8 +13,8 @@
         @mouseup="stopDrag"
       />
     </div>
-    <input type="file" @change="onFileChange" class="mb-4 mt-4"/>
-    <input step="0.1" type="range" min="1" max="3" scale="0.1" v-model="zoom">
+    <input type="file" @change="onFileChange" class="mb-4 mt-4" />
+    <input step="0.1" type="range" min="1" max="3" scale="0.1" v-model="zoom" />
   </div>
 </template>
 
@@ -65,20 +65,31 @@ export default {
     async capturedAndEmit() {
       try {
         const container = this.$refs.imageContainer;
-        const html2canvas = (await import("html2canvas")).default;
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-        html2canvas(container).then((canvas) => {
-          canvas.toBlob((blob) => {
-            if (blob) {
-              // Créer un objet Blob à partir de l'image
-              this.$emit("avatarSaved", blob);
-            } else {
-              console.error("Conversion de l'image en blob a échoué.");
-            }
-          }, "image/png"); // Spécifiez le type MIME de l'image
-        });
+        // Définir la taille du canvas sur celle du conteneur
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+
+        // Dessiner l'image du conteneur sur le canvas
+        const imageElement = container.querySelector("img");
+        ctx.drawImage(imageElement, 0, 0, canvas.width, canvas.height);
+        // Récupérer l'élément img d'origine pour obtenir le type MIME
+        const originalImage = container.querySelector("img");
+        const originalMimeType = originalImage.src.split(";")[0].split(":")[1];
+
+        // Convertir le canvas en blob avec le type MIME d'origine
+        canvas.toBlob((blob) => {
+          if (blob) {
+            // Émettre le blob avec l'événement avatarSaved
+            this.$emit("avatarSaved", blob);
+          } else {
+            console.error("Conversion de l'image en blob a échoué.");
+          }
+        }, originalMimeType); // Utiliser le type MIME d'origine
       } catch (error) {
-        console.error("Erreur lors de l'importation de html2canvas :", error);
+        console.error("Erreur lors de la capture de l'image :", error);
       }
     },
   },

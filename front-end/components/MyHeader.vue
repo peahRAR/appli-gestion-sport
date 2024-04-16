@@ -28,9 +28,9 @@
               Administration
             </NuxtLink>
           </div>
-          <button @click="logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer">
+          <NuxtLink @click="logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer">
             Déconnexion
-          </button>
+          </NuxtLink>
         </div>
       </div>
     </div>

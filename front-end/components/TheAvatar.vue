@@ -1,7 +1,7 @@
 <template>
   <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center">
     <div class="image-container" ref="imageContainer">
-      <img
+      <NuxtImg v-if="imageUrl"
         :src="imageUrl"
         :style="imageStyles"
         class="avatar-image"
@@ -13,7 +13,7 @@
         @mouseup="stopDrag"
       />
     </div>
-    <input type="file" @change="onFileChange" class="mb-4 mt-4" />
+    <input type="file" @change="onFileChange" class="mb-4 mt-4" accept="image/png, image/jpeg" />
     <input step="0.1" type="range" min="1" max="3" scale="0.1" v-model="zoom" />
   </div>
 </template>
@@ -41,6 +41,10 @@ export default {
   methods: {
     async onFileChange(event) {
       const file = event.target.files[0];
+      if (!/^image\//.test(file.type)) {
+        alert(`${file.name} n'est pas une image !`)
+        return
+      }
       this.imageUrl = URL.createObjectURL(file);
       await this.capturedAndEmit();
     },

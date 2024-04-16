@@ -332,7 +332,7 @@ export default {
     },
     // Valider Confirm Password
     validerConfirmPassword() {
-      if (this.confirmNewPassword === this.newPassword) {
+      if ((this.confirmNewPassword === this.newPassword) && this.validerNewPassword) {
         return true;
       }
       return false;

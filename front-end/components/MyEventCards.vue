@@ -150,23 +150,8 @@
             v-for="participant in eventParticipants"
             :key="participant.id"
             class="flex flex-row items-center p-1"
-            :class="{
-              'bg-orange-500':
-                (!participant.license ||
-                  !participant.date_end_pay ||
-                  new Date(participant.date_end_pay.data) < new Date()) &&
-                (userRole === 1 || userRole === 2),
-              'bg-red-500':
-                !participant.license &&
-                (!participant.date_end_pay ||
-                  new Date(participant.date_end_pay.data) < new Date()) &&
-                (userRole === 1 || userRole === 2),
-              'bg-white':
-                participant.license &&
-                (participant.date_end_pay ||
-                  new Date(participant.date_end_pay.data) >= new Date()) &&
-                (userRole === 1 || userRole === 2),
-            }"
+            :class="userBgColor(participant)"
+            
           >
             <NuxtImg
               v-if="participant.avatar"
@@ -358,6 +343,33 @@ export default {
   },
 
   methods: {
+    userBgColor(participant) {
+      if (participant) {
+        if (
+          !participant.license &&
+          (!participant.date_end_pay ||
+            new Date(participant.date_end_pay) < new Date())
+        ) {
+          return "bg-red-500 bg-opacity-75";
+        }
+        if (
+          !participant.license ||
+          !participant.date_end_pay ||
+          new Date(participant.date_end_pay) < new Date()
+        ) {
+          return "bg-orange-500 bg-opacity-75";
+        }
+        if (
+          participant.license &&
+          participant.date_end_pay &&
+          new Date(participant.date_end_pay) >= new Date()
+        ) {
+          return "bg-white";
+        }
+      }
+      // Si user n'est pas défini, retournez une classe par défaut
+      return "bg-gray-300"; // Ou toute autre classe par défaut que vous souhaitez utiliser
+    },
     async fetchAlerts() {
       try {
         const token = localStorage.getItem("accessToken");

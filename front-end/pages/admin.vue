@@ -13,33 +13,39 @@
             <table class="mx-auto min-w-full divide-y divide-gray-200">
               <!-- Unactivate users table header  -->
               <thead class="bg-gray-50">
-                <tr>
+                <tr class="flex justify-between w-full">
                   <!-- Name -->
                   <th
                     scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Nom
                   </th>
                   <!-- Firstname -->
                   <th
                     scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Prénom
                   </th>
                   <!-- Actions -->
                   <th
                     scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
                     Actions
                   </th>
                 </tr>
               </thead>
               <!-- Unactivate user table value -->
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(user, index) in inactiveUsers" :key="user.id">
+              <tbody
+                class="flex justify-between bg-white divide-y divide-gray-200"
+              >
+                <tr
+                  v-for="(user, index) in inactiveUsers"
+                  :key="user.id"
+                  class="flex justify-between items-center w-full"
+                >
                   <!-- Name -->
                   <td
                     class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
@@ -190,20 +196,7 @@
                 <tr
                   v-for="(user, index) in users"
                   :key="user.id"
-                  :class="{
-                    'bg-orange-500':
-                      !user.license ||
-                      !user.date_end_pay ||
-                      new Date(user.date_end_pay) < new Date(),
-                    'bg-red-500':
-                      !user.license &&
-                      (!user.date_end_pay ||
-                        new Date(user.date_end_pay) < new Date()),
-                    'bg-white':
-                      user.license &&
-                      (user.date_end_pay ||
-                        new Date(user.date_end_pay) >= new Date()),
-                  }"
+                  :class="userBgColor(user)"
                 >
                   <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                     <!-- Icon Status -->
@@ -257,7 +250,7 @@
                     {{ user.firstname.data }}
                   </td>
                   <td
-                    class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
+                    class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
                   >
                     <!-- Button open modal -->
                     <button
@@ -362,12 +355,16 @@
               </thead>
               <!-- Alert Table Value -->
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="(alert, index) in alerts" :key="alert.id">
+                <tr
+                  v-for="(alert, index) in alerts"
+                  :key="alert.id"
+                  class="w-full justify-between items-center"
+                >
                   <td class="w-3 px-3 py-4">{{ alert.titre }}</td>
                   <td class="w-3 px-3 py-4 whitespace-nowrap">
                     {{ formatDate(alert.dateFin) }}
                   </td>
-                  <td class="px-3 py-4 whitespace-nowrap flex flex-col">
+                  <td class="px-3 py-4 whitespace-nowrap text-center">
                     <button
                       @click="deleteAlert(alert.id)"
                       class="bg-red-500 text-white p-1 rounded-md hover:bg-red-600"
@@ -513,9 +510,7 @@
                   {{ formatDate(event.date_event) }}
                 </td>
                 <!-- Event Name -->
-                <td
-                  class="px-3 py-2 max-w-20  text-sm text-gray-500 uppercase"
-                >
+                <td class="px-3 py-2 max-w-20 text-sm text-gray-500 uppercase">
                   {{ event.name_event }}
                 </td>
                 <td
@@ -819,8 +814,36 @@ export default {
         this.newCourse.duration = value * 60;
       },
     },
+
   },
   methods: {
+    userBgColor(user) {
+      if (user) {
+        if (
+          !user.license &&
+          (!user.date_end_pay ||
+            new Date(user.date_end_pay) < new Date())
+        ) {
+          return "bg-red-500 bg-opacity-75";
+        }
+        if (
+          !user.license ||
+          !user.date_end_pay ||
+          new Date(user.date_end_pay) < new Date()
+        ) {
+          return "bg-orange-500 bg-opacity-75";
+        }
+        if (
+          user.license &&
+          user.date_end_pay &&
+          new Date(user.date_end_pay) >= new Date()
+        ) {
+          return "bg-white";
+        }
+      }
+      // Si user n'est pas défini, retournez une classe par défaut
+      return "bg-gray-300"; // Ou toute autre classe par défaut que vous souhaitez utiliser
+    },
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;

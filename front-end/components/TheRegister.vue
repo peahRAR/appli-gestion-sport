@@ -178,7 +178,7 @@ export default {
     },
     // Valider Confirm Password
     validerConfirmPassword() {
-      if (this.confirmNewPassword === this.user.password) {
+      if ((this.confirmNewPassword === this.user.password) && this.validerPassword) {
         return true;
       }
       return false;

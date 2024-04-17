@@ -6,535 +6,43 @@
         <h1 class="text-3xl ml-2 font-semibold mb-4">
           Administration de l'application
         </h1>
+        <!-- Inactive Users Table -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-          <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
-          <div class="overflow-x-hidden">
-            <!-- Unactivate users Table  -->
-            <table class="mx-auto min-w-full divide-y divide-gray-200">
-              <!-- Unactivate users table header  -->
-              <thead class="bg-gray-50">
-                <tr class="flex justify-between w-full">
-                  <!-- Name -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Nom
-                  </th>
-                  <!-- Firstname -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Prénom
-                  </th>
-                  <!-- Actions -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <!-- Unactivate user table value -->
-              <tbody
-                class="flex justify-between bg-white divide-y divide-gray-200"
-              >
-                <tr
-                  v-for="(user, index) in inactiveUsers"
-                  :key="user.id"
-                  class="flex justify-between items-center w-full"
-                >
-                  <!-- Name -->
-                  <td
-                    class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-                  >
-                    {{ user.name.data }}
-                  </td>
-                  <!-- Firstname -->
-                  <td
-                    class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-                  >
-                    {{ user.firstname.data }}
-                  </td>
-                  <!-- Button For activate User -->
-                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                    <button
-                      @click="reactivateUser(user)"
-                      class="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-blue-600"
-                    >
-                      <svg
-                        class="h-4 w-4 inline-block"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M5 13l4 4L19 7"
-                        ></path>
-                      </svg>
-                      <!-- Icône de check -->
-                    </button>
-
-                    <button
-                      @click="deleteUser(user)"
-                      class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600 ml-2"
-                    >
-                      <svg
-                        class="h-4 w-4 inline-block"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                      <!-- Icône de croix -->
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <inactive-users-table
+            :inactive-users="inactiveUsers"
+            @reactivate="reactivateUser"
+            @delete="deleteUser"
+          />
         </div>
-
         <!-- USERS List -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-          <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
-          <div class="flex items-center space-x-4 mb-4">
-            <!-- handleSort BY -->
-            <select @change="updateSortBy($event.target.value)">
-              <option value="">Trier par...</option>
-              <option value="age">Âge</option>
-              <option value="gender">Genre</option>
-              <option value="weight">Poids</option>
-              <option value="name">Nom</option>
-              <!-- Ajout du tri par nom -->
-            </select>
-            <!-- handleSort ORDER -->
-            <div class="flex">
-              <input
-                type="radio"
-                id="asc"
-                value="asc"
-                v-model="sortOrder"
-                @change="updateSortOrder('asc')"
-                class="hidden"
-              />
-              <label
-                for="asc"
-                class="cursor-pointer bg-gray-200 px-4 py-2 mr-4 rounded-md"
-                :class="{ 'bg-gray-500 text-white': sortOrder === 'asc' }"
-                >Croissant</label
-              >
-
-              <input
-                type="radio"
-                id="desc"
-                value="desc"
-                v-model="sortOrder"
-                @change="updateSortOrder('desc')"
-                class="hidden"
-              />
-              <label
-                for="desc"
-                class="cursor-pointer bg-gray-200 px-4 py-2 rounded-md"
-                :class="{ 'bg-gray-500 text-white': sortOrder === 'desc' }"
-                >Décroissant</label
-              >
-            </div>
-          </div>
-
-          <!-- User Table -->
-          <div class="overflow-x-auto">
-            <table class="mx-auto min-w-full divide-y divide-gray-200">
-              <!-- Table user Header -->
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Statut
-                    <!-- Ajoutez l'icône pour le statut ici -->
-                  </th>
-                  <!-- Name -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Nom
-                  </th>
-                  <!-- Firstname -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Prénom
-                  </th>
-                  <!-- Action -->
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <!-- User Table Value -->
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr
-                  v-for="(user, index) in users"
-                  :key="user.id"
-                  :class="userBgColor(user)"
-                >
-                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                    <!-- Icon Status -->
-                    <span>
-                      <!-- Cash icon if date_end_pay is null or < date of the day -->
-                      <svg
-                        v-if="
-                          !user.date_end_pay ||
-                          new Date(user.date_end_pay) < new Date()
-                        "
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 256 256"
-                      >
-                        <g fill="text-black">
-                          <path
-                            d="M160 128a32 32 0 1 1-32-32a32 32 0 0 1 32 32m40-64a48.85 48.85 0 0 0 40 40V64Zm0 128h40v-40a48.85 48.85 0 0 0-40 40M16 152v40h40a48.85 48.85 0 0 0-40-40m0-48a48.85 48.85 0 0 0 40-40H16Z"
-                            opacity=".2"
-                          />
-                          <path
-                            d="M128 88a40 40 0 1 0 40 40a40 40 0 0 0-40-40m0 64a24 24 0 1 1 24-24a24 24 0 0 1-24 24m112-96H16a8 8 0 0 0-8 8v128a8 8 0 0 0 8 8h224a8 8 0 0 0 8-8V64a8 8 0 0 0-8-8M24 72h21.37A40.81 40.81 0 0 1 24 93.37Zm0 112v-21.37A40.81 40.81 0 0 1 45.37 184Zm208 0h-21.37A40.81 40.81 0 0 1 232 162.63Zm0-38.35A56.78 56.78 0 0 0 193.65 184H62.35A56.78 56.78 0 0 0 24 145.65v-35.3A56.78 56.78 0 0 0 62.35 72h131.3A56.78 56.78 0 0 0 232 110.35Zm0-52.28A40.81 40.81 0 0 1 210.63 72H232Z"
-                          />
-                        </g>
-                      </svg>
-                      <!-- Id Card icon if license is null -->
-                      <svg
-                        v-if="!user.license"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          fill="text-black"
-                          d="M14 13h5v-2h-5zm0-3h5V8h-5zm-9 6h8v-.55q0-1.125-1.1-1.787T9 13q-1.8 0-2.9.663T5 15.45zm4-4q.825 0 1.413-.587T11 10q0-.825-.587-1.412T9 8q-.825 0-1.412.588T7 10q0 .825.588 1.413T9 12m-5 8q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
-                        />
-                      </svg>
-                    </span>
-                  </td>
-                  <!-- Name -->
-                  <td
-                    class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
-                  >
-                    {{ user.name.data }}
-                  </td>
-                  <!-- Firstname -->
-                  <td
-                    class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
-                  >
-                    {{ user.firstname.data }}
-                  </td>
-                  <td
-                    class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
-                  >
-                    <!-- Button open modal -->
-                    <button
-                      @click="openModal(user)"
-                      class="focus:outline-none text-black"
-                    >
-                      <!-- Arrow bottom -->
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5 text-black hover:text-gray-600 transition duration-300"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fill-rule="evenodd"
-                          d="M10 12l-6-6h12l-6 6z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <UserList
+            :users="users"
+            @update:users="updateUsers"
+            @open-modal="openModal"
+          />
         </div>
         <!-- Add Alert Form -->
         <div class="bg-white mx-2 rounded p-2 mb-10">
-          <!-- Title Section -->
-          <h2 class="text-xl font-semibold mb-2">Ajouter une alerte</h2>
-          <form @submit.prevent="submitAlert" class="flex flex-col space-y-4">
-            <!-- Titre -->
-            <div class="flex flex-col">
-              <label for="titre" class="font-semibold">Titre :</label>
-              <input
-                type="text"
-                v-model="newAlert.titre"
-                id="titre"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-                required
-              />
-            </div>
-            <!-- Contenu -->
-            <div class="flex flex-col">
-              <label for="contenu" class="font-semibold">Contenu :</label>
-              <textarea
-                v-model="newAlert.contenu"
-                id="contenu"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-                required
-              ></textarea>
-            </div>
-            <!-- Date de fin -->
-            <div class="flex flex-col">
-              <label for="dateFin" class="font-semibold"
-                >Date de fin de validité :</label
-              >
-              <input
-                type="date"
-                v-model="newAlert.dateFin"
-                id="dateFin"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-                required
-              />
-            </div>
-            <!-- Bouton de soumission -->
-            <button
-              type="submit"
-              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Ajouter l'alerte
-            </button>
-          </form>
+          <add-alert-form @new-alert="submitAlert" />
         </div>
         <!-- Liste des alertes -->
         <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden">
-          <h2 class="text-xl font-semibold mb-2">Liste des alertes</h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <!-- Table alert Header -->
-              <thead class="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Titre
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Date de fin
-                  </th>
-                  <th
-                    scope="col"
-                    class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <!-- Alert Table Value -->
-              <tbody class="bg-white divide-y divide-gray-200">
-                <tr
-                  v-for="(alert, index) in alerts"
-                  :key="alert.id"
-                  class="w-full justify-between items-center"
-                >
-                  <td class="w-3 px-3 py-4">{{ alert.titre }}</td>
-                  <td class="w-3 px-3 py-4 whitespace-nowrap">
-                    {{ formatDate(alert.dateFin) }}
-                  </td>
-                  <td class="px-3 py-4 whitespace-nowrap text-center">
-                    <button
-                      @click="deleteAlert(alert.id)"
-                      class="bg-red-500 text-white p-1 rounded-md hover:bg-red-600"
-                    >
-                      <svg
-                        class="h-4 w-4 inline-block"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12"
-                        ></path>
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <AlertList :alerts="alerts" @delete-alert="deleteAlert" />
         </div>
         <!-- Create Event Form  -->
         <div class="bg-white mx-2 rounded p-2">
-          <!-- Title Section -->
-          <h2 class="text-xl font-semibold mb-2">Créer un nouveau cours</h2>
-          <form @submit.prevent="createCourse" class="flex flex-col space-y-4">
-            <!-- Name Event -->
-            <div class="flex flex-col">
-              <label for="title" class="font-semibold">Titre du cours</label>
-              <input
-                type="text"
-                v-model="newCourse.name_event"
-                id="title"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              />
-            </div>
-            <!-- Overview -->
-            <div class="flex flex-col">
-              <label for="description" class="font-semibold"
-                >Description du cours</label
-              >
-              <textarea
-                v-model="newCourse.overview"
-                id="description"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-                placeholder=""
-              ></textarea>
-            </div>
-            <!-- Date -->
-            <div class="flex flex-col">
-              <label for="date">Date et heure de début</label>
-              <input
-                type="datetime-local"
-                v-model="newCourse.date_event"
-                id="date"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              />
-            </div>
-            <!-- Coach -->
-            <div class="flex flex-col">
-              <label for="coach">Nom du coach</label>
-              <input
-                type="text"
-                v-model="newCourse.coach"
-                id="coach"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              />
-            </div>
-            <!-- Duration -->
-            <div class="flex flex-col">
-              <label for="duration">Durée du cours (en minutes)</label>
-              <input
-                type="number"
-                v-model="durationInHours"
-                id="duration"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              />
-            </div>
-            <!-- Total places -->
-            <div class="flex flex-col">
-              <label for="totalSeats">Nombre de places total disponibles</label>
-              <input
-                type="number"
-                v-model="newCourse.totalPlaces"
-                id="totalSeats"
-                class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              />
-            </div>
-            <!-- Submit Button -->
-            <button
-              type="submit"
-              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Créer le cours
-            </button>
-          </form>
+          <create-course-form @create="createCourse" />
         </div>
       </div>
 
       <!-- Event Table -->
       <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-        <!-- Section name -->
-        <h2 class="text-xl font-semibold mb-2">Liste des événements</h2>
-        <div class="max-w-screen-lg mx-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <!-- Row Table header -->
-            <thead class="bg-gray-50">
-              <tr>
-                <!-- Date -->
-                <th
-                  scope="col"
-                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Date
-                </th>
-                <!-- Name -->
-                <th
-                  scope="col"
-                  class="px-3 py-1 text-left max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Intitulé
-                </th>
-                <!-- Action -->
-                <th
-                  scope="col"
-                  class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <!--Row Value Database -->
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="(event, index) in events" :key="event.id">
-                <!-- Event Date -->
-                <td
-                  class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
-                >
-                  {{ formatDate(event.date_event) }}
-                </td>
-                <!-- Event Name -->
-                <td class="px-3 py-2 max-w-20 text-sm text-gray-500 uppercase">
-                  {{ event.name_event }}
-                </td>
-                <td
-                  class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
-                >
-                  <!-- Button Modify Event -->
-                  <button
-                    @click="editEvent(event)"
-                    class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600"
-                  >
-                    Modifier
-                  </button>
-                  <!-- Button Delete Event -->
-                  <button
-                    @click="deleteEvent(event.id)"
-                    class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600"
-                  >
-                    Supprimer
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <event-list
+          :events="events"
+          @edit-event="editEvent"
+          @delete-event="deleteEvent"
+        />
       </div>
       <TheModal
         :isOpen="showModalSelectedUser"
@@ -765,21 +273,6 @@ export default {
   data() {
     return {
       users: [], // User List
-      newCourse: {
-        // New Event to create
-        name_event: null,
-        overview: null,
-        coach: null,
-        date_event: null,
-        duration: 0,
-        totalPlaces: null,
-        places: null,
-      },
-      newAlert: {
-        titre: "",
-        contenu: "",
-        dateFin: "", // Champ pour la date de fin de validité de l'alerte
-      },
       selectedUser: null, // user selected
       inactiveUsers: [], // Unactivate User
       events: [], // Events List
@@ -814,36 +307,8 @@ export default {
         this.newCourse.duration = value * 60;
       },
     },
-
   },
   methods: {
-    userBgColor(user) {
-      if (user) {
-        if (
-          !user.license &&
-          (!user.date_end_pay ||
-            new Date(user.date_end_pay) < new Date())
-        ) {
-          return "bg-red-500 bg-opacity-75";
-        }
-        if (
-          !user.license ||
-          !user.date_end_pay ||
-          new Date(user.date_end_pay) < new Date()
-        ) {
-          return "bg-orange-500 bg-opacity-75";
-        }
-        if (
-          user.license &&
-          user.date_end_pay &&
-          new Date(user.date_end_pay) >= new Date()
-        ) {
-          return "bg-white";
-        }
-      }
-      // Si user n'est pas défini, retournez une classe par défaut
-      return "bg-gray-300"; // Ou toute autre classe par défaut que vous souhaitez utiliser
-    },
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
@@ -906,10 +371,10 @@ export default {
         console.error("Erreur lors du chargement des événements", error);
       }
     },
-    async createCourse() {
+    async createCourse(newCourseData) {
       try {
-        this.newCourse.places = this.newCourse.totalPlaces;
-        const duration = this.newCourse.duration * 60;
+        newCourseData.places = newCourseData.totalPlaces;
+        const duration = newCourseData.duration * 60;
         const url = this.getUrl();
         const token = localStorage.getItem("accessToken");
         // Request Post for create new Event
@@ -919,33 +384,25 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(this.newCourse),
+          body: JSON.stringify(newCourseData),
         });
 
         // Check if the request return status 200 (OK)
         if (response.ok) {
-          // Retake all value like null string
-          this.newCourse = {
-            title: "",
-            description: "",
-            totalSeats: "",
-            date_event: "",
-            coach: "",
-            duration: "",
-          };
-          // Return a success message at the user
+          // Afficher un message de succès
           this.openErrorModal();
           this.errorMessage = "Le cours a été créé avec succès!";
-          //refresh the evnts list
+          // Rafraîchir la liste des événements
           this.loadEvents();
         } else {
-          // In the Error case
+          // En cas d'erreur
           this.openErrorModal();
           this.errorMessage = "Erreur lors de la création du cours";
         }
       } catch (error) {
+        // En cas d'erreur
         this.openErrorModal();
-        (this.errorMessage = "Erreur lors de la création du cours:"), error;
+        this.errorMessage = "Erreur lors de la création du cours: " + error;
       }
     },
     async loadUsers() {
@@ -1295,64 +752,10 @@ export default {
 
       this.errorMessage = "";
     },
-    // Update Sort By
-    updateSortBy(value) {
-      this.sortBy = value; // Mettre à jour la variable sortBy avec la valeur sélectionnée
-      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
+    updateUsers(sortedUsers) {
+      this.users = sortedUsers;
     },
-    // Update Sort Order
-    updateSortOrder(value) {
-      this.sortOrder = value; // Mettre à jour la variable sortOrder avec la valeur sélectionnée
-      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
-    },
-    // Handle Sort
-    async handleSort() {
-      if (this.sortBy && this.sortOrder) {
-        let sortedUsers = [...this.users];
-
-        switch (this.sortBy) {
-          case "age":
-            sortedUsers.sort((a, b) => {
-              const dateA = new Date(a.birthday.data);
-              const dateB = new Date(b.birthday.data);
-              return this.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-            });
-            break;
-          case "gender":
-            sortedUsers.sort((a, b) => {
-              if (a.gender === b.gender) {
-                return 0;
-              } else if (this.sortOrder === "asc") {
-                return a.gender ? -1 : 1;
-              } else {
-                return a.gender ? 1 : -1;
-              }
-            });
-            break;
-          case "weight":
-            sortedUsers.sort((a, b) => {
-              const weightA = a.weight !== null ? a.weight : 0;
-              const weightB = b.weight !== null ? b.weight : 0;
-              return this.sortOrder === "asc"
-                ? weightA - weightB
-                : weightB - weightA;
-            });
-            break;
-          case "name":
-            sortedUsers.sort((a, b) => {
-              const nameA = a.name.data.toLowerCase();
-              const nameB = b.name.data.toLowerCase();
-              return this.sortOrder === "asc"
-                ? nameA.localeCompare(nameB)
-                : nameB.localeCompare(nameA);
-            });
-            break;
-        }
-
-        this.users = sortedUsers;
-      }
-    },
-    async submitAlert() {
+    async submitAlert(newAlertData) {
       try {
         const token = localStorage.getItem("accessToken");
         const url = this.getUrl();
@@ -1363,7 +766,7 @@ export default {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(this.newAlert),
+          body: JSON.stringify(newAlertData), // Utiliser les données reçues de l'événement
         });
 
         if (!response.ok) {
@@ -1371,12 +774,11 @@ export default {
           this.errorMessage = "Erreur lors de la création de l'alerte";
         }
 
-        // Réinitialiser le formulaire
-        this.newAlert.titre = "";
-        this.newAlert.contenu = "";
-        this.newAlert.dateFin = "";
+        // Afficher un message de succès
         this.openErrorModal();
-        this.errorMessage = "L'alerte à été ajoutée !";
+        this.errorMessage = "L'alerte a été ajoutée !";
+
+        // Mettre à jour les alertes après l'ajout d'une nouvelle alerte
         this.fetchAlerts();
       } catch (error) {
         console.error("Error adding alert:", error);

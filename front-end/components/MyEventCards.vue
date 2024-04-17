@@ -151,7 +151,6 @@
             :key="participant.id"
             class="flex flex-row items-center p-1"
             :class="userBgColor(participant)"
-            
           >
             <NuxtImg
               v-if="participant.avatar"
@@ -207,7 +206,7 @@
         <li>
           <NuxtImg
             v-if="userDetails.avatar"
-            :src="userDetails.avatar.data"
+            :src="userDetails.avatar"
             alt="Avatar"
             class="w-28 h-28 rounded-full mx-auto mb-4"
           />
@@ -234,53 +233,44 @@
             </span>
           </div>
         </li>
+        <li class="capitalize"><strong>Nom:</strong> {{ userDetails.name }}</li>
         <li class="capitalize">
-          <strong>Nom:</strong> {{ userDetails.name.data }}
-        </li>
-        <li class="capitalize">
-          <strong>Prénom:</strong> {{ userDetails.firstname.data }}
+          <strong>Prénom:</strong> {{ userDetails.firstname }}
         </li>
 
-        <li><strong>E-mail:</strong> {{ userDetails.email.data }}</li>
+        <li><strong>E-mail:</strong> {{ userDetails.email }}</li>
         <li>
           <strong>Numéro de téléphone:</strong>
-          {{
-            (userDetails.tel_num && userDetails.tel_num.data) || "Non renseigné"
-          }}
+          {{ (userDetails.tel_num && userDetails.tel_num) || "Non renseigné" }}
         </li>
         <li>
           <strong>Numéro médical:</strong>
           {{
-            (userDetails.tel_medic && userDetails.tel_medic.data) ||
-            "Non renseigné"
+            (userDetails.tel_medic && userDetails.tel_medic) || "Non renseigné"
           }}
         </li>
         <li>
           <strong>Numéro d'urgence:</strong>
           {{
-            (userDetails.tel_emergency && userDetails.tel_emergency.data) ||
+            (userDetails.tel_emergency && userDetails.tel_emergency) ||
             "Non renseigné"
           }}
         </li>
         <li>
           <strong>Poids:</strong>
-          {{
-            (userDetails.weight && userDetails.weight.data) || "Non renseigné"
-          }}
+          {{ (userDetails.weight && userDetails.weight) || "Non renseigné" }}
         </li>
         <li>
           <strong>Genre:</strong> {{ userDetails.gender ? "Homme" : "Femme" }}
         </li>
         <li>
           <strong>license:</strong>
-          {{
-            (userDetails.license && userDetails.license.data) || "Non renseigné"
-          }}
+          {{ (userDetails.license && userDetails.license) || "Non renseigné" }}
         </li>
         <li>
           <strong>Date de fin de paiement:</strong>
           {{
-            (userDetails.date_end_pay && userDetails.date_end_pay.data) ||
+            (userDetails.date_end_pay && userDetails.date_end_pay) ||
             "Non renseigné"
           }}
         </li>
@@ -453,7 +443,7 @@ export default {
         });
 
         // Stocker les événements dans la variable events
-        return response.data;
+        return response;
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }
@@ -646,12 +636,10 @@ export default {
               // Mettez à jour la liste des participants avec les données récupérées des utilisateurs
               this.eventParticipants = users.map((user) => ({
                 id: user.id,
-                license: user.license ? `${user.license.data}` : null,
-                date_end_pay: user.date_end_pay
-                  ? `${user.date_end_pay.data}`
-                  : null,
-                avatar: user.avatar ? `${user.avatar.data}` : null,
-                name: `${user.firstname.data} ${user.name.data}`, // Ajouter le nom et le prénom de l'utilisateur
+                license: user.license ? `${user.license}` : null,
+                date_end_pay: user.date_end_pay ? `${user.date_end_pay}` : null,
+                avatar: user.avatar ? `${user.avatar}` : null,
+                name: `${user.firstname} ${user.name}`, // Ajouter le nom et le prénom de l'utilisateur
               }));
               this.showModal = true; // Afficher la modale une fois les données récupérées
             } catch (error) {
@@ -659,10 +647,10 @@ export default {
               // Gérer les erreurs d'une manière appropriée, par exemple, afficher un message à l'utilisateur
             }
           },
-          license: user.license ? `${user.license.data}` : '',
-          date_end_pay: user.date_end_pay ? `${user.date_end_pay.data}` : '',
-          avatar: user.avatar ? `${user.avatar.data}` : null,
-          name: `${user.firstname.data} ${user.name.data}`, // Ajouter le nom et le prénom de l'utilisateur
+          license: user.license ? `${user.license}` : "",
+          date_end_pay: user.date_end_pay ? `${user.date_end_pay}` : "",
+          avatar: user.avatar ? `${user.avatar}` : null,
+          name: `${user.firstname} ${user.name}`, // Ajouter le nom et le prénom de l'utilisateur
         }));
         this.showModal = true; // Afficher la modale une fois les données récupérées
       } catch (error) {

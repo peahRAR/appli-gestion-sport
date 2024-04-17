@@ -3,44 +3,14 @@
     <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
     <!-- Filter and sort section -->
     <div class="flex items-center space-x-4 mb-4">
-      <select @change="updateSortBy($event.target.value)">
-        <option value="">Trier par...</option>
-        <option value="age">Âge</option>
-        <option value="gender">Genre</option>
-        <option value="weight">Poids</option>
-        <option value="name">Nom</option>
-        <!-- Ajout du tri par nom -->
+      <select v-model="currentSortBy">
+        <option value="">Trier par ...</option>
+        <option v-for="cat in sortByList" :value="cat.value">
+          {{ cat.cat }}
+        </option>
       </select>
       <div class="flex">
-        <input
-          type="radio"
-          id="asc"
-          value="asc"
-          v-model="sortOrder"
-          @change="updateSortOrder('asc')"
-          class="hidden"
-        />
-        <label
-          for="asc"
-          class="cursor-pointer bg-gray-200 px-4 py-2 mr-4 rounded-md"
-          :class="{ 'bg-gray-500 text-white': sortOrder === 'asc' }"
-          >Croissant</label
-        >
-
-        <input
-          type="radio"
-          id="desc"
-          value="desc"
-          v-model="sortOrder"
-          @change="updateSortOrder('desc')"
-          class="hidden"
-        />
-        <label
-          for="desc"
-          class="cursor-pointer bg-gray-200 px-4 py-2 rounded-md"
-          :class="{ 'bg-gray-500 text-white': sortOrder === 'desc' }"
-          >Décroissant</label
-        >
+        <button @click="updateSortOrder()">Test</button>
       </div>
     </div>
     <div class="overflow-x-auto">
@@ -122,12 +92,12 @@
             <td
               class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
             >
-              {{ user.name.data }}
+              {{ user.name }}
             </td>
             <td
               class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
             >
-              {{ user.firstname.data }}
+              {{ user.firstname }}
             </td>
             <td
               class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
@@ -165,67 +135,24 @@ export default {
       type: Array,
       required: true,
     },
+    sortByList: {
+      type: Array,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      asc: true,
+      currentSortBy: null,
+    };
   },
   methods: {
     openModal(user) {
       this.$emit("open-modal", user);
     },
-    // Update Sort By
-    updateSortBy(value) {
-      this.sortBy = value; // Mettre à jour la variable sortBy avec la valeur sélectionnée
-      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
-    },
     // Update Sort Order
-    updateSortOrder(value) {
-      this.sortOrder = value; // Mettre à jour la variable sortOrder avec la valeur sélectionnée
-      this.handleSort(); // Appeler la méthode handleSort pour effectuer le tri
-    },
-    // Handle Sort
-    async handleSort() {
-      if (this.sortBy && this.sortOrder) {
-        let sortedUsers = [...this.users];
-
-        switch (this.sortBy) {
-          case "age":
-            sortedUsers.sort((a, b) => {
-              const dateA = new Date(a.birthday.data);
-              const dateB = new Date(b.birthday.data);
-              return this.sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-            });
-            break;
-          case "gender":
-            sortedUsers.sort((a, b) => {
-              if (a.gender === b.gender) {
-                return 0;
-              } else if (this.sortOrder === "asc") {
-                return a.gender ? -1 : 1;
-              } else {
-                return a.gender ? 1 : -1;
-              }
-            });
-            break;
-          case "weight":
-            sortedUsers.sort((a, b) => {
-              const weightA = a.weight !== null ? a.weight : 0;
-              const weightB = b.weight !== null ? b.weight : 0;
-              return this.sortOrder === "asc"
-                ? weightA - weightB
-                : weightB - weightA;
-            });
-            break;
-          case "name":
-            sortedUsers.sort((a, b) => {
-              const nameA = a.name.data.toLowerCase();
-              const nameB = b.name.data.toLowerCase();
-              return this.sortOrder === "asc"
-                ? nameA.localeCompare(nameB)
-                : nameB.localeCompare(nameA);
-            });
-            break;
-        }
-
-        this.$emit("update:users", sortedUsers);
-      }
+    updateSortOrder() {
+      this.asc = !this.asc;
     },
     userBgColor(user) {
       if (user) {
@@ -254,15 +181,26 @@ export default {
       return "bg-gray-300"; // Ou toute autre classe par défaut que vous souhaitez utiliser
     },
   },
-  data() {
-    return {
-      sortBy: null, // handleSort BY
-      sortOrder: null, // handleSort Order
-    };
-  },
   computed: {
     sortedUsers() {
-      return this.users.slice(); // Retourne une copie triée des utilisateurs
+      console.log("computed");
+      if (!this.currentSortBy) {
+        console.log("pas de selection");
+        return this.users;
+      }
+      console.log(...this.users);
+      return [...this.users].sort((a, b) => {
+        console.log("return");
+        let modifier = this.asc ? 1 : -1;
+        console.log(a);
+        console.log(a.weight);
+        console.log(this.currentSortBy);
+        let valA = a[this.currentSortBy] || "";
+        let valB = b[this.currentSortBy] || "";
+        // console.log(valA);
+        // console.log(valB);
+        return valA < valB ? -1 * modifier : valA > valB ? 1 * modifier : 0;
+      });
     },
   },
 };

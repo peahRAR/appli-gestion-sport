@@ -10,7 +10,7 @@
             <!-- Avatar -->
             <NuxtImg
               v-if="user.avatar"
-              :src="user.avatar.data"
+              :src="user.avatar"
               alt="Avatar"
               class="w-28 h-28 rounded-full mx-auto mb-4"
             />
@@ -39,44 +39,32 @@
             <!-- Name -->
             <p class="text-gray-600 mb-2 capitalize">
               <strong>Nom:</strong>
-              {{
-                user.name && user.name.data ? user.name.data : "Non Renseigné"
-              }}
+              {{ user.name && user.name ? user.name : "Non Renseigné" }}
             </p>
             <!-- FirstName -->
             <p class="text-gray-600 mb-2 capitalize">
               <strong>Prénom:</strong>
               {{
-                user.firstname && user.firstname.data
-                  ? user.firstname.data
+                user.firstname && user.firstname
+                  ? user.firstname
                   : "Non Renseigné"
               }}
             </p>
             <!-- Email -->
             <p class="text-gray-600 mb-2">
               <strong>Email:</strong>
-              {{
-                user.email && user.email.data
-                  ? user.email.data
-                  : "Non Renseigné"
-              }}
+              {{ user.email && user.email ? user.email : "Non Renseigné" }}
             </p>
             <!-- Weight -->
             <p class="text-gray-600 mb-2">
               <strong>Poids:</strong>
-              {{
-                user.weight && user.weight.data
-                  ? user.weight.data
-                  : "Non Renseigné"
-              }}
+              {{ user.weight && user.weight ? user.weight : "Non Renseigné" }}
             </p>
             <!-- license -->
             <p class="text-gray-600 mb-2">
               <strong>license:</strong>
               {{
-                user.license && user.license.data
-                  ? user.license.data
-                  : "Non Renseigné"
+                user.license && user.license ? user.license : "Non Renseigné"
               }}
             </p>
             <!-- Gender -->
@@ -87,17 +75,15 @@
             <p class="text-gray-600 mb-2">
               <strong>Numéro de téléphone:</strong>
               {{
-                user.tel_num && user.tel_num.data
-                  ? user.tel_num.data
-                  : "Non Renseigné"
+                user.tel_num && user.tel_num ? user.tel_num : "Non Renseigné"
               }}
             </p>
             <!-- Tel Medic -->
             <p class="text-gray-600 mb-2">
               <strong>Téléphone Médical:</strong>
               {{
-                user.tel_medic && user.tel_medic.data
-                  ? user.tel_medic.data
+                user.tel_medic && user.tel_medic
+                  ? user.tel_medic
                   : "Non Renseigné"
               }}
             </p>
@@ -105,8 +91,8 @@
             <p class="text-gray-600 mb-2">
               <strong>Téléphone d'urgence:</strong>
               {{
-                user.tel_emergency && user.tel_emergency.data
-                  ? user.tel_emergency.data
+                user.tel_emergency && user.tel_emergency
+                  ? user.tel_emergency
                   : "Non Renseigné"
               }}
             </p>
@@ -114,8 +100,8 @@
             <p class="text-gray-600 mb-2">
               <strong>Date fin de paiment:</strong>
               {{
-                user.date_end_pay && user.date_end_pay.data
-                  ? user.date_end_pay.data
+                user.date_end_pay && user.date_end_pay
+                  ? user.date_end_pay
                   : "Non Renseigné"
               }}
             </p>
@@ -149,15 +135,11 @@
         </button>
       </div>
       <!-- Modal Edit Profil -->
-      <TheModal
-        :isOpen="isEditing"
-        title="Modifications"
-        @close="cancelEdit"
-      >
+      <TheModal :isOpen="isEditing" title="Modifications" @close="cancelEdit">
         <!-- Modal Content -->
         <!-- Avatar -->
         <p>Avatar:</p>
-        <TheAvatar @avatarSaved="avatar = $event"  />
+        <TheAvatar @avatarSaved="avatar = $event" />
         <!-- Weight -->
         <p>Poids:</p>
         <input
@@ -283,7 +265,7 @@ export default {
         weight: null,
         license: null,
         gender: null,
-        tel_num:null,
+        tel_num: null,
         tel_medic: null,
         tel_emergency: null,
         avatar: null,
@@ -332,7 +314,10 @@ export default {
     },
     // Valider Confirm Password
     validerConfirmPassword() {
-      if ((this.confirmNewPassword === this.newPassword) && this.validerNewPassword) {
+      if (
+        this.confirmNewPassword === this.newPassword &&
+        this.validerNewPassword
+      ) {
         return true;
       }
       return false;
@@ -435,16 +420,12 @@ export default {
     editProfile() {
       this.isEditing = true;
       // Initialiser les champs d'entrée avec les valeurs actuelles de l'utilisateur
-      this.editedWeight = this.user.weight ? this.user.weight.data : null;
-      this.editedlicense = this.user.license ? this.user.license.data : null;
-      this.editedTelNum = this.user.tel_num
-        ? this.user.tel_num.data
-        : null;
-      this.editedTelMedic = this.user.tel_medic
-        ? this.user.tel_medic.data
-        : null;
+      this.editedWeight = this.user.weight ? this.user.weight : null;
+      this.editedlicense = this.user.license ? this.user.license : null;
+      this.editedTelNum = this.user.tel_num ? this.user.tel_num : null;
+      this.editedTelMedic = this.user.tel_medic ? this.user.tel_medic : null;
       this.editedTelEmergency = this.user.tel_emergency
-        ? this.user.tel_emergency.data
+        ? this.user.tel_emergency
         : null;
     },
     // Api request for update user data

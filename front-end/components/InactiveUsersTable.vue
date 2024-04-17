@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-8 bg-white rounded " style="overflow-x: auto">
+  <div class="mb-8 bg-white rounded" style="overflow-x: auto">
     <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
     <div class="max-w-screen-lg mx-auto">
       <table class="mx-auto min-w-full divide-y divide-gray-200">
@@ -12,8 +12,8 @@
         </thead>
         <tbody class="flex justify-between bg-gray-300 divide-y divide-gray-200">
           <tr v-for="(user, index) in inactiveUsers" :key="user.id" class="flex justify-between items-center w-full">
-            <td class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize">{{ user.name.data }}</td>
-            <td class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize">{{ user.firstname.data }}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize">{{ user.name }}</td>
+            <td class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize">{{ user.firstname }}</td>
             <td class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black">
               <button @click="reactivate(user)" class="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-blue-600">
                <svg

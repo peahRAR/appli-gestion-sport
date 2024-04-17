@@ -18,6 +18,7 @@
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
           <UserList
             :users="users"
+            :sortByList
             @update:users="updateUsers"
             @open-modal="openModal"
           />
@@ -54,7 +55,7 @@
         <div class="mb-2 mt-4">
           <NuxtImg
             v-if="selectedUser.avatar"
-            :src="selectedUser.avatar.data"
+            :src="selectedUser.avatar"
             alt="Avatar"
             class="w-28 h-28 rounded-full mx-auto mb-4"
           />
@@ -84,7 +85,7 @@
           <input
             class="border border-gray-500 p-1"
             type="text"
-            v-model="selectedUser.name.data"
+            v-model="selectedUser.name"
             id="username"
           />
         </div>
@@ -94,18 +95,16 @@
           <input
             class="border border-gray-500 p-1"
             type="text"
-            v-model="selectedUser.firstname.data"
+            v-model="selectedUser.firstname"
             id="userfirstname"
           />
         </div>
 
-        <p class="mb-2">
-          <strong>E-mail:</strong> {{ selectedUser.email.data }}
-        </p>
+        <p class="mb-2"><strong>E-mail:</strong> {{ selectedUser.email }}</p>
         <!-- Birthday -->
         <p class="mb-2">
           <strong>Date de naissance:</strong>
-          {{ formatDate(selectedUser.birthday.data) }}
+          {{ formatDate(selectedUser.birthday) }}
         </p>
         <!-- Gender -->
         <p class="mb-2">
@@ -115,22 +114,21 @@
         <p>
           <strong>Poids:</strong>
           {{
-            (selectedUser.weight && selectedUser.weight.data + "Kg") ||
+            (selectedUser.weight && selectedUser.weight + "Kg") ||
             "Non renseigné"
           }}
         </p>
         <p class="mb-2">
           <strong>Numéro de téléphone:</strong>
           {{
-            (selectedUser.tel_num && selectedUser.tel_num.data) ||
-            "Non renseigné"
+            (selectedUser.tel_num && selectedUser.tel_num) || "Non renseigné"
           }}
         </p>
         <!-- Tel Medic -->
         <p class="mb-2">
           <strong>Téléphone médical:</strong>
           {{
-            (selectedUser.tel_medic && selectedUser.tel_medic.data) ||
+            (selectedUser.tel_medic && selectedUser.tel_medic) ||
             "Non renseigné"
           }}
         </p>
@@ -138,7 +136,7 @@
         <p class="mb-2">
           <strong>Téléphone d'urgence:</strong>
           {{
-            (selectedUser.tel_emergency && selectedUser.tel_emergency.data) ||
+            (selectedUser.tel_emergency && selectedUser.tel_emergency) ||
             "Non renseigné"
           }}
         </p>
@@ -285,6 +283,12 @@ export default {
       showErrorModal: false,
       errorMessage: null,
       alerts: [],
+      sortByList: [
+        { cat: "Nom", value: "name" },
+        { cat: "Age", value: "birthday" },
+        { cat: "Poids", value: "weight" },
+        { cat: "Genre", value: "gender" },
+      ],
     };
   },
   async mounted() {
@@ -366,7 +370,7 @@ export default {
         });
 
         // Keep the elements in Events
-        this.events = response.data;
+        this.events = response;
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }
@@ -420,7 +424,7 @@ export default {
         });
 
         // Keep all in Users Array
-        this.users = response.data;
+        this.users = response;
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs", error);
       }
@@ -479,8 +483,8 @@ export default {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            name: this.selectedUser.name.data,
-            firstname: this.selectedUser.firstname.data,
+            name: this.selectedUser.name,
+            firstname: this.selectedUser.firstname,
             date_end_pay: this.selectedUser.date_end_pay,
             date_payment: this.selectedUser.date_payment,
           }),

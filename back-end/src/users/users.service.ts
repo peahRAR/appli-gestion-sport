@@ -200,7 +200,25 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     // Récupérer tous les utilisateurs depuis la base de données
-    const users = await this.userRepository.find();
+    const users = await this.userRepository.find({
+      select: [
+        'id',
+        'email',
+        'gender',
+        'weight',
+        'license',
+        'name',
+        'firstname',
+        'tel_num',
+        'tel_medic',
+        'tel_emergency',
+        'avatar',
+        'date_end_pay',
+        'date_payment',
+        'date_subscribe',
+        'role',
+      ],
+    });
 
     // Définir les champs à décrypter
     const fieldsToDecrypt = [
@@ -225,7 +243,7 @@ export class UsersService {
       for (const field of fieldsToDecrypt) {
         if (user[field] && user[field].data) {
           const decryptedField = this.decryptField(user[field].data);
-          user[field].data = decryptedField;
+          user[field] = decryptedField;
         }
       }
     }
@@ -234,7 +252,7 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: number): Promise<User | undefined> {
+  async findOne(id: number): Promise<any | undefined> {
     // Récupérer l'utilisateur depuis la base de données
     const user = await this.userRepository.findOne({
       where: { id },
@@ -253,7 +271,7 @@ export class UsersService {
         'date_end_pay',
         'date_payment',
         'date_subscribe',
-        'role'
+        'role',
       ],
     });
 
@@ -300,7 +318,37 @@ export class UsersService {
       user.date_subscribe.data = this.decryptField(user.date_subscribe.data);
     }
 
-    return user;
+    const result = {
+      id: user.id,
+
+      role: user.role,
+      
+      email: user.email.data,
+
+      weight: user.weight.data,
+
+      license: user.license.data,
+
+      name: user.name.data,
+
+      firstname: user.firstname.data,
+
+      tel_num: user.tel_num.data,
+
+      tel_medic: user.tel_medic.data,
+
+      tel_emergency: user.tel_emergency.data,
+
+      avatar: user.avatar.data,
+
+      date_end_pay: user.date_end_pay.data,
+
+      date_payment: user.date_payment.data,
+
+      date_subscribe: user.date_subscribe.data,
+    };
+
+    return result;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -374,9 +422,7 @@ export class UsersService {
     }
     if (updateUserDto.tel_num) {
       console.log('tel num change');
-      const telNumEncrypt = this.createEncryptedField(
-        updateUserDto.tel_num,
-      );
+      const telNumEncrypt = this.createEncryptedField(updateUserDto.tel_num);
       user.tel_num = {
         identifier: telNumEncrypt,
         data: telNumEncrypt,
@@ -458,11 +504,11 @@ export class UsersService {
     const user = await this.findOne(id);
 
     await this.mailerService.sendMail({
-      to: user.email.data,
+      to: user.email,
       subject: 'Suppression de compte',
       template: 'suppression',
       context: {
-        email: user.email.data,
+        email: user.email,
       },
     });
     await this.userRepository.delete(id);

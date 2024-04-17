@@ -203,6 +203,7 @@ export class UsersService {
     const users = await this.userRepository.find({
       select: [
         'id',
+        'isActive',
         'email',
         'gender',
         'weight',
@@ -322,30 +323,32 @@ export class UsersService {
       id: user.id,
 
       role: user.role,
-      
-      email: user.email.data,
 
-      weight: user.weight.data,
+      email: user.email?.data ?? null,
 
-      license: user.license.data,
+      weight: user.weight?.data ?? null,
 
-      name: user.name.data,
+      license: user.license?.data ?? null,
 
-      firstname: user.firstname.data,
+      name: user.name?.data ?? null,
 
-      tel_num: user.tel_num.data,
+      firstname: user.firstname?.data ?? null,
 
-      tel_medic: user.tel_medic.data,
+      tel_num: user.tel_num?.data ?? null,
 
-      tel_emergency: user.tel_emergency.data,
+      tel_medic: user.tel_medic?.data ?? null,
 
-      avatar: user.avatar.data,
+      tel_emergency: user.tel_emergency?.data ?? null,
 
-      date_end_pay: user.date_end_pay.data,
+      avatar: user.avatar?.data ?? null,
 
-      date_payment: user.date_payment.data,
+      date_end_pay: user.date_end_pay?.data ?? null,
 
-      date_subscribe: user.date_subscribe.data,
+      date_payment: user.date_payment?.data ?? null,
+
+      date_subscribe: user.date_subscribe?.data ?? null,
+
+      isActive: user.isActive,
     };
 
     return result;

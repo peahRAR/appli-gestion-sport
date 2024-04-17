@@ -250,6 +250,26 @@
         >{{ this.errorMessage }}</TheModal
       >
     </div>
+    <TheModal
+      :isOpen="showConfirmationModal"
+      :title="confirmationMessage"
+      @close="showConfirmationModal = false"
+    >
+      <div class="flex justify-center space-x-4">
+        <button
+          @click="deleteUser"
+          class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+        >
+          Confirmer
+        </button>
+        <button
+          @click="showConfirmationModal = false"
+          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        >
+          Annuler
+        </button>
+      </div>
+    </TheModal>
   </div>
 </template>
 
@@ -292,6 +312,8 @@ export default {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
       showErrorModal: false,
       errorMessage: null,
+      showConfirmationModal: false,
+      confirmationMessage: "",
     };
   },
   async mounted() {
@@ -491,9 +513,9 @@ export default {
     },
     // Confirm Deletion
     confirmDelete() {
-      if (confirm("Êtes-vous sûr de vouloir supprimer votre compte ?")) {
-        this.deleteUser();
-      }
+      this.confirmationMessage =
+        "Êtes-vous sûr de vouloir supprimer votre compte ?";
+      this.showConfirmationModal = true;
     },
     // Request for delete user
     async deleteUser() {

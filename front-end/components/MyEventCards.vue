@@ -443,7 +443,7 @@ export default {
         });
 
         // Stocker les événements dans la variable events
-        return response;
+        return response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }

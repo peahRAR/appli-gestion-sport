@@ -16,12 +16,13 @@
         </div>
         <!-- USERS List -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-          <UserList
+         <UserList
             :users="users"
             :sortByList
+            :filterList
             @update:users="updateUsers"
             @open-modal="openModal"
-          />
+          /> 
         </div>
         <!-- Add Alert Form -->
         <div class="bg-white mx-2 rounded p-2 mb-10">
@@ -289,6 +290,13 @@ export default {
         { cat: "Poids", value: "weight" },
         { cat: "Genre", value: "gender" },
       ],
+      filterList: [
+        { filter: "Filtrer par ...", value: "all" },
+        { filter: "Actifs", value: "isActive" },
+        { filter: "Hommes", value: "homme" },
+        { filter: "Femmes", value: "femme" },
+        {filter: "Date de fin de paiement", value:"dateEndPay"},
+      ],
     };
   },
   async mounted() {
@@ -370,7 +378,7 @@ export default {
         });
 
         // Keep the elements in Events
-        this.events = response;
+        this.events = response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }
@@ -424,7 +432,7 @@ export default {
         });
 
         // Keep all in Users Array
-        this.users = response;
+        this.users = response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs", error);
       }

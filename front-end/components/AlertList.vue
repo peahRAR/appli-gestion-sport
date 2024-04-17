@@ -4,7 +4,7 @@
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
-          <tr>
+          <tr class="bg-gray-200">
             <th
               scope="col"
               class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -25,10 +25,10 @@
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-gray-300 divide-y divide-gray-200">
           <tr v-for="(alert, index) in alerts" :key="alert.id" class="w-full justify-between items-center">
-            <td class="w-3 px-3 py-4">{{ alert.titre }}</td>
-            <td class="w-3 px-3 py-4 whitespace-nowrap">{{ formatAlertDate(alert.dateFin) }}</td>
+            <td class="w-3 px-3 py-4 text-black font-bold">{{ alert.titre }}</td>
+            <td class="w-3 px-3 py-4 text-black font-bold whitespace-nowrap">{{ formatAlertDate(alert.dateFin) }}</td>
             <td class="px-3 py-4 whitespace-nowrap text-center">
               <button @click="deleteAlert(alert.id)" class="bg-red-500 text-white p-1 rounded-md hover:bg-red-600">
                 <!-- Icône de suppression -->

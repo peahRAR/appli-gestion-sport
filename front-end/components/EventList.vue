@@ -4,39 +4,39 @@
     <div class="max-w-screen-lg mx-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
-          <tr>
+          <tr class="bg-gray-200">
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Date
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Intitulé
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Actions
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-gray-300 divide-y divide-gray-200">
           <tr v-for="(event, index) in events" :key="event.id">
             <td
-              class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 capitalize"
+              class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
             >
               {{ formatDate(event.date_event) }}
             </td>
-            <td class="px-3 py-2 max-w-20 text-sm text-gray-500 uppercase">
+            <td class="px-3 py-2 max-w-20 text-sm text-black font-semibold uppercase">
               {{ event.name_event }}
             </td>
             <td
-              class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-gray-500"
+              class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-black"
             >
               <button
                 @click="emitEditEvent(event)"

@@ -46,29 +46,29 @@
     <div class="overflow-x-auto">
       <table class="mx-auto min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
-          <tr>
+          <tr class="bg-gray-200">
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Statut
               <!-- Ajoutez l'icône pour le statut ici -->
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Nom
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Prénom
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Actions
             </th>

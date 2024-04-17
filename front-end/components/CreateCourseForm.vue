@@ -25,7 +25,7 @@
       </div>
       <!-- Date -->
       <div class="flex flex-col">
-        <label for="date">Date et heure de début</label>
+        <label class="font-semibold" for="date">Date et heure de début</label>
         <input
           type="datetime-local"
           v-model="newCourse.date_event"
@@ -35,7 +35,7 @@
       </div>
       <!-- Coach -->
       <div class="flex flex-col">
-        <label for="coach">Nom du coach</label>
+        <label class="font-semibold" for="coach">Nom du coach</label>
         <input
           type="text"
           v-model="newCourse.coach"
@@ -45,7 +45,7 @@
       </div>
       <!-- Duration -->
       <div class="flex flex-col">
-        <label for="duration">Durée du cours (en minutes)</label>
+        <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
         <input
           type="number"
           v-model="newCourse.duration"
@@ -55,7 +55,7 @@
       </div>
       <!-- Total places -->
       <div class="flex flex-col">
-        <label for="totalSeats">Nombre de places total disponibles</label>
+        <label class="font-semibold" for="totalSeats">Nombre de places total disponibles</label>
         <input
           type="number"
           v-model="newCourse.totalPlaces"

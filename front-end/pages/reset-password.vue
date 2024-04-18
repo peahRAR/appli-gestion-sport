@@ -52,6 +52,12 @@
         </div>
       </form>
     </div>
+    <TheModal
+      :isOpen="showErrorModal"
+      title="Message"
+      @close="closeErrorModal"
+      >{{ this.errorMessage }}</TheModal
+    >
   </div>
 </template>
 
@@ -64,13 +70,14 @@ export default {
       confirmPassword: "", // Confirmation of the new password
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      showErrorModal: false,
+      errorMessage: null,
     };
   },
   created() {
     // Take the reset Token from the URL
     const urlParams = new URLSearchParams(window.location.search);
     this.token = urlParams.get("token");
-    
   },
   computed: {
     // Pattern Regex
@@ -109,12 +116,12 @@ export default {
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
-      return url
+      return url;
     },
     getKey() {
       const config = useRuntimeConfig();
       const key = config.public.resetKey;
-      return key
+      return key;
     },
     // Submit the form to update the database via API
     async resetPassword() {
@@ -133,7 +140,6 @@ export default {
       // Build the PATCH request URL with user ID
       const url = this.getUrl();
       const resetKey = this.getKey();
-      
 
       try {
         // Perform the PATCH request to update user password
@@ -152,11 +158,12 @@ export default {
 
         // Check if the request was successful
         if (response.ok) {
-          alert("Mot de passe réinitialisé avec succès !");
+          this.openErrorModal();
+          this.errorMessage = "Mot de passe réinitialisé avec succès !";
         } else {
-          alert(
-            "Une erreur s'est produite lors de la réinitialisation du mot de passe."
-          );
+          this.openErrorModal();
+          this.errorMessage =
+            "Une erreur s'est produite lors de la réinitialisation du mot de passe.";
         }
       } catch (error) {
         console.error(
@@ -187,6 +194,15 @@ export default {
       }
 
       return payload.sub;
+    },
+    openErrorModal() {
+      this.showErrorModal = true;
+    },
+    //  Close Modal Password change
+    closeErrorModal() {
+      this.showErrorModal = false;
+
+      this.errorMessage = "";
     },
   },
 };

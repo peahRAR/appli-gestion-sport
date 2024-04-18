@@ -51,7 +51,7 @@
           v-model="filterOption"
           class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
         >
-           <option v-for="cat in filterList" :value="cat.value">
+          <option v-for="cat in filterList" :value="cat.value">
             {{ cat.filter }}
           </option>
         </select>
@@ -59,7 +59,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="mx-auto min-w-full divide-y divide-gray-200">
+      <table class="mx-auto w-full min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr class="bg-gray-200">
             <th
@@ -70,17 +70,14 @@
               <!-- Ajoutez l'icône pour le statut ici -->
             </th>
             <th
+              v-for="col in currentColumns"
+              :key="col"
               scope="col"
               class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
-              Nom
+              {{ columnsNames[col] || col }}
             </th>
-            <th
-              scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Prénom
-            </th>
+
             <th
               scope="col"
               class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -135,14 +132,11 @@
               </span>
             </td>
             <td
-              class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
+              v-for="col in currentColumns"
+              :key="col"
+              class="px-3 py-2 whitespace-nowrap text-center text-sm text-black font-semibold capitalize"
             >
-              {{ user.name }}
-            </td>
-            <td
-              class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize"
-            >
-              {{ user.firstname }}
+              {{ user[col] }}
             </td>
             <td
               class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
@@ -171,44 +165,55 @@
       </table>
     </div>
     <!-- Pagination -->
-    <div class="mt-4 flex justify-center">
-      <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
-        @click="prevPage"
-        :class="{ hidden: currentPage === 1 }"
-        :disabled="currentPage === 1"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
+    <div class="mt-4 w-full flex items-center">
+      <div>
+        <select v-model="pageSize">
+          <option value="5" default>5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select>
+      </div>
+      <div class="flex justify-center w-full items-center">
+        <button
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+          @click="prevPage"
+          :class="{ hidden: currentPage === 1 }"
+          :disabled="currentPage === 1"
         >
-          <path
-            fill="currentColor"
-            d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z"
-          />
-        </svg>
-      </button>
-      <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
-      <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
-        @click="nextPage"
-        :class="{ hidden: currentPage === totalPages }"
-        :disabled="currentPage === totalPages"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z"
+            />
+          </svg>
+        </button>
+        <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
+        <button
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+          @click="nextPage"
+          :class="{ hidden: currentPage === totalPages }"
+          :disabled="currentPage === totalPages"
         >
-          <path
-            fill="currentColor"
-            d="m12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
-          />
-        </svg>
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="currentColor"
+              d="m12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -227,15 +232,28 @@ export default {
     filterList: {
       type: Array,
       required: true,
-    }
+    },
+    activeColumns: {
+      type: Array,
+      required: true,
+    },
+    defaultColumns: {
+      type: Array,
+      required: true,
+    },
+    columnsNames: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
       asc: true,
       currentSortBy: null,
       currentPage: 1,
-      pageSize: 5,
       filterOption: "all",
+      currentColumns: this.activeColumns,
+      pageSize: 5,
     };
   },
   methods: {
@@ -284,8 +302,6 @@ export default {
     },
     filterUsers(users) {
       switch (this.filterOption) {
-        case "isActive":
-          return users.filter((user) => user.isActive);
         case "homme":
           return users.filter((user) => user.gender === true);
         case "femme":
@@ -300,7 +316,25 @@ export default {
       }
     },
   },
+  watch: {
+    currentSortBy(newVal) {
+      if (
+        newVal &&
+        newVal !== "null" &&
+        !this.defaultColumns.includes(newVal)
+      ) {
+        this.currentColumns = [...this.defaultColumns, newVal];
+      } else {
+        this.currentColumns = [...this.defaultColumns];
+      }
+    },
+  },
   computed: {
+    capitalize() {
+      return this.activeColumns.map((col) => {
+        return col.charAt(0).toUpperCase() + col.slice(1);
+      });
+    },
     sortedUsers() {
       if (!this.currentSortBy) {
         return this.users;

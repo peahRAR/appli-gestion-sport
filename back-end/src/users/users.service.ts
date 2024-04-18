@@ -17,7 +17,7 @@ import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
-// import { JwtService } from '@nestjs/jwt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +29,7 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
+    private readonly jwtService: JwtService,
     // private jwtService: JwtService,
   ) {
     this.salt = this.configService.get<string>('SALT');
@@ -204,6 +205,7 @@ export class UsersService {
       select: [
         'id',
         'isActive',
+        'birthday',
         'email',
         'gender',
         'weight',
@@ -253,13 +255,14 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: number): Promise<any | undefined> {
+  async findOne(id: number): Promise<User | undefined> {
     // Récupérer l'utilisateur depuis la base de données
     const user = await this.userRepository.findOne({
       where: { id },
       select: [
         'id',
         'email',
+        'birthday',
         'gender',
         'weight',
         'license',
@@ -276,82 +279,35 @@ export class UsersService {
       ],
     });
 
+    const fieldsToDecrypt = [
+      'email',
+      'name',
+      'firstname',
+      'avatar',
+      'birthday',
+      'date_subscribe',
+      'date_payment',
+      'date_end_pay',
+      'license',
+      'weight',
+      'tel_num',
+      'tel_medic',
+      'tel_emergency',
+    ];
+
     // Vérifier si l'utilisateur n'existe pas
     if (!user) {
       return undefined;
     }
 
-    // Déchiffrer les champs encryptés s'ils sont non null
-    if (user.email?.data) {
-      user.email.data = this.decryptField(user.email.data);
-    }
-    if (user.weight?.data) {
-      user.weight.data = this.decryptField(user.weight.data);
-    }
-    if (user.license?.data) {
-      user.license.data = this.decryptField(user.license.data);
-    }
-    if (user.name?.data) {
-      user.name.data = this.decryptField(user.name.data);
-    }
-    if (user.firstname?.data) {
-      user.firstname.data = this.decryptField(user.firstname.data);
-    }
-    if (user.tel_num?.data) {
-      user.tel_num.data = this.decryptField(user.tel_num.data);
-    }
-    if (user.tel_medic?.data) {
-      user.tel_medic.data = this.decryptField(user.tel_medic.data);
-    }
-    if (user.tel_emergency?.data) {
-      user.tel_emergency.data = this.decryptField(user.tel_emergency.data);
-    }
-    if (user.avatar?.data) {
-      user.avatar.data = this.decryptField(user.avatar.data);
-    }
-    if (user.date_end_pay?.data) {
-      user.date_end_pay.data = this.decryptField(user.date_end_pay.data);
-    }
-    if (user.date_payment?.data) {
-      user.date_payment.data = this.decryptField(user.date_payment.data);
-    }
-    if (user.date_subscribe?.data) {
-      user.date_subscribe.data = this.decryptField(user.date_subscribe.data);
+    for (const field of fieldsToDecrypt) {
+      if (user[field] && user[field].data) {
+        const decryptedField = this.decryptField(user[field].data);
+        user[field] = decryptedField;
+      }
     }
 
-    const result = {
-      id: user.id,
-
-      role: user.role,
-
-      email: user.email?.data ?? null,
-
-      weight: user.weight?.data ?? null,
-
-      license: user.license?.data ?? null,
-
-      name: user.name?.data ?? null,
-
-      firstname: user.firstname?.data ?? null,
-
-      tel_num: user.tel_num?.data ?? null,
-
-      tel_medic: user.tel_medic?.data ?? null,
-
-      tel_emergency: user.tel_emergency?.data ?? null,
-
-      avatar: user.avatar?.data ?? null,
-
-      date_end_pay: user.date_end_pay?.data ?? null,
-
-      date_payment: user.date_payment?.data ?? null,
-
-      date_subscribe: user.date_subscribe?.data ?? null,
-
-      isActive: user.isActive,
-    };
-
-    return result;
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -505,9 +461,10 @@ export class UsersService {
 
   async remove(id: number): Promise<void> {
     const user = await this.findOne(id);
+    const userEmail = user.email.toString();
 
     await this.mailerService.sendMail({
-      to: user.email,
+      to: userEmail,
       subject: 'Suppression de compte',
       template: 'suppression',
       context: {
@@ -527,12 +484,12 @@ export class UsersService {
     // Générer un token unique et le stocker dans la table de réinitialisation de mot de passe
     const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
     console.log(payload);
-    // const resetToken = await this.jwtService.signAsync(payload);
+    const resetToken = await this.jwtService.signAsync(payload);
 
     const decryptedEmail = this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    // const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,
@@ -540,7 +497,7 @@ export class UsersService {
       template: 'reset-password',
       context: {
         email: decryptedEmail,
-        // resetUrl: resetUrl,
+        resetUrl: resetUrl,
       },
     });
   }

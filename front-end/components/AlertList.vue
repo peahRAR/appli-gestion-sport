@@ -7,19 +7,19 @@
           <tr class="bg-gray-200">
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Titre
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Date de fin
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Supprimer
             </th>

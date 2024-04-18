@@ -139,7 +139,7 @@
         <!-- Modal Content -->
         <!-- Avatar -->
         <p>Avatar:</p>
-        <TheAvatar @avatarSaved="avatar = $event" />
+        <TheAvatar @avatarSaved="avatar = $event" message="Fichier image png, jpeg ou jpg de moins de 3 Mo" />
         <!-- Weight -->
         <p>Poids:</p>
         <input

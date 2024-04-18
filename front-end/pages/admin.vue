@@ -9,7 +9,8 @@
         <!-- Inactive Users Table -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
           <inactive-users-table
-            :inactive-users="inactiveUsers"
+            :inactive-users="filterUsers(false)"
+            :pageSize="10"
             @reactivate="reactivateUser"
             @delete="deleteUser"
           />
@@ -17,9 +18,12 @@
         <!-- USERS List -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
          <UserList
-            :users="users"
+            :users="preprocessUsers(filterUsers(true))"
             :sortByList
             :filterList
+            :activeColumns
+            :defaultColumns
+            :columnsNames
             @update:users="updateUsers"
             @open-modal="openModal"
           /> 
@@ -286,25 +290,27 @@ export default {
       alerts: [],
       sortByList: [
         { cat: "Nom", value: "name" },
+        { cat: "Prénom", value: "firstname" },
         { cat: "Age", value: "birthday" },
         { cat: "Poids", value: "weight" },
-        { cat: "Genre", value: "gender" },
+        
       ],
       filterList: [
         { filter: "Filtrer par ...", value: "all" },
-        { filter: "Actifs", value: "isActive" },
         { filter: "Hommes", value: "homme" },
         { filter: "Femmes", value: "femme" },
         {filter: "Date de fin de paiement", value:"dateEndPay"},
       ],
+      activeColumns: ["name", "firstname"],
+      defaultColumns: ["name", "firstname"],
+      columnsNames: { name: "Nom", firstname: "Prénom", birthday: "Age", weight: "Poids" },
     };
   },
   async mounted() {
     // Get The element from the Api At the composant Mounted
     await this.checkUserRole(); // check UserRole
     await this.loadEvents(); // Events
-    await this.loadUsers(); // Users
-    await this.loadInactiveUsers(); // Inactive Users
+    await this.loadAllUsers(); // Users
     await this.fetchAlerts(); // Alerts
   },
   computed: {
@@ -321,6 +327,23 @@ export default {
     },
   },
   methods: {
+     preprocessUsers(users) {
+      return users.map((user) => ({
+        ...user,
+        weight: user.weight ? `${user.weight} Kg` : "-",
+        birthday: this.calculateAge(user.birthday),
+      }));
+    },
+    calculateAge(birthday) {
+      const birthdate = new Date(birthday);
+      const today = new Date();
+      let age = today.getFullYear() - birthdate.getFullYear();
+      const m = today.getMonth() - birthdate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
+        age--;
+      }
+      return age;
+    },
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
@@ -417,7 +440,7 @@ export default {
         this.errorMessage = "Erreur lors de la création du cours: " + error;
       }
     },
-    async loadUsers() {
+    async loadAllUsers() {
       try {
         const token = localStorage.getItem("accessToken");
         // Get Request at the Api for users
@@ -430,13 +453,25 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
-
+        this.loading = false
         // Keep all in Users Array
         this.users = response.data;
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs", error);
       }
+
     },
+    filterUsers(isActive) {
+      // Covert the respons in JSON
+          const allUsers = this.users;
+          // Filter Users
+          const users = allUsers.filter(
+            (user) => user.isActive === isActive
+      );
+
+      return users
+    },
+    
     // Open Selected User Modal to show user details
     openModal(user) {
       this.selectedUser = user;
@@ -505,49 +540,13 @@ export default {
         // Check if the request throw a 200 status
         this.openErrorModal();
         (this.errorMessage = "Mise à jour réussie :"), response;
-        this.loadUsers();
+        this.loadAllUsers();
         this.closeModal();
       } catch (error) {
         this.openErrorModal();
         (this.errorMessage = "Erreur lors de la mise à jour de l'utilisateur"),
           error;
         // Show error message if it not in status 200
-      }
-    },
-
-    async loadInactiveUsers() {
-      try {
-        const token = localStorage.getItem("accessToken");
-        // Get request for All users
-        const url = this.getUrl();
-        const response = await fetch(`${url}/users`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Check if Response is OK (statut 200)
-        if (response.ok) {
-          // Covert the respons in JSON
-          const allUsers = await response.json();
-          // Filter Users
-          this.inactiveUsers = allUsers.filter(
-            (user) => user.isActive === false
-          );
-          this.loading = false;
-        } else {
-          // In error case show error message
-          throw new Error(
-            "Erreur lors du chargement des utilisateurs inactifs"
-          );
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des utilisateurs inactifs",
-          error
-        );
       }
     },
     // Method for activate user is not yet
@@ -568,7 +567,7 @@ export default {
         // Check the response and showw error message if it's not ok
         this.openErrorModal();
         (this.errorMessage = "Utilisateur réactivé avec succès :"), response;
-        await this.loadInactiveUsers();
+        await this.loadAllUsers();
       } catch (error) {
         this.openErrorModal();
         (this.errorMessage = "Erreur lors de la réactivation de l'utilisateur"),
@@ -595,8 +594,7 @@ export default {
           this.openErrorModal();
           this.errorMessage = "L'utilisateur a été supprimé !";
           this.closeModalUser();
-          this.loadUsers();
-          this.loadInactiveUsers();
+          this.loadAllUsers();
         } else {
           this.openErrorModal();
           this.errorMessage = "Erreur lors de la suppression de l'utilisateur";
@@ -629,6 +627,7 @@ export default {
     },
     // Change the user role
     async changeUserRole(userId) {
+      console.log(this.selectedUser.id)
       try {
         const token = localStorage.getItem("accessToken");
         if (token) {
@@ -654,7 +653,7 @@ export default {
                 this.openErrorModal();
                 this.errorMessage =
                   "Le rôle de l'utilisateur a été modifié avec succès";
-                this.loadUsers();
+                this.loadAllUSers();
                 this.closeModal();
               } else {
                 this.openErrorModal();

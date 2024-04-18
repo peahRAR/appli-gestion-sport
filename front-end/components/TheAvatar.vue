@@ -1,7 +1,8 @@
 <template>
-  <div class="avatar-picker bg-gray-200 rounded flex flex-col items-center">
+  <div class="avatar-picker bg-gray-200 p-4 mb-4 rounded flex flex-col items-center">
     <div class="image-container" ref="imageContainer">
-      <NuxtImg v-if="imageUrl"
+      <NuxtImg
+        v-if="imageUrl"
         :src="imageUrl"
         :style="imageStyles"
         class="avatar-image"
@@ -13,22 +14,42 @@
         @mouseup="stopDrag"
       />
     </div>
-    <input type="file" @change="onFileChange" class="mb-4 mt-4" accept="image/png, image/jpeg" />
-    <input step="0.1" type="range" min="1" max="3" scale="0.1" v-model="zoom" />
+    <div class="flex mt-2">
+      <p class="mr-2">Zoom :</p>
+      <input
+        step="0.1"
+        type="range"
+        min="1"
+        max="3"
+        scale="0.1"
+        v-model="zoom"
+      />
+    </div>
+    <input
+      type="file"
+      @change="onFileChange"
+      class="max-w-full mb-4 mt-4"
+      accept="image/png, image/jpeg"
+    />
+    <p>{{ message }}</p>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    message: String,
+  },
   data() {
     return {
       imageUrl: null,
-      zoom: 1,
+      zoom: 1.8,
       dragging: false,
       dragStartX: 0,
       dragStartY: 0,
       imageX: 0,
       imageY: 0,
+     
     };
   },
   computed: {
@@ -42,8 +63,8 @@ export default {
     async onFileChange(event) {
       const file = event.target.files[0];
       if (!/^image\//.test(file.type)) {
-        alert(`${file.name} n'est pas une image !`)
-        return
+        alert(`${file.name} n'est pas une image !`);
+        return;
       }
       this.imageUrl = URL.createObjectURL(file);
       await this.capturedAndEmit();

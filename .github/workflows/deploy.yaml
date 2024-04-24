@@ -17,10 +17,12 @@ jobs:
         node-version: '14'
 
     - name: Install dependencies
-      run: npm install
+      run: cd back 
+        npm install
 
     - name: Build
-      run: npm run build
+      run: cd back 
+        npm run build
 
     - name: Deploy to Google App Engine
       uses: google-github-actions/deploy-appengine@v0.2.0

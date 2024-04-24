@@ -21,7 +21,10 @@ import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobsModule } from './cronjobs/cronjobs.module';
 
+import * as fs from 'fs';
+import * as path from 'path';
 
+const pathToPem = path.join(__dirname, '../ca.pem'); 
 
 @Module({
   imports: [
@@ -44,6 +47,10 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
         database: configService.get('DATABASE_NAME'),
         autoLoadEntities: true,
         entities: [User, Event, ListsMember],
+        ssl: {
+          rejectUnauthorized: true,
+          ca: fs.readFileSync(pathToPem, 'utf8')
+        },
         synchronize: configService.get('TYPEORM_SYNC', 'false') === 'true',
       }),
     }),

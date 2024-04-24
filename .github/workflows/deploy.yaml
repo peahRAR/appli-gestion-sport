@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-    paths:
-      - 'back-end/**' 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest

@@ -17,11 +17,11 @@ jobs:
         node-version: '14'
 
     - name: Install dependencies
-      run: cd back 
+      run: cd back-end 
         npm install
 
     - name: Build
-      run: cd back 
+      run: cd back-end 
         npm run build
 
     - name: Deploy to Google App Engine

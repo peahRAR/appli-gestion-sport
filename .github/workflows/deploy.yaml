@@ -7,10 +7,6 @@ on:
       - main
 
 jobs:
-  job_id:
-    permissions:
-      contents: 'read'
-      id-token: 'write'
   deploy:
     runs-on: ubuntu-latest
     steps:

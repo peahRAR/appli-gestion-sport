@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "engines": {
-    "node": "21.x.x"
+    "node": "20.1.x"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.9.0",

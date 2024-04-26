@@ -9,7 +9,6 @@ handlers:
       redirect_http_response_code: 301
       script: auto
 
-# commande pour demarrer son applicati
 
 env_variables:
   NODE_ENV: 'production'

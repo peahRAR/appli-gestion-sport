@@ -2,6 +2,7 @@ name: Deploy to Google App Engine
 
 on:
   workflow_dispatch: ~
+  pull_request: ~
   push:
     branches:
       - main
@@ -21,7 +22,7 @@ jobs:
       run: |
         cd back-end 
         npm install
-        
+
     - name: Build
       run: |
         cd back-end 

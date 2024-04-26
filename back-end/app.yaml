@@ -1,4 +1,4 @@
-runtime: nodejs18 # Mise à jour de la version du runtime
+runtime: nodejs20 # Mise à jour de la version du runtime
 env: flex
 
 resources:

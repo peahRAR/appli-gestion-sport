@@ -26,6 +26,9 @@ jobs:
         cd back-end 
         npm run build
 
+    - name: Configure GCloud
+      run: gcloud config set app/use_deprecated_preparation True
+
     - name: Deploy to Google App Engine
       uses: google-github-actions/deploy-appengine@v0.2.0
       with:

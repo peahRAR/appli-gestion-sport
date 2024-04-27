@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -23,6 +23,7 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { SecretsService } from './secrets/secrets.service';
 
 const pathToPem = path.join(__dirname, '../ca.pem'); 
 
@@ -36,15 +37,15 @@ const pathToPem = path.join(__dirname, '../ca.pem');
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
+      inject: [ConfigService, SecretsService],
 
-      useFactory: (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService, secretsService: SecretsService) => ({
         type: 'postgres',
-        host: configService.get('DATABASE_HOST'),
-        port: configService.get('DATABASE_PORT'),
-        username: configService.get('DATABASE_USERNAME'),
-        password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'),
+        host: await secretsService.getSecret('DATABASE_HOST'),
+        port: parseInt(await secretsService.getSecret('DATABASE_PORT'), 10),
+        username: await secretsService.getSecret('DATABASE_USERNAME'),
+        password: await secretsService.getSecret('DATABASE_PASSWORD'),
+        database: await secretsService.getSecret('DATABASE_NAME'),
         autoLoadEntities: true,
         entities: [User, Event, ListsMember],
         ssl: {
@@ -65,5 +66,12 @@ const pathToPem = path.join(__dirname, '../ca.pem');
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private secretsService: SecretsService) { }
+
+  async onModuleInit() {
+    const databaseHost = await this.secretsService.getSecret('DATABASE_HOST');
+    console.log(`Database Host: ${databaseHost}`);
+  }
+}
 

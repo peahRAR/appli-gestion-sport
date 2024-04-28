@@ -25,7 +25,6 @@ import * as path from 'path';
 import { SecretsService } from './secrets/secrets.service';
 import { SecretsModule } from './secrets/secrets.module';
 
-const pathToPem = path.join(__dirname, '../ca.pem');
 
 @Module({
   imports: [
@@ -51,7 +50,7 @@ const pathToPem = path.join(__dirname, '../ca.pem');
         entities: [User, Event, ListsMember],
         ssl: {
           rejectUnauthorized: true,
-          ca: fs.readFileSync(pathToPem, 'utf8')
+          ca: await secretsService.getSecret('DATABASE_SSL_CA')
         },
         synchronize: configService.get('TYPEORM_SYNC', 'false') === 'true',
       }),

@@ -3,10 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
-import {User} from './users/users.entity'
-import {Event} from './events/events.entity';
-import {ListsMember} from './lists-members/lists-member.entity'
+import { User } from './users/users.entity';
+import { Event } from './events/events.entity';
+import { ListsMember } from './lists-members/lists-member.entity';
 
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
@@ -24,11 +23,13 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SecretsService } from './secrets/secrets.service';
+import { SecretsModule } from './secrets/secrets.module';
 
-const pathToPem = path.join(__dirname, '../ca.pem'); 
+const pathToPem = path.join(__dirname, '../ca.pem');
 
 @Module({
   imports: [
+    SecretsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -74,4 +75,3 @@ export class AppModule implements OnModuleInit {
     console.log(`Database Host: ${databaseHost}`);
   }
 }
-

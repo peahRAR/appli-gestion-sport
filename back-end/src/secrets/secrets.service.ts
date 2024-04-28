@@ -1,10 +1,14 @@
-// src/secrets/secrets.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
 @Injectable()
 export class SecretsService {
-    private client = new SecretManagerServiceClient();
+    private readonly client: SecretManagerServiceClient;
+    private readonly logger = new Logger(SecretsService.name);
+
+    constructor() {
+        this.client = new SecretManagerServiceClient();
+    }
 
     async getSecret(secretName: string): Promise<string> {
         const [version] = await this.client.accessSecretVersion({
@@ -13,8 +17,11 @@ export class SecretsService {
 
         if (version.payload && version.payload.data) {
             const payload = version.payload.data.toString(); // Convert Buffer to string
+            this.logger.debug(`Secret récupéré avec succès : ${secretName}`);
             return payload;
         }
-        throw new Error('No secret data found.');
+
+        this.logger.error('Aucune donnée secrète trouvée.');
+        throw new Error('Aucune donnée secrète trouvée.');
     }
 }

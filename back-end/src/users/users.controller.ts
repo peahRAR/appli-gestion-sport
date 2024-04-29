@@ -16,31 +16,42 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Storage } from '@google-cloud/storage';
-import { ConfigService } from '@nestjs/config';
 import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
+import { SecretsService } from 'src/secrets/secrets.service';
 
 
 
 @Controller('users')
 export class UsersController {
   // Créez une instance de Storage avec vos informations d'authentification
-  private storage = new Storage({
-    projectId: this.configService.get('PROJECT_ID'),
-    keyFilename: this.configService.get('GOOGLE_APPLICATION_CREDENTIALS'), // Chemin vers votre fichier de clé d'authentification
-  });
+  private storage: Storage; 
+  private bucketName: string;
 
-  // Définissez le nom de votre bucket GCS
-  private bucketName = this.configService.get('BUCKET_NAME');
 
   constructor(
     private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
     @Inject(forwardRef(() => ListsMembersService))
     private listsMembersService: ListsMembersService,
-  ) {}
+    private readonly secretsService: SecretsService,
+  ) {
+    this.initializeStorage();
+  }
+
+  private async initializeStorage(): Promise<void> {
+    const projectId = await this.secretsService.getSecret('PROJECT_ID');
+    const keyFilename = await this.secretsService.getSecret('GOOGLE_APPLICATION_CREDENTIALS');
+    const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
+
+    this.storage = new Storage({
+      projectId: projectId,
+      keyFilename: keyFilename,
+    });
+
+    this.bucketName = bucketName;
+  }
 
   // Utilisez cette fonction pour uploader un fichier sur GCS
   private async uploadFileToGCS(
@@ -69,7 +80,7 @@ export class UsersController {
       });
 
       stream.on('finish', () => {
-        const publicUrl = `https://${this.configService.get('PUBLIC_URL')}/${this.bucketName}/${destination}`;
+        const publicUrl = `https://${this.secretsService.getSecret('PUBLIC_URL')}/${this.bucketName}/${destination}`;
         resolve(publicUrl);
       });
 
@@ -83,7 +94,7 @@ export class UsersController {
 
   async emptyGCSFolder(folderPath: string) {
     const storage = new Storage();
-    const bucketName = this.configService.get('BUCKET_NAME');
+    const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
 
     const options = {
       prefix: folderPath,

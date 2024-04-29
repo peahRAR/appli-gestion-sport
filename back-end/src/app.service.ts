@@ -2,32 +2,30 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from './users/users.service';
 import { User } from './users/users.entity';
 import { ConfigService } from '@nestjs/config';
+import { SecretsService } from './secrets/secrets.service';
 
 @Injectable()
 export class AppService {
   constructor(
     private usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
   ) {}
 
   async initApp(): Promise<User> {
     const users = await this.usersService.findAll();
 
     if (users.length < 1) {
-      const dateSubscribeString = new Date();
-
-      // Convertir la chaîne de caractères de la date en un objet Date
-      const birthday = new Date(this.configService.get('BIRTHDAYSUPERADMIN'));
 
       const superAdmin = {
-        email: this.configService.get('EMAILSUPERADMIN'),
-        password: this.configService.get('PASSWORDSUPERADMIN'),
-        birthday: birthday,
-        name: this.configService.get('NAMESUPERADMIN'),
-        firstname: this.configService.get('FIRSTNAMESUPERADMIN'),
-        date_subscribe: dateSubscribeString,
-        gender: this.configService.get('GENDERSUPERADMIN'),
-        role: this.configService.get('ROLESUPERADMIN'),
+        email: await this.secretsService.getSecret('EMAILSUPERADMIN'),
+        password: await this.secretsService.getSecret('PASSWORDSUPERADMIN'),
+        birthday: new Date(await this.secretsService.getSecret('BIRTHDAYSUPERADMIN')),
+        name: await this.secretsService.getSecret('NAMESUPERADMIN'),
+        firstname: await this.secretsService.getSecret('FIRSTNAMESUPERADMIN'),
+        date_subscribe: new Date(),
+        gender: (await this.secretsService.getSecret('GENDERSUPERADMIN')) === 'true', 
+        role: parseInt(await this.secretsService.getSecret('ROLESUPERADMIN')),
         isActive: true,
         license: null,
         tel_num: null,

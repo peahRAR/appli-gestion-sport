@@ -9,39 +9,39 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
-import { ConfigService } from '@nestjs/config';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { promisify } from 'util';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { createCipheriv, randomBytes, scrypt } from 'crypto';
 import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
 import { JwtService } from '@nestjs/jwt';
+import { SecretsService } from 'src/secrets/secrets.service';
 
 @Injectable()
 export class UsersService {
-  private readonly salt: string;
+  private salt: string;
+
   constructor(
     @InjectRepository(ResetPassword)
     private readonly resetPasswordRepository: Repository<ResetPassword>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly configService: ConfigService,
+    private readonly secretsService: SecretsService,
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
-    // private jwtService: JwtService,
   ) {
-    this.salt = this.configService.get<string>('SALT');
+    this.initialize();
   }
 
-  private createidentifier(email: string): string {
-    const secretKey = this.configService.get<string>('PASSWORDMAIL');
+  async initialize() {
+    this.salt = await this.secretsService.getSecret('SALT');
+  }
+
+  private async createIdentifier(email: string): Promise<string> {
+    const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
-  private createdata(email: string): string {
-    const secret = this.configService.get<string>('ENCRYPTION_KEY');
+  private async createdata(email: string): Promise<string> {
+    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
     if (!secret) {
       throw new Error('Secret key is not defined in the configuration');
     }
@@ -59,31 +59,21 @@ export class UsersService {
     return iv.toString('hex') + ':' + encrypted;
   }
 
-  private createEncryptedField(data: string): string {
-    const secret = this.configService.get<string>('ENCRYPTION_KEY');
-    if (!secret) {
-      throw new Error('Secret key is not defined in the configuration');
-    }
-    // Générer une clé de 32 octets à partir de la phrase secrète
-    const key = crypto.scryptSync(secret, 'salt', 32);
-
-    // Générer un IV aléatoire
+  private async createEncryptedField(data: string): Promise<string> {
+    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
+    const key = crypto.scryptSync(secret, this.salt, 32);
     const iv = crypto.randomBytes(16);
-
-    // Créer/utiliser le chiffreur
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(data, 'utf-8', 'hex');
     encrypted += cipher.final('hex');
-
     return iv.toString('hex') + ':' + encrypted;
   }
 
-  public decryptField(encryptedData: string): string {
-    const secret = this.configService.get<string>('ENCRYPTION_KEY');
-    // Extraire l'IV de la chaîne encryptée
+  public async decryptField(encryptedData: string): Promise<string> {
     const [ivString, encryptedString] = encryptedData.split(':');
     const iv = Buffer.from(ivString, 'hex');
-    const key = crypto.scryptSync(secret, 'salt', 32);
+    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
+    const key = crypto.scryptSync(secret, this.salt, 32);
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
     let decrypted = decipher.update(encryptedString, 'hex', 'utf-8');
     decrypted += decipher.final('utf-8');
@@ -135,12 +125,13 @@ export class UsersService {
     );
 
     // Créer le identifier
-    const identifier = this.createidentifier(createUserDto.email);
+    const identifier = this.createIdentifier(createUserDto.email);
 
     // Verifier que mdp correspond à la regex sinon lever erreur
-    // if (!this.verifyPasswordRegex(createUserDto.password)) {
-    //   throw new Error('Le mot de passe ne correspond pas aux critères requis.');
-    // }
+    if (!this.verifyPasswordRegex(createUserDto.password)) {
+      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
+    }
+
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
@@ -157,6 +148,7 @@ export class UsersService {
     }
 
     const decryptedEmail = createUserDto.email;
+
 
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
@@ -312,7 +304,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | undefined> {
     // Créer le identifier à partir de l'e-mail fourni
-    const identifier = this.createidentifier(email);
+    const identifier = this.createIdentifier(email);
 
     // Rechercher l'utilisateur dans la base de données en utilisant le identifier
     const user = await this.userRepository
@@ -486,7 +478,7 @@ export class UsersService {
     console.log(payload);
     const resetToken = await this.jwtService.signAsync(payload);
 
-    const decryptedEmail = this.decryptField(user.email.data);
+    const decryptedEmail =  this.decryptField(user.email.data);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
     const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;

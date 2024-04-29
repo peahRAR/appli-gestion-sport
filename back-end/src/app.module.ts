@@ -20,8 +20,6 @@ import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronjobsModule } from './cronjobs/cronjobs.module';
 
-import * as fs from 'fs';
-import * as path from 'path';
 import { SecretsService } from './secrets/secrets.service';
 import { SecretsModule } from './secrets/secrets.module';
 

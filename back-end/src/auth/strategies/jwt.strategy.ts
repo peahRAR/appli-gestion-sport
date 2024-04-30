@@ -4,20 +4,16 @@ import { Injectable, UnauthorizedException} from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { SecretsService } from 'src/secrets/secrets.service';
 
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  private static async setup(secretsService: SecretsService, usersService: UsersService): Promise<JwtStrategy> {
-    const secret = await secretsService.getSecret('JWT_SECRET');
-    return new this(secret, usersService);
-  }
-
   constructor(
-    secret: string, // Recevez la clé secrète en tant que paramètre
-    private readonly usersService: UsersService
+    private readonly secretsService: SecretsService,
+    private readonly usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: secret,
+      secretOrKey: async () => await secretsService.getSecret('JWT_SECRET'),
       ignoreExpiration: false,
     });
   }

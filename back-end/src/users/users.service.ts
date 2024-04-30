@@ -31,27 +31,13 @@ export class UsersService {
     this.initialize();
   }
 
-  async initialize() {
-    this.salt = await this.secretsService.getSecret('SALT');
+  private async createIdentifier(email: string): Promise<string> {
+    const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+    return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
-  private async createdata(email: string): Promise<string> {
-    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
-    if (!secret) {
-      throw new Error('Secret key is not defined in the configuration');
-    }
-    // générer une clé de 32 octets à partir de la phrase secret
-    const key = crypto.scryptSync(secret, 'salt', 32);
-
-    // Générer un iv aléatoire
-    const iv = crypto.randomBytes(16);
-
-    // Créer/Uiliser le chiffreur
-    const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-    let encrypted = cipher.update(email, 'utf-8', 'hex');
-    encrypted += cipher.final('hex');
-
-    return iv.toString('hex') + ':' + encrypted;
+  async initialize() {
+    this.salt = await this.secretsService.getSecret('SALT');
   }
 
   private async createEncryptedField(data: string): Promise<string> {
@@ -119,9 +105,9 @@ export class UsersService {
     const encryptedFirstName = await this.createEncryptedField(
       createUserDto.firstname,
     );
-    const encryptedEmail = await this.createEncryptedField(createUserDto.email);
+    const emailData = await this.createEncryptedField(createUserDto.email)
 
-
+    const encryptedEmail = await this.createIdentifier(createUserDto.email);
 
     // Verifier que mdp correspond à la regex sinon lever erreur
     if (!this.verifyPasswordRegex(createUserDto.password)) {
@@ -133,8 +119,8 @@ export class UsersService {
 
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'encryptedEmail' = :encryptedEmail", {
-        encryptedEmail,
+      .where("users.email->>'identifier' = :identifier", {
+        identifier: encryptedEmail,
       })
       .getOne();
 
@@ -160,7 +146,7 @@ export class UsersService {
       password: hashedPassword,
       email: {
         identifier: encryptedEmail,
-        data: encryptedEmail,
+        data: emailData,
       },
       birthday: {
         identifier: encryptedBirthday,
@@ -300,7 +286,7 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | undefined> {
     // Créer le identifier à partir de l'e-mail fourni
-    const identifier = this.createEncryptedField(email);
+    const identifier = await this.createIdentifier(email);
 
     // Rechercher l'utilisateur dans la base de données en utilisant le identifier
     const user = await this.userRepository
@@ -368,7 +354,6 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_num) {
-      console.log('tel num change');
       const telNumEncrypt = await this.createEncryptedField(updateUserDto.tel_num);
       user.tel_num = {
         identifier: telNumEncrypt,
@@ -376,7 +361,6 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_medic) {
-      console.log('tel medic change');
       const telMedicEncrypt = await this.createEncryptedField(
         updateUserDto.tel_medic,
       );
@@ -386,7 +370,6 @@ export class UsersService {
       };
     }
     if (updateUserDto.tel_emergency) {
-      console.log('tel emergency change');
       const telEmergencyEncrypt = await this.createEncryptedField(
         updateUserDto.tel_emergency,
       );
@@ -396,7 +379,6 @@ export class UsersService {
       };
     }
     if (updateUserDto.weight) {
-      console.log('weight change');
       const weightEncrypt = await this.createEncryptedField(
         updateUserDto.weight.toString(),
       );
@@ -406,7 +388,6 @@ export class UsersService {
       };
     }
     if (updateUserDto.license) {
-      console.log('license');
       const licenseEncrypt = await this.createEncryptedField(
         updateUserDto.license.toString(),
       );
@@ -471,7 +452,6 @@ export class UsersService {
 
     // Générer un token unique et le stocker dans la table de réinitialisation de mot de passe
     const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
-    console.log(payload);
     const resetToken = await this.jwtService.signAsync(payload);
 
     const decryptedEmail = await this.decryptField(user.email.data);

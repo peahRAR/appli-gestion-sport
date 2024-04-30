@@ -50,7 +50,7 @@ import { SecretsModule } from './secrets/secrets.module';
           rejectUnauthorized: true,
           ca: await secretsService.getSecret('DATABASE_SSL_CA')
         },
-        synchronize: 'false',
+        synchronize: false,
       }),
     }),
     UsersModule,

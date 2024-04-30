@@ -47,7 +47,7 @@ import { SecretsModule } from './secrets/secrets.module';
         autoLoadEntities: true,
         entities: [User, Event, ListsMember],
         ssl: {
-          rejectUnauthorized: true,
+          rejectUnauthorized: false,
           ca: await secretsService.getSecret('DATABASE_SSL_CA')
         },
         synchronize: false,

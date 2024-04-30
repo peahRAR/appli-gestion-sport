@@ -70,7 +70,8 @@ export class UsersService {
     const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
     const key = crypto.scryptSync(secret, this.salt, 32);
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decrypted = decipher.update(encryptedString, 'hex', 'utf-8');
+    decipher.setAutoPadding(false);
+    let decrypted = decipher.update(Buffer.from(encryptedString, 'hex'), null, 'utf-8');
     decrypted += decipher.final('utf-8');
     return decrypted;
   }

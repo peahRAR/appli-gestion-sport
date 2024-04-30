@@ -14,7 +14,6 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AlertModule } from './alert/alert.module';
-import { mailerConfig } from './mailer.config';
 import { PassportModule } from '@nestjs/passport';
 
 import { ScheduleModule } from '@nestjs/schedule';
@@ -22,6 +21,7 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
 
 import { SecretsService } from './secrets/secrets.service';
 import { SecretsModule } from './secrets/secrets.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 
 @Module({
@@ -30,7 +30,31 @@ import { SecretsModule } from './secrets/secrets.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MailerModule.forRoot(mailerConfig),
+    MailerModule.forRootAsync({
+      imports: [SecretsModule], // Assurez-vous que SecretsModule est importé
+      inject: [SecretsService], // Injectez SecretsService pour l'utiliser dans useFactory
+      useFactory: async (secretsService: SecretsService) => ({
+        transport: {
+          host: await secretsService.getSecret('SMTP_HOST'),
+          port: parseInt(await secretsService.getSecret('SMTP_PORT'), 10),
+          secure: false, // Note: Set to true if using port 465, or if explicitly needed
+          auth: {
+            user: await secretsService.getSecret('SMTP_USER'),
+            pass: await secretsService.getSecret('SMTP_PASS'),
+          },
+        },
+        defaults: {
+          from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
+        },
+        template: {
+          dir: process.cwd() + '/templates/email/',
+          adapter: new HandlebarsAdapter(), // or any other adapter
+          options: {
+            strict: false,
+          },
+        },
+      }),
+    }),
     ScheduleModule.forRoot(),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forRootAsync({

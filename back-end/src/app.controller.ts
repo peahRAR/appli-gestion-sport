@@ -16,6 +16,7 @@ export class AppController {
   @Public()
   @Get('/wake-up')
   wakeUp() {
+    console.log('Wake-up route called');
     return 'Application réveillée!';
   }
 }

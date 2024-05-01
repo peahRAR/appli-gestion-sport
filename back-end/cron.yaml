@@ -1,0 +1,6 @@
+cron:
+  - description: "Réveiller l'application juste avant minuit"
+    url: /wake-up
+    schedule: '58 23 * * *'
+    timezone: 'Europe/Paris' 
+

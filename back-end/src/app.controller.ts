@@ -12,4 +12,10 @@ export class AppController {
   initApp(): Promise<User> {
     return this.appService.initApp();
   }
+
+  @Public()
+  @Get('/wake-up')
+  wakeUp() {
+    return 'Application réveillée!';
+  }
 }

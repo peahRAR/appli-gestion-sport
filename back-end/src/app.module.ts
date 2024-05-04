@@ -74,7 +74,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           rejectUnauthorized: false,
           ca: await secretsService.getSecret('DATABASE_SSL_CA')
         },
-        synchronize: false,
+        synchronize: configService.get('TYPEORM_SYNC', 'false') === 'true',
       }),
     }),
     UsersModule,

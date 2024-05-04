@@ -36,9 +36,9 @@ export class AdminService {
     await this.userRepository.save(user);
 
     // Décrypter l'adresse email
-    const decryptedEmail = await this.usersService.decryptField(user.email.data);
+    const decryptedEmail = await this.usersService.decryptField(user.email , true);
 
-    
+
     await this.mailerService.sendMail({
         to: decryptedEmail,
         subject: 'Confirmation de compte',

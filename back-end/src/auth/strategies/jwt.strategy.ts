@@ -13,7 +13,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: async () => await secretsService.getSecret('JWT_SECRET'),
+      secretOrKeyProvider: async (request, rawJwtToken, callback) => {
+        try {
+          const secretKey = await secretsService.getSecret('JWT_SECRET');
+          callback(null, secretKey); // Assurez-vous que cette fonction callback est bien appelée avec les bons paramètres.
+        } catch (error) {
+          callback(error, null);
+        }
+      },
       ignoreExpiration: false,
     });
   }

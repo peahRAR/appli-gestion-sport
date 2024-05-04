@@ -31,34 +31,65 @@ export class UsersService {
     this.initialize();
   }
 
+  async initialize() {
+    this.salt = await this.secretsService.getSecret('SALT');
+  }
+
   private async createIdentifier(email: string): Promise<string> {
     const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
-  async initialize() {
-    this.salt = await this.secretsService.getSecret('SALT');
-  }
-
-  private async createEncryptedField(data: string): Promise<string> {
+  private async createEncryptedField(data: string, isEmail: boolean = false): Promise<string> {
+    console.log("Crypt")
+    // Initialisation par défaut avec la clé et l'IV pour les cas généraux
     const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
-    const key = crypto.scryptSync(secret, this.salt, 32);
-    const iv = crypto.randomBytes(16);
+    let key = crypto.scryptSync(secret, this.salt, 32);
+    let iv = crypto.randomBytes(16);
+
+    // Si c'est un email, utiliser une clé spécifique et un IV fixe
+    if (isEmail) {
+      console.log("email")
+      const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+      key = crypto.scryptSync(secretKey, this.salt, 32);
+      iv = Buffer.from('unIVfixe16octets'); // Corrigé pour être exactement 16 octets
+    }
+
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(data, 'utf-8', 'hex');
     encrypted += cipher.final('hex');
     return iv.toString('hex') + ':' + encrypted;
   }
 
-  public async decryptField(encryptedData: string): Promise<string> {
-    const [ivString, encryptedString] = encryptedData.split(':');
-    const iv = Buffer.from(ivString, 'hex');
-    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
-    const key = crypto.scryptSync(secret, this.salt, 32);
+  splitEncryptedField(encryptedData: string): object {
+    const [identifier, data] = encryptedData.split(':');
+    return { identifier, data }
+  }
+
+  public async decryptField(encryptedObj: { identifier: string, data: string }, isEmail: boolean = false): Promise<string> {
+    // Récupérer l'IV et les données cryptées depuis l'objet
+    const { identifier, data } = encryptedObj;
+
+    // Initialisation par défaut en utilisant la clé de cryptage générale
+    const defaultSecret = await this.secretsService.getSecret('ENCRYPTION_KEY');
+    let key = crypto.scryptSync(defaultSecret, this.salt, 32);
+    console.log("identifier : " + identifier);
+    console.log("data : " + data)
+    const iv = Buffer.from(identifier, 'hex');  // Convertir l'IV hexadécimal en Buffer
+
+    // Condition spécifique pour les emails
+    if (isEmail) {
+      const emailSecretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+      key = crypto.scryptSync(emailSecretKey, this.salt, 32);
+      // L'IV est déjà fixé lors du cryptage pour les emails
+    }
+
+    // Créer un déchiffreur avec l'algorithme, la clé, et l'IV
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    decipher.setAutoPadding(false);
-    let decrypted = decipher.update(Buffer.from(encryptedString, 'hex'), null, 'utf-8');
-    decrypted += decipher.final('utf-8');
+    console.log('Data to decrypt:', data);
+    let decrypted = decipher.update(data, 'hex', 'utf-8');
+    decrypted += decipher.final('utf-8');  // Concaténer le résultat final au texte déchiffré
+
     return decrypted;
   }
 
@@ -98,16 +129,17 @@ export class UsersService {
     const dateSubscribeString = new Date().toString();
 
     // Créer les champs encryptés
-    const encryptedBirthday = await this.createEncryptedField(birthdayString);
+    const encryptedBirthday = this.splitEncryptedField(await this.createEncryptedField(birthdayString));
     const encryptedDateSubscribe =
-      await this.createEncryptedField(dateSubscribeString);
-    const encryptedName = await this.createEncryptedField(createUserDto.name);
-    const encryptedFirstName = await this.createEncryptedField(
-      createUserDto.firstname,
+      this.splitEncryptedField(await this.createEncryptedField(dateSubscribeString));
+    const encryptedName = this.splitEncryptedField(await this.createEncryptedField(createUserDto.name));
+    const encryptedFirstName = this.splitEncryptedField(await this.createEncryptedField(
+      createUserDto.firstname)
     );
-    const emailData = await this.createEncryptedField(createUserDto.email)
+    const encryptedEmail = this.splitEncryptedField(await this.createEncryptedField(createUserDto.email, true));
 
-    const encryptedEmail = await this.createIdentifier(createUserDto.email);
+
+
 
     // Verifier que mdp correspond à la regex sinon lever erreur
     if (!this.verifyPasswordRegex(createUserDto.password)) {
@@ -117,12 +149,15 @@ export class UsersService {
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    console.log(" Email crypt : ")
+    console.log(encryptedEmail)
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'identifier' = :identifier", {
-        identifier: encryptedEmail,
-      })
+      .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
+    
+    console.log( "existant : " + existingUser)
+    console.log( existingUser)
 
     // Si un utilisateur existe déjà avec le même identifier, renvoyer une erreur
     if (existingUser) {
@@ -135,31 +170,17 @@ export class UsersService {
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
       gender: createUserDto.gender,
-      firstname: {
-        identifier: encryptedFirstName,
-        data: encryptedFirstName,
-      },
-      name: {
-        identifier: encryptedName,
-        data: encryptedName,
-      },
+      firstname: encryptedFirstName,
+      name: encryptedName,
       password: hashedPassword,
-      email: {
-        identifier: encryptedEmail,
-        data: emailData,
-      },
-      birthday: {
-        identifier: encryptedBirthday,
-        data: encryptedBirthday,
-      },
-      date_subscribe: {
-        identifier: encryptedDateSubscribe,
-        data: encryptedDateSubscribe,
-      },
+      email: encryptedEmail,
+      birthday: encryptedBirthday,
+      date_subscribe: encryptedDateSubscribe,
       role: role,
       isActive: isActive,
     });
 
+    console.log(decryptedEmail)
     await this.mailerService.sendMail({
       to: decryptedEmail,
       subject: 'Confirmation de compte',
@@ -219,7 +240,8 @@ export class UsersService {
       // Parcourir chaque champ à décrypter
       for (const field of fieldsToDecrypt) {
         if (user[field] && user[field].data) {
-          const decryptedField = this.decryptField(user[field].data);
+          const isEmail = field === 'email';
+          const decryptedField = await this.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
           user[field] = decryptedField;
         }
       }
@@ -276,7 +298,8 @@ export class UsersService {
 
     for (const field of fieldsToDecrypt) {
       if (user[field] && user[field].data) {
-        const decryptedField = this.decryptField(user[field].data);
+        const isEmail = field === 'email';
+        const decryptedField = await this.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
         user[field] = decryptedField;
       }
     }
@@ -286,16 +309,15 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | undefined> {
     // Créer le identifier à partir de l'e-mail fourni
-    const identifier = await this.createIdentifier(email);
+    const encryptedEmail = await this.splitEncryptedField(await this.createEncryptedField(email, true));
 
     // Rechercher l'utilisateur dans la base de données en utilisant le identifier
     const user = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'identifier' = :identifier", {
-        identifier,
-      })
+      .where("users.email->>'identifier' = :identifier", { identifier: (encryptedEmail as { identifier: string }).identifier })
       .getOne();
 
+    console.log(user)
     return user;
   }
 
@@ -324,7 +346,7 @@ export class UsersService {
       const isPasswordValid =
         (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
         updateUserDto.currentPassword ===
-          this.secretsService.getSecret('REINITIALIZATIONKEY');
+        this.secretsService.getSecret('REINITIALIZATIONKEY');
       if (!isPasswordValid) {
         throw new UnauthorizedException('Mot de passe actuel incorrect.');
       }
@@ -336,89 +358,94 @@ export class UsersService {
       user.password = hashedPassword;
     }
 
+    interface EncryptedField {
+      identifier: string;
+      data: string;
+    }
+
     // Crypter les autres champs s'ils sont non null
     if (updateUserDto.name) {
-      const nameEncrypt = await this.createEncryptedField(updateUserDto.name);
+      const nameEncrypt = this.splitEncryptedField(await this.createEncryptedField(updateUserDto.name)) as EncryptedField;
       user.name = {
-        identifier: nameEncrypt,
-        data: nameEncrypt,
+        identifier: nameEncrypt.identifier,
+        data: nameEncrypt.data,
       };
     }
     if (updateUserDto.firstname) {
-      const firstnameEncrypt = await this.createEncryptedField(
-        updateUserDto.firstname,
-      );
+      const firstnameEncrypt = this.splitEncryptedField(await this.createEncryptedField(
+        updateUserDto.firstname)
+      ) as EncryptedField;
       user.firstname = {
-        identifier: firstnameEncrypt,
-        data: firstnameEncrypt,
+        identifier: firstnameEncrypt.identifier,
+        data: firstnameEncrypt.data,
       };
     }
     if (updateUserDto.tel_num) {
-      const telNumEncrypt = await this.createEncryptedField(updateUserDto.tel_num);
+      const telNumEncrypt = this.splitEncryptedField(await this.createEncryptedField(updateUserDto.tel_num)) as EncryptedField;
       user.tel_num = {
-        identifier: telNumEncrypt,
-        data: telNumEncrypt,
+        identifier: telNumEncrypt.identifier,
+        data: telNumEncrypt.data,
       };
     }
     if (updateUserDto.tel_medic) {
-      const telMedicEncrypt = await this.createEncryptedField(
-        updateUserDto.tel_medic,
-      );
+      const telMedicEncrypt = this.splitEncryptedField(await this.createEncryptedField(
+        updateUserDto.tel_medic)) as EncryptedField
+        ;
       user.tel_medic = {
-        identifier: telMedicEncrypt,
-        data: telMedicEncrypt,
+        identifier: telMedicEncrypt.identifier,
+        data: telMedicEncrypt.data,
       };
     }
     if (updateUserDto.tel_emergency) {
-      const telEmergencyEncrypt = await this.createEncryptedField(
-        updateUserDto.tel_emergency,
-      );
+      const telEmergencyEncrypt = this.splitEncryptedField(await this.createEncryptedField(
+        updateUserDto.tel_emergency)
+      ) as EncryptedField;
       user.tel_emergency = {
-        identifier: telEmergencyEncrypt,
-        data: telEmergencyEncrypt,
+        identifier: telEmergencyEncrypt.identifier,
+        data: telEmergencyEncrypt.data,
       };
     }
     if (updateUserDto.weight) {
-      const weightEncrypt = await this.createEncryptedField(
-        updateUserDto.weight.toString(),
-      );
+      const weightEncrypt = this.splitEncryptedField(await this.createEncryptedField(
+        updateUserDto.weight.toString())
+      ) as EncryptedField;
       user.weight = {
-        identifier: weightEncrypt,
-        data: weightEncrypt,
+        identifier: weightEncrypt.identifier,
+        data: weightEncrypt.data,
       };
     }
     if (updateUserDto.license) {
-      const licenseEncrypt = await this.createEncryptedField(
-        updateUserDto.license.toString(),
-      );
+      const licenseEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+        updateUserDto.license.toString())
+      ) as EncryptedField;
       user.license = {
-        identifier: licenseEncrypt,
-        data: licenseEncrypt,
+        identifier: licenseEncrypt.identifier,
+        data: licenseEncrypt.data,
       };
     }
     if (updateUserDto.date_payment) {
-      const datePaymentEncrypt = await this.createEncryptedField(
-        updateUserDto.date_payment.toString(),
-      );
+      const datePaymentEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+        updateUserDto.date_payment.toString())
+      ) as EncryptedField;
       user.date_payment = {
-        identifier: datePaymentEncrypt,
-        data: datePaymentEncrypt,
+        identifier: datePaymentEncrypt.identifier,
+        data: datePaymentEncrypt.data,
       };
     }
     if (updateUserDto.date_end_pay) {
-      const dateEndPayEncrypt = await this.createEncryptedField(
-        updateUserDto.date_end_pay.toString(),
-      );
+      const dateEndPayEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+        updateUserDto.date_end_pay.toString())
+      ) as EncryptedField;
       user.date_end_pay = {
-        identifier: dateEndPayEncrypt,
-        data: dateEndPayEncrypt,
+        identifier: dateEndPayEncrypt.identifier,
+        data: dateEndPayEncrypt.data,
       };
     }
     if (updateUserDto.avatar) {
-      const avatarEncrypt = await this.createEncryptedField(updateUserDto.avatar);
+      const avatarEncrypt = this.splitEncryptedField( await this.createEncryptedField(updateUserDto.avatar)) as EncryptedField;
       user.avatar = {
-        identifier: avatarEncrypt,
-        data: avatarEncrypt,
+        identifier: avatarEncrypt.identifier,
+        data: avatarEncrypt.data,
       };
     }
     // Enregistrer les modifications
@@ -454,7 +481,7 @@ export class UsersService {
     const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
     const resetToken = await this.jwtService.signAsync(payload);
 
-    const decryptedEmail = await this.decryptField(user.email.data);
+    const decryptedEmail = await this.decryptField(user.email, true);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
     const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;

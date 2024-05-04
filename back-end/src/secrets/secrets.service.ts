@@ -5,6 +5,7 @@ import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 export class SecretsService {
     private readonly client: SecretManagerServiceClient;
     private readonly logger = new Logger(SecretsService.name);
+    private jwtSecret: string;
 
     constructor() {
         this.client = new SecretManagerServiceClient();
@@ -20,6 +21,7 @@ export class SecretsService {
             this.logger.debug(`Secret récupéré avec succès : ${secretName}`);
             return payload;
         }
+
 
         this.logger.error('Aucune donnée secrète trouvée.');
         throw new Error('Aucune donnée secrète trouvée.');

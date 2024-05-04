@@ -110,18 +110,23 @@ export class UsersController {
   @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
+    console.log("CREATE")
     return this.usersService.create(createUserDto);
   }
 
+
   @Get()
   findAll() {
+    console.log("find all")
     return this.usersService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log("find by id")
     return this.usersService.findOne(+id);
   }
+
 
   @UseGuards(UserIdOradminRoleGuard)
   @Patch(':id')

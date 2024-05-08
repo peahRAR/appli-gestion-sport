@@ -1,0 +1,37 @@
+name: Deploy Frontend to Google Cloud Storage
+
+on:
+  workflow_dispatch: ~
+  push:
+    branches:
+      - main
+    paths:
+      - 'front-end/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: |
+        cd front-end
+        npm install
+
+    - name: Build frontend
+      run: |
+        cd front-end
+        npm run generate
+
+    - name: Deploy to Google Cloud Storage
+      uses: google-github-actions/upload-cloud-storage@v0.8.0
+      with:
+        path: front-end/dist
+        destination: gs://${{ secrets.GCS_BUCKET_NAME }}
+        credentials: ${{ secrets.GCP_SA_KEY }}

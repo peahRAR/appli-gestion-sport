@@ -24,6 +24,9 @@ jobs:
       with:
         node-version: '20'
 
+    - name: Change directory
+      run: cd front-end 
+
     - name: Install NPM dependencies
       run: npm install
 

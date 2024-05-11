@@ -24,13 +24,12 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Change directory
-      run: cd front-end 
-
     - name: Install NPM dependencies
+      working-directory: ./front-end
       run: npm install
 
     - name: Generate static project
+      working-directory: ./front-end
       run: npm run generate
 
     - name: Authenticate to Google Cloud

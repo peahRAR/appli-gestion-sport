@@ -42,7 +42,7 @@ jobs:
       uses: google-github-actions/upload-cloud-storage@v2
       with:
         path: ./front-end/dist  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
-        destination: gs://${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
+        destination: ${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
 
     - name: Log upload
       run: echo "Uploaded files to ${{ steps.upload-file.outputs.uploaded }}"

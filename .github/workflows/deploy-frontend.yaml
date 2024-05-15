@@ -32,6 +32,13 @@ jobs:
       working-directory: ./front-end
       run: npm run generate
 
+    - name: Verify dist folder exists
+      run: |
+        if [ ! -d "./front-end/dist" ]; then
+          echo "dist folder not found"
+          exit 1
+        fi
+
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
@@ -41,7 +48,7 @@ jobs:
       id: 'upload-file'
       uses: google-github-actions/upload-cloud-storage@v2
       with:
-        path: ./front-end/dist/**  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
+        path: ./front-end/dist/  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
         destination: ${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
 
     - name: Log upload

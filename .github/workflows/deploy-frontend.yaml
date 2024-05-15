@@ -32,6 +32,9 @@ jobs:
       working-directory: ./front-end
       run: npm run generate
 
+    - name: List generated files
+      run: ls -la ./front-end/dist
+
     - name: Verify dist folder exists
       run: |
         if [ ! -d "./front-end/dist" ]; then
@@ -49,6 +52,7 @@ jobs:
       uses: google-github-actions/upload-cloud-storage@v2
       with:
         path: ./front-end/dist/*  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
+        parent: false
         destination: ${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
 
     - name: Log upload

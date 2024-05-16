@@ -1,5 +1,6 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
+  app: { baseURL: process.env.CI ? "/components-library/" : "/" },
   ssr: false,
   modules: ["@nuxt/image", "nuxt-icon", "@pinia/nuxt"],
   css: ["~/assets/main.css"],

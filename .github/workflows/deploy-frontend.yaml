@@ -51,7 +51,7 @@ jobs:
       id: 'upload-file'
       uses: google-github-actions/upload-cloud-storage@v2
       with:
-        path: ./front-end/dist/*  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
+        path: ./front-end/dist/  # Assurez-vous que le dossier correspond à la sortie de `npm run generate`
         parent: false
         destination: ${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
 

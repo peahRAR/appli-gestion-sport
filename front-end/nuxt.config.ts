@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
-    baseURL: process.env.CI ? "https://storage.googleapis.com/frontend-app-mma" : "/",
+    baseURL: process.env.CI ? "/storage.googleapis.com/frontend-app-mma" : "/",
   },
 
   ssr: false,

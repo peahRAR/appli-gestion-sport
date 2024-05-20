@@ -1,7 +1,8 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
-    baseURL: process.env.CI ? "/storage.googleapis.com/frontend-app-mma" : "/",
+    baseURL: '/', // Base URL de l'application (la racine)
+    buildAssetsDir: '/_nuxt/', // Dossier des assets de build
   },
 
   ssr: false,

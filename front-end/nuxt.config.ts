@@ -2,7 +2,6 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
     baseURL: process.env.CI ? "/frontend-app-mma/" : "/",
-    buildAssetsDir: process.env.CI ? '/frontend-app-mma/_nuxt/' : '/_nuxt/'
   },
   ssr: false,
   modules: ["@nuxt/image", "nuxt-icon", "@pinia/nuxt"],

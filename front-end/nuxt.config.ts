@@ -13,12 +13,12 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  // runtimeConfig: {
-  //   public: {
-  //     siteUrl: process.env.API_URL,
-  //     resetKey: process.env.REINITIALIZATIONKEY,
-  //     frontVersion: process.env.FRONTEND_VERSION,
-  //     backVersion: process.env.BACKEND_VERSION,
-  //   },
-  // },
+  runtimeConfig: {
+    public: {
+      siteUrl: process.env.API_URL,
+      resetKey: process.env.REINITIALIZATIONKEY,
+      frontVersion: "Bêta",
+      backVersion: "1.0",
+    },
+  },
 });

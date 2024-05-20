@@ -14,8 +14,17 @@ export default defineNuxtConfig({
     public: {
       siteUrl: process.env.API_URL,
       resetKey: process.env.REINITIALIZATIONKEY,
-      frontVersion: "Bêta",
+      frontVersion: " Bêta",
       backVersion: "1.0",
     },
   },
+
+  nitro: {
+    prerender: {
+      routes: [
+        '/_ipx/w_3072&f_png/MMABsxLogo.png'
+      ]
+    }
+  }
+
 });

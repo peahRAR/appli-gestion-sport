@@ -1,15 +1,9 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
-    baseURL: process.env.CI ? "https://storage.googleapis.com/frontend-app-mma" : "/",
+    baseURL: process.env.CI ? "/storage.googleapis.com/frontend-app-mma" : "/",
   },
-  nitro: {
-    baseURL: "https://storage.googleapis.com/frontend-app-mma",
-    prerender: {
-      crawlLinks: true,
-      failOnError: false,
-    },
-  },
+
   ssr: false,
   modules: ["@nuxt/image", "nuxt-icon", "@pinia/nuxt"],
   css: ["~/assets/main.css"],

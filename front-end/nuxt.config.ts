@@ -22,7 +22,15 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       routes: [
-        '/_ipx/w_3072&f_png/MMABsxLogo.png'
+        '/_ipx/w_320&f_webp/MMABsxLogo.png',
+        '/_ipx/w_640&f_webp/MMABsxLogo.png',
+        '/_ipx/w_768&f_webp/MMABsxLogo.png',
+        '/_ipx/w_1024&f_webp/MMABsxLogo.png',
+        '/_ipx/w_1280&f_webp/MMABsxLogo.png',
+        '/_ipx/w_1536&f_webp/MMABsxLogo.png',
+        '/_ipx/w_2048&f_webp/MMABsxLogo.png',
+        '/_ipx/w_2560&f_webp/MMABsxLogo.png',
+        '/_ipx/w_3072&f_webp/MMABsxLogo.png',
       ]
     }
   }

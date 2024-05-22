@@ -119,13 +119,13 @@ export default {
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
-      console.log(url)
       return url;
     },
     // LOGIN API method
     async signIn() {
       console.log("Sign In");
       const url = this.getUrl();
+      console.log(url)
       try {
         const { data } = await useFetch(`${url}/auth/login`, {
           method: "POST",

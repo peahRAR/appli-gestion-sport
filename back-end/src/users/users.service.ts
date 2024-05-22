@@ -484,7 +484,7 @@ export class UsersService {
     const decryptedEmail = await this.decryptField(user.email, true);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
-    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+    const resetUrl = `https://app.mmabaisieux.fr/reset-password?token=${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,

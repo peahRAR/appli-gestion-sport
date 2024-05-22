@@ -12,8 +12,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      siteUrl: process.env.API_URL,
-      resetKey: process.env.REINITIALIZATIONKEY,
+      siteUrl: "https://mma-app-api.mmabaisieux.fr",
       frontVersion: " Bêta",
       backVersion: "1.0",
     },

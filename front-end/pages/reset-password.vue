@@ -118,11 +118,6 @@ export default {
       const url = config.public.siteUrl;
       return url;
     },
-    getKey() {
-      const config = useRuntimeConfig();
-      const key = config.public.resetKey;
-      return key;
-    },
     // Submit the form to update the database via API
     async resetPassword() {
       if (this.password !== this.confirmPassword) {
@@ -139,7 +134,6 @@ export default {
 
       // Build the PATCH request URL with user ID
       const url = this.getUrl();
-      const resetKey = this.getKey();
 
       try {
         // Perform the PATCH request to update user password
@@ -147,7 +141,6 @@ export default {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            currentPassword: resetKey,
             password: this.password,
           }),
           headers: {

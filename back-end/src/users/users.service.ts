@@ -472,6 +472,8 @@ export class UsersService {
 
   async requestPasswordReset(email: string): Promise<void> {
     // Rechercher l'utilisateur par email et récupérer son ID
+    console.log("Request new password")
+
     const user = await this.findByEmail(email);
     if (!user) {
       throw new Error('Utilisateur non trouvé.');

@@ -55,5 +55,8 @@ jobs:
         parent: false
         destination: ${{ secrets.GCS_BUCKET_NAME }}  # Remplacez par le nom de votre bucket
 
+    - name: Set Cache-Control metadata
+      run: gsutil -m setmeta -h "Cache-Control:private, max-age=0, no-transform" 'gs://${{ secrets.GCS_BUCKET_NAME }}/**'
+
     - name: Log upload
       run: echo "Uploaded files to ${{ steps.upload-file.outputs.uploaded }}"

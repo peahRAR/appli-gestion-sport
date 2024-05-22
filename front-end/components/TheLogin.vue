@@ -119,6 +119,7 @@ export default {
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;
+      console.log(url)
       return url;
     },
     // LOGIN API method

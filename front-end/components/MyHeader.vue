@@ -54,13 +54,10 @@ export default {
     checkAuthentication() {
       try {
         const accessToken = localStorage.getItem("accessToken");
-        console.log(accessToken);
-        console.log(typeof (accessToken));
 
         // Puisque `null` et la chaîne vide sont tous les deux falsy, 
         // cette vérification empêche d'entrer dans le bloc si `accessToken` n'est pas valide
         if (accessToken) {
-          console.log("coucou");
 
           // La chaîne n'est décodée et analysée que si `accessToken` est truthy
           const payloadBase64 = accessToken.split(".")[1];

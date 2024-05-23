@@ -41,7 +41,6 @@ export class UsersService {
   }
 
   private async createEncryptedField(data: string, isEmail: boolean = false): Promise<string> {
-    console.log("Crypt")
     // Initialisation par défaut avec la clé et l'IV pour les cas généraux
     const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
     let key = crypto.scryptSync(secret, this.salt, 32);
@@ -49,7 +48,6 @@ export class UsersService {
 
     // Si c'est un email, utiliser une clé spécifique et un IV fixe
     if (isEmail) {
-      console.log("email")
       const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
       key = crypto.scryptSync(secretKey, this.salt, 32);
       iv = Buffer.from('unIVfixe16octets'); // Corrigé pour être exactement 16 octets
@@ -73,8 +71,6 @@ export class UsersService {
     // Initialisation par défaut en utilisant la clé de cryptage générale
     const defaultSecret = await this.secretsService.getSecret('ENCRYPTION_KEY');
     let key = crypto.scryptSync(defaultSecret, this.salt, 32);
-    console.log("identifier : " + identifier);
-    console.log("data : " + data)
     const iv = Buffer.from(identifier, 'hex');  // Convertir l'IV hexadécimal en Buffer
 
     // Condition spécifique pour les emails
@@ -86,7 +82,6 @@ export class UsersService {
 
     // Créer un déchiffreur avec l'algorithme, la clé, et l'IV
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    console.log('Data to decrypt:', data);
     let decrypted = decipher.update(data, 'hex', 'utf-8');
     decrypted += decipher.final('utf-8');  // Concaténer le résultat final au texte déchiffré
 
@@ -310,11 +305,12 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | undefined> {
     // Créer le identifier à partir de l'e-mail fourni
     const encryptedEmail = await this.splitEncryptedField(await this.createEncryptedField(email, true));
+    console.log(encryptedEmail)
 
-    // Rechercher l'utilisateur dans la base de données en utilisant le identifier
+    // Rechercher l'utilisateur dans la base de données en utilisant le data
     const user = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'identifier' = :identifier", { identifier: (encryptedEmail as { identifier: string }).identifier })
+      .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
 
     console.log(user)

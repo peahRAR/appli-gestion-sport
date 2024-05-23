@@ -28,7 +28,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 @Controller('users')
 export class UsersController {
   // Créez une instance de Storage avec vos informations d'authentification
-  private storage: Storage; 
+  private storage: Storage;
   private bucketName: string;
 
 
@@ -37,51 +37,61 @@ export class UsersController {
     @Inject(forwardRef(() => ListsMembersService))
     private listsMembersService: ListsMembersService,
     private readonly secretsService: SecretsService,
-  ) {
-    this.initializeStorage();
+  ) { }
+
+
+  async onModuleInit() {
+    await this.initializeStorage();
   }
 
   private async initializeStorage(): Promise<void> {
-    const projectId = await this.secretsService.getSecret('PROJECT_ID');
-    const keyFilename = await this.secretsService.getSecret('GOOGLE_APPLICATION_CREDENTIALS');
-    const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
+    try {
+      const projectId = await this.secretsService.getSecret('PROJECT_ID');
+      const credentialsJson = await this.secretsService.getSecret('GOOGLE_APPLICATION_CREDENTIALS');
+      const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
 
-    this.storage = new Storage({
-      projectId: projectId,
-      keyFilename: keyFilename,
-    });
 
-    this.bucketName = bucketName;
+      const credentials = JSON.parse(credentialsJson);
+
+      this.storage = new Storage({
+        projectId: projectId,
+        credentials: credentials,
+      });
+
+      this.bucketName = bucketName;
+
+      console.log('Storage initialized successfully');
+    } catch (error) {
+      console.error('Error initializing storage:', error);
+      throw error;
+    }
   }
 
-  // Utilisez cette fonction pour uploader un fichier sur GCS
-  private async uploadFileToGCS(
-    file: Express.Multer.File,
-    destination: string,
-  ): Promise<string> {
-    console.log('UPLOAD');
-    console.log(file);
-    console.log(destination);
-    const bucket = this.storage.bucket(this.bucketName);
+
+  private async uploadFileToGCS(file: Express.Multer.File, destination: string): Promise<string> {
+
+    // Enlever les apostrophes du nom du bucket
+    const bucketName = this.bucketName.replace(/'/g, "");
+
+    const bucket = this.storage.bucket(bucketName);
     const fileUpload = bucket.file(destination);
 
-    // Créez un stream à partir du fichier uploadé par Multer
     const stream = fileUpload.createWriteStream({
       metadata: {
         contentType: file.mimetype,
       },
       resumable: false,
     });
-    console.log(file);
-    // Retourne une promesse pour suivre le succès ou l'échec de l'upload
+
     return new Promise<string>((resolve, reject) => {
       stream.on('error', (err) => {
         reject(err);
         console.log(err);
       });
 
-      stream.on('finish', () => {
-        const publicUrl = `https://${this.secretsService.getSecret('PUBLIC_URL')}/${this.bucketName}/${destination}`;
+      stream.on('finish', async () => {
+        const publicUrl = `https://${await this.secretsService.getSecret('PUBLIC_URL')}/${bucketName}/${destination}`;
+        console.log(publicUrl);
         resolve(publicUrl);
       });
 
@@ -93,19 +103,36 @@ export class UsersController {
     });
   }
 
-  async emptyGCSFolder(folderPath: string) {
-    const storage = new Storage();
-    const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
+
+  private async emptyGCSFolder(folderPath: string): Promise<void> {
+    console.log("Début de la vidange du dossier...");
+
+    // Enlever les apostrophes du nom du bucket
+    const bucketName = this.bucketName.replace(/'/g, "");
+
+    const bucket = this.storage.bucket(bucketName);
+
+    console.log("Nom du bucket :", bucketName);
+    console.log("Chemin du dossier :", folderPath);
 
     const options = {
       prefix: folderPath,
     };
 
-    // Récupérez tous les fichiers dans le dossier
-    const [files] = await storage.bucket(bucketName).getFiles(options);
+    console.log("Options :", options);
 
-    // Supprimez chaque fichier dans le dossier
-    await Promise.all(files.map((file) => file.delete()));
+    try {
+      const [files] = await bucket.getFiles(options);
+
+      console.log("Fichiers à supprimer :", files);
+
+      await Promise.all(files.map((file) => file.delete()));
+      console.log("Dossier vidé avec succès.");
+    } catch (error) {
+      console.error("Erreur lors de la vidange du dossier :", error.message);
+      console.error("Détails de l'erreur :", error);
+      throw error;
+    }
   }
 
   // Creer User
@@ -134,7 +161,6 @@ export class UsersController {
   // Trouver un User
   @Get(':id')
   findOne(@Param('id') id: string) {
-    console.log("find by id")
     return this.usersService.findOne(+id);
   }
 
@@ -147,12 +173,8 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    console.log('Fichier reçu:', file);
     if (!file) {
       console.log('Aucun fichier reçu.');
-    } else {
-      console.log('Type MIME du fichier:', file.mimetype);
-      console.log('Taille du buffer:', file.buffer?.length);
     }
     let data;
     // On parse le body user pour récuperer un objet
@@ -164,8 +186,6 @@ export class UsersController {
 
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
-      console.log('Fichier');
-      console.log(file);
       const timestamp = Date.now(); // Obtenez le timestamp actuel
       const destination = `avatars/${id}/${timestamp}`;
 
@@ -176,7 +196,6 @@ export class UsersController {
       const avatarUrl = await this.uploadFileToGCS(file, destination);
       data.avatar = avatarUrl;
     }
-    console.log(file);
     // Mettez à jour l'utilisateur dans la base de données
     return this.usersService.update(+id, data);
   }
@@ -207,7 +226,9 @@ export class UsersController {
   }
 
   private async deleteFolderFromGCS(folderPath: string): Promise<void> {
-    const bucket = this.storage.bucket(this.bucketName);
+    const bucketName = this.bucketName.replace(/'/g, "");
+
+    const bucket = this.storage.bucket(bucketName);
 
     // Récupérer la liste des fichiers dans le dossier
     const [files] = await bucket.getFiles({

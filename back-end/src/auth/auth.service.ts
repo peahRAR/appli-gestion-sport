@@ -11,7 +11,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async signIn(
     email: string,
@@ -19,12 +19,17 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     const user = await this.validateUser(email, password);
     const payload = { sub: user.id, email: user.email, role: user.role };
-    return { access_token: this.jwtService.sign(payload) };
-    
+    const token = this.jwtService.sign(payload);
+
+    console.log(`User authenticated: ${user.email}, Token: ${token}`);
+
+    return { access_token: token };
   }
 
   async validateUser(email: string, password: string): Promise<User> {
+    console.log(email)
     const user = await this.usersService.findByEmail(email);
+    console.log(user)
     if (user) {
       if (!user.isActive) {
         throw new UnauthorizedException('Compte non active');
@@ -39,4 +44,3 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 }
-

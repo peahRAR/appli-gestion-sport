@@ -155,9 +155,9 @@ export class UsersService {
       .createQueryBuilder('users')
       .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
-    
-    console.log( "existant : " + existingUser)
-    console.log( existingUser)
+
+    console.log("existant : " + existingUser)
+    console.log(existingUser)
 
     // Si un utilisateur existe déjà avec le même identifier, renvoyer une erreur
     if (existingUser) {
@@ -415,7 +415,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.license) {
-      const licenseEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+      const licenseEncrypt = this.splitEncryptedField(await this.createEncryptedField(
         updateUserDto.license.toString())
       ) as EncryptedField;
       user.license = {
@@ -424,7 +424,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.date_payment) {
-      const datePaymentEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+      const datePaymentEncrypt = this.splitEncryptedField(await this.createEncryptedField(
         updateUserDto.date_payment.toString())
       ) as EncryptedField;
       user.date_payment = {
@@ -433,7 +433,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.date_end_pay) {
-      const dateEndPayEncrypt = this.splitEncryptedField( await this.createEncryptedField(
+      const dateEndPayEncrypt = this.splitEncryptedField(await this.createEncryptedField(
         updateUserDto.date_end_pay.toString())
       ) as EncryptedField;
       user.date_end_pay = {
@@ -442,7 +442,7 @@ export class UsersService {
       };
     }
     if (updateUserDto.avatar) {
-      const avatarEncrypt = this.splitEncryptedField( await this.createEncryptedField(updateUserDto.avatar)) as EncryptedField;
+      const avatarEncrypt = this.splitEncryptedField(await this.createEncryptedField(updateUserDto.avatar)) as EncryptedField;
       user.avatar = {
         identifier: avatarEncrypt.identifier,
         data: avatarEncrypt.data,
@@ -472,7 +472,7 @@ export class UsersService {
 
   async requestPasswordReset(email: string): Promise<void> {
     // Rechercher l'utilisateur par email et récupérer son ID
-    console.log("Request new password")
+    console.log('Request new password');
 
     const user = await this.findByEmail(email);
     if (!user) {
@@ -483,10 +483,24 @@ export class UsersService {
     const payload = { sub: user.id, email: user.email }; // Utilisez les informations appropriées de l'utilisateur
     const resetToken = await this.jwtService.signAsync(payload);
 
+    // Définir la date d'expiration du token (par exemple, 1 heure à partir de maintenant)
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 1);
+
+    // Créer un enregistrement de réinitialisation de mot de passe
+    const resetRecord = new ResetPassword();
+    resetRecord.token = resetToken;
+    resetRecord.userId = user.id;
+    resetRecord.expires = expires;
+
+    // Sauvegarder l'enregistrement dans la base de données
+    await this.resetPasswordRepository.save(resetRecord);
+
     const decryptedEmail = await this.decryptField(user.email, true);
 
     // Envoyer un email à l'utilisateur avec le lien de réinitialisation
     const resetUrl = `https://app.mmabaisieux.fr/reset-password/?token=${resetToken}`;
+    //const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
 
     await this.mailerService.sendMail({
       to: decryptedEmail,
@@ -499,20 +513,41 @@ export class UsersService {
     });
   }
 
+
   async resetPassword(token: string, newPassword: string): Promise<void> {
+    // Log the token for debugging
+    console.log('Token received:', token);
+
+    // Décoder le token JWT pour extraire l'ID de l'utilisateur
+    let userId: number;
+    try {
+      const payload = this.jwtService.verify(token);
+      userId = payload.sub; // Assurez-vous que le token contient l'ID utilisateur dans le champ `sub`
+    } catch (error) {
+      throw new UnauthorizedException('Token invalide ou expiré.');
+    }
+
     // Rechercher le token dans la table de réinitialisation de mot de passe
     const resetRecord = await this.resetPasswordRepository.findOne({
       where: { token },
     });
+
+    // Log the resetRecord for debugging
+    console.log('Reset record found:', resetRecord);
+
     if (!resetRecord || resetRecord.expires < new Date()) {
       throw new Error('Token de réinitialisation invalide ou expiré.');
     }
 
     // Mettre à jour le mot de passe de l'utilisateur et supprimer l'enregistrement de réinitialisation
-    const user = await this.findOne(resetRecord.userId);
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
     if (!user) {
       throw new Error('Utilisateur non trouvé.');
     }
+
     user.password = await bcrypt.hash(newPassword, 10);
     await this.userRepository.save(user);
     await this.resetPasswordRepository.delete(resetRecord.id);

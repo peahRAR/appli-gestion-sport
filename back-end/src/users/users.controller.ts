@@ -21,6 +21,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { SecretsService } from 'src/secrets/secrets.service';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 
 
@@ -107,6 +108,7 @@ export class UsersController {
     await Promise.all(files.map((file) => file.delete()));
   }
 
+  // Creer User
   @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -114,20 +116,29 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  // Réinitialiser le mot de passe
+  @Patch('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    const { token, newPassword } = resetPasswordDto;
+    await this.usersService.resetPassword(token, newPassword);
+    return { message: 'Mot de passe réinitialisé avec succès.' };
+  }
 
+  // Liste des Users
   @Get()
   findAll() {
     console.log("find all")
     return this.usersService.findAll();
   }
 
+  // Trouver un User
   @Get(':id')
   findOne(@Param('id') id: string) {
     console.log("find by id")
     return this.usersService.findOne(+id);
   }
 
-
+  // Modifier un User
   @UseGuards(UserIdOradminRoleGuard)
   @Patch(':id')
   @UseInterceptors(multerOptions.interceptor)
@@ -170,6 +181,7 @@ export class UsersController {
     return this.usersService.update(+id, data);
   }
 
+  // Supprimer un User
   @UseGuards(UserIdOradminRoleGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {

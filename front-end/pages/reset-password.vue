@@ -137,11 +137,12 @@ export default {
 
       try {
         // Perform the PATCH request to update user password
-        const response = await fetch(`${url}/users/${userId}`, {
+        const response = await fetch(`${url}/users/reset-password`, {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            password: this.password,
+            token: this.token,
+            newPassword: this.password,
           }),
           headers: {
             "Content-Type": "application/json",

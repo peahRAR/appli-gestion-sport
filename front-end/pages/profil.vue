@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-6">
+  <div>
     <TheSkeleton v-if="loading" />
     <div v-else class="container mx-auto px-4 py-8 min-h-screen">
       <h1 class="text-3xl font-bold mb-8">Profil Utilisateur</h1>
@@ -58,7 +58,7 @@
             <!-- Weight -->
             <p class="text-gray-600 mb-2">
               <strong>Poids:</strong>
-              {{ user.weight && user.weight ? user.weight : "Non Renseigné" }}
+              {{ user.weight && user.weight ? user.weight : "Non Renseigné" }} Kg
             </p>
             <!-- license -->
             <p class="text-gray-600 mb-2">

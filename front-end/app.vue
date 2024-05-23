@@ -3,16 +3,12 @@
     <header>
       <my-header class="mb-2"/>
     </header>
-    <NuxtPage class="size"/>
+    <NuxtPage />
     <footer>
       <my-footer class="mt-2"/>
     </footer>
   </div>
 </template>
 
-<style>
-.size{
-  min-height: 90dvh;
-}
-</style>
+
 

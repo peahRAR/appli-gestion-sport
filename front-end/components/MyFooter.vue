@@ -1,10 +1,10 @@
 <template>
-  <footer class="fixed bottom-0 w-full bg-gray-300 opacity-50">
-    <div class="container mx-auto flex justify-between text-gray-300">
-        <p class="text-black text-sm">Frontend V{{ $config.public.frontVersion }}</p>
-        <p class="text-black text-sm">Backend V{{ $config.public.backVersion }}</p>
+  <div class="fixed bottom-0 px-4 w-full  opacity-50">
+    <div class="container mx-auto flex justify-between mb-2">
+      <p class="text-black px-2 bg-white rounded-full inline text-sm">UI v:{{ $config.public.frontVersion }}</p>
+      <p class="text-black px-2 bg-white rounded-full inline text-sm">API v:{{ $config.public.backVersion }}</p>
     </div>
-  </footer>
+  </div>
 </template>
 
 <script>

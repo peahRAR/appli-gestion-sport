@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-6">
+  <div>
     <TheSkeleton v-if="loading" />
     <div v-else>
       <div class="container mx-auto py-8">
@@ -40,16 +40,17 @@
         <div class="bg-white mx-2 rounded p-2">
           <create-course-form @create="createCourse" />
         </div>
+
+        <!-- Event Table -->
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+          <event-list
+            :events="events"
+            @edit-event="editEvent"
+            @delete-event="deleteEvent"
+          />
+        </div>
       </div>
 
-      <!-- Event Table -->
-      <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-        <event-list
-          :events="events"
-          @edit-event="editEvent"
-          @delete-event="deleteEvent"
-        />
-      </div>
       <TheModal
         :isOpen="showModalSelectedUser"
         title="Informations utilisateurs"

@@ -305,7 +305,6 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | undefined> {
     // Créer le identifier à partir de l'e-mail fourni
     const encryptedEmail = await this.splitEncryptedField(await this.createEncryptedField(email, true));
-    console.log(encryptedEmail)
 
     // Rechercher l'utilisateur dans la base de données en utilisant le data
     const user = await this.userRepository
@@ -313,7 +312,6 @@ export class UsersService {
       .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
 
-    console.log(user)
     return user;
   }
 

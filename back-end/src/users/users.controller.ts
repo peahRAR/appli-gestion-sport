@@ -90,10 +90,14 @@ export class UsersController {
       });
 
       stream.on('finish', async () => {
-        const publicUrl = `https://${await this.secretsService.getSecret('PUBLIC_URL')}/${bucketName}/${destination}`;
-        console.log(publicUrl);
-        resolve(publicUrl);
+        let publicUrl = await this.secretsService.getSecret('PUBLIC_URL');
+        publicUrl = publicUrl.replace(/'/g, ""); // Supprimer les apostrophes
+
+        const fullUrl = `https://${publicUrl}/${bucketName}/${destination}`;
+        console.log(fullUrl);
+        resolve(fullUrl);
       });
+
 
       if (file.buffer) {
         stream.end(file.buffer);

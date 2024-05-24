@@ -1,10 +1,10 @@
 <template>
   <div>
     <TheSkeleton v-if="loading" />
-    <div class=" min-h-screen"v-else>
+    <div class=" min-h-screen" v-else>
       <TheAlert class="mx-2 rounded mb-4" :alerts="alerts" />
       <div class="no-events min-h-screen m-auto w-full h-full text-center flex align-middle" v-if="events.length < 1">
-        <p  class="inline m-auto p-4 bg-white border rounded-full">Aucun cours prévu</p>
+        <p class="inline m-auto p-4 bg-white border rounded-full">Aucun cours prévu</p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="(event, index) in events" :key="event.id"
@@ -17,11 +17,11 @@
                 </p>
               </div>
               <div @click="openModal(event)" class="flex flex-row justify-between items-center rounded px-1" :class="{
-                  'bg-transparent': event.places === 0, // gris transparent quand il reste 0 place
-                  'bg-orange-500':
-                    event.places > 0 && event.places <= event.totalPlaces * 0.2, // couleur orangée quand il reste moins de 20% des places
-                  'bg-green-600': event.places > event.totalPlaces * 0.2, // couleur verte par défaut
-                }">
+      'bg-transparent': event.places === 0, // gris transparent quand il reste 0 place
+      'bg-orange-500':
+        event.places > 0 && event.places <= event.totalPlaces * 0.2, // couleur orangée quand il reste moins de 20% des places
+      'bg-green-600': event.places > event.totalPlaces * 0.2, // couleur verte par défaut
+    }">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 48 48">
                   <g fill="currentColor">
                     <path
@@ -82,17 +82,17 @@
               <button @click="participate(event, true)" :disabled="event.isParticipating || event.places <= 0"
                 class="bg-green-600 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500"
                 :class="{
-                  'opacity-50 cursor-not-allowed':
-                    event.isParticipating || event.places <= 0,
-                }">
+      'opacity-50 cursor-not-allowed':
+        event.isParticipating || event.places <= 0,
+    }">
                 Je participe
               </button>
 
               <button @click="participate(event, false)" :disabled="!event.isParticipating"
                 class="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 :class="{
-                  'opacity-50 cursor-not-allowed': !event.isParticipating,
-                }">
+      'opacity-50 cursor-not-allowed': !event.isParticipating,
+    }">
                 Je ne participe pas
               </button>
             </div>
@@ -123,8 +123,8 @@
               <span v-if="userRole === 1 || userRole === 2" @click="openDetailsModal(participant)"
                 class="cursor-pointer font-bold capitalize">{{ participant.name }}</span>
               <span v-else class="font-bold capitalize">{{
-                participant.name
-                }}</span>
+      participant.name
+    }}</span>
             </div>
           </li>
         </ul>
@@ -161,15 +161,15 @@
         <li>
           <strong>Numéro médical:</strong>
           {{
-          (userDetails.tel_medic && userDetails.tel_medic) || "Non renseigné"
-          }}
+      (userDetails.tel_medic && userDetails.tel_medic) || "Non renseigné"
+    }}
         </li>
         <li>
           <strong>Numéro d'urgence:</strong>
           {{
-          (userDetails.tel_emergency && userDetails.tel_emergency) ||
-          "Non renseigné"
-          }}
+        (userDetails.tel_emergency && userDetails.tel_emergency) ||
+        "Non renseigné"
+      }}
         </li>
         <li>
           <strong>Poids:</strong>
@@ -185,9 +185,9 @@
         <li>
           <strong>Date de fin de paiement:</strong>
           {{
-          (userDetails.date_end_pay && userDetails.date_end_pay) ||
-          "Non renseigné"
-          }}
+      (userDetails.date_end_pay && userDetails.date_end_pay) ||
+      "Non renseigné"
+    }}
         </li>
       </ul>
     </TheModal>
@@ -393,17 +393,16 @@ export default {
       // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
       const startTime = new Date(timeString);
 
-      // Extraire l'heure et les minutes de l'objet Date
-      const hours = startTime.getHours();
-      const minutes = startTime.getMinutes();
+      // Extraire l'heure et les minutes en UTC de l'objet Date
+      const hours = startTime.getUTCHours();
+      const minutes = startTime.getUTCMinutes();
 
       // Formater l'heure au format HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}h${minutes
-        .toString()
-        .padStart(2, "0")}`;
+      const formattedTime = `${hours.toString().padStart(2, "0")}h${minutes.toString().padStart(2, "0")}`;
 
       return formattedTime;
     },
+
     nbPlaces(places) {
       console.log(places);
     },
@@ -649,7 +648,8 @@ export default {
 
       return formattedEndTime;
     },
-    
+
+
     checkUserRole() {
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {

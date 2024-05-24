@@ -8,9 +8,9 @@
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="(event, index) in events" :key="event.id"
-          class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mx-2">
-          <div class="p-2">
-            <div class="flex felx-rox justify-between mb-4 border-b border-gray-300 pb-2">
+          class="bg-white rounded-lg relative shadow-md overflow-hidden border border-gray-200 mx-2">
+          <div class="p-2 flex flex-col h-full justify-between ">
+            <div class="flex justify-between mb-4 border-b border-gray-300 pb-2">
               <div>
                 <p class="text-gray-800 text-xl font-bold capitalize">
                   {{ formatDate(event.date_event) }}
@@ -36,65 +36,71 @@
                 </p>
               </div>
             </div>
-            <div class="flex flex-row justify-between items-center">
-              <h2 class="text-lg font-semibold text-gray-800 mb-2 uppercase">
-                {{ event.name_event }}
-              </h2>
-              <div class="flex flex-row justify-between">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512">
-                  <circle cx="256" cy="56" r="56" fill="text-gray-500" />
-                  <path fill="text-gray-500"
-                    d="M437 128H75a27 27 0 0 0 0 54h101.88c6.91 0 15 3.09 19.58 15c5.35 13.83 2.73 40.54-.57 61.23l-4.32 24.45a.42.42 0 0 1-.12.35l-34.6 196.81A27.43 27.43 0 0 0 179 511.58a27.06 27.06 0 0 0 31.42-22.29l23.91-136.8S242 320 256 320c14.23 0 21.74 32.49 21.74 32.49l23.91 136.92a27.24 27.24 0 1 0 53.62-9.6L320.66 283a.45.45 0 0 0-.11-.35l-4.33-24.45c-3.3-20.69-5.92-47.4-.57-61.23c4.56-11.88 12.91-15 19.28-15H437a27 27 0 0 0 0-54Z" />
-                </svg>
-                <p class="text-gray-500">{{ event.coach }}</p>
-              </div>
-            </div>
-            <div class="flex row mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
-                <path fill="currentColor"
-                  d="m12.5 12.387l2.788 2.788q.14.136.14.339t-.14.35q-.146.165-.356.155q-.21-.01-.357-.156l-2.833-2.832q-.13-.131-.186-.275q-.056-.143-.056-.296V8.423q0-.212.144-.356T12 7.923t.356.144q.143.144.143.356zM12 6q-.213 0-.357-.144q-.143-.143-.143-.356V4h1v1.5q0 .213-.144.356Q12.212 6 12 6m6 6q0-.213.144-.357q.144-.143.356-.143H20v1h-1.5q-.213 0-.356-.144Q18 12.212 18 12m-6 6q.213 0 .357.144q.143.144.143.356V20h-1v-1.5q0-.213.144-.356Q11.788 18 12 18m-6-6q0 .213-.144.357q-.143.143-.356.143H4v-1h1.5q.213 0 .356.144Q6 11.788 6 12m6.003 9q-1.866 0-3.51-.708q-1.643-.709-2.859-1.924q-1.216-1.214-1.925-2.856Q3 13.87 3 12.003q0-1.866.708-3.51q.709-1.643 1.924-2.859q1.214-1.216 2.856-1.925Q10.13 3 11.997 3q1.866 0 3.51.708q1.643.709 2.859 1.924q1.216 1.214 1.925 2.856Q21 10.13 21 11.997q0 1.866-.708 3.51q-.709 1.643-1.924 2.859q-1.214 1.216-2.856 1.925Q13.87 21 12.003 21M20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20q3.35 0 5.675-2.325T20 12m-8 0" />
-              </svg>
-              <p class="text-gray-800 font-semibold">De:</p>
-              <p class="text-gray-800 font-semibold ml-1">
-                {{ formatTime(event.date_event) }}
-              </p>
-              <p class="text-gray-800 font-semibold ml-1">à</p>
-              <p class="text-gray-800 font-semibold ml-1">
-                {{ calculateEndTime(event.date_event, event.duration) }}
-              </p>
+            <div class="flex flex-col justify-between h-full">
+              <div class="flex flex-col">
+                <div class="flex w-full justify-between">
 
-              <p class="text-gray-500 ml-1">
-                ({{ formatDuration(event.duration) }})
-              </p>
-            </div>
-            <div v-if="event.overview" class="flex flex-col">
-              <p class="text-gray-500 mb-4 p-1 text-left" :class="{ 'line-clamp-3': !event.showOverflow }">
-                {{ formatOverview(event.overview) }}
-              </p>
-              <button @click="toggleOverflow(event)"
-                class="text-gray-800 font-semibold text-sm focus:outline-none text-center"
-                v-if="event.overview.length > 150 || showOverflow">
-                Afficher
-                {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
-              </button>
-            </div>
-            <div class="flex flex-col justify-between mt-4">
-              <button @click="participate(event, true)" :disabled="event.isParticipating || event.places <= 0"
-                class="bg-green-600 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500"
-                :class="{
+                  <h2 class="text-lg font-semibold text-gray-800 mb-2 uppercase">
+                    {{ event.name_event }}
+                  </h2>
+                  <div class="flex flex-row justify-between">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 512 512">
+                      <circle cx="256" cy="56" r="56" fill="text-gray-500" />
+                      <path fill="text-gray-500"
+                        d="M437 128H75a27 27 0 0 0 0 54h101.88c6.91 0 15 3.09 19.58 15c5.35 13.83 2.73 40.54-.57 61.23l-4.32 24.45a.42.42 0 0 1-.12.35l-34.6 196.81A27.43 27.43 0 0 0 179 511.58a27.06 27.06 0 0 0 31.42-22.29l23.91-136.8S242 320 256 320c14.23 0 21.74 32.49 21.74 32.49l23.91 136.92a27.24 27.24 0 1 0 53.62-9.6L320.66 283a.45.45 0 0 0-.11-.35l-4.33-24.45c-3.3-20.69-5.92-47.4-.57-61.23c4.56-11.88 12.91-15 19.28-15H437a27 27 0 0 0 0-54Z" />
+                    </svg>
+                    <p class="text-gray-500">{{ event.coach }}</p>
+                  </div>
+
+                </div>
+                <div class="flex row mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                      d="m12.5 12.387l2.788 2.788q.14.136.14.339t-.14.35q-.146.165-.356.155q-.21-.01-.357-.156l-2.833-2.832q-.13-.131-.186-.275q-.056-.143-.056-.296V8.423q0-.212.144-.356T12 7.923t.356.144q.143.144.143.356zM12 6q-.213 0-.357-.144q-.143-.143-.143-.356V4h1v1.5q0 .213-.144.356Q12.212 6 12 6m6 6q0-.213.144-.357q.144-.143.356-.143H20v1h-1.5q-.213 0-.356-.144Q18 12.212 18 12m-6 6q.213 0 .357.144q.143.144.143.356V20h-1v-1.5q0-.213.144-.356Q11.788 18 12 18m-6-6q0 .213-.144.357q-.143.143-.356.143H4v-1h1.5q.213 0 .356.144Q6 11.788 6 12m6.003 9q-1.866 0-3.51-.708q-1.643-.709-2.859-1.924q-1.216-1.214-1.925-2.856Q3 13.87 3 12.003q0-1.866.708-3.51q.709-1.643 1.924-2.859q1.214-1.216 2.856-1.925Q10.13 3 11.997 3q1.866 0 3.51.708q1.643.709 2.859 1.924q1.216 1.214 1.925 2.856Q21 10.13 21 11.997q0 1.866-.708 3.51q-.709 1.643-1.924 2.859q-1.214 1.216-2.856 1.925Q13.87 21 12.003 21M20 12q0-3.35-2.325-5.675T12 4Q8.65 4 6.325 6.325T4 12q0 3.35 2.325 5.675T12 20q3.35 0 5.675-2.325T20 12m-8 0" />
+                  </svg>
+                  <p class="text-gray-800 font-semibold">De:</p>
+                  <p class="text-gray-800 font-semibold ml-1">
+                    {{ formatTime(event.date_event) }}
+                  </p>
+                  <p class="text-gray-800 font-semibold ml-1">à</p>
+                  <p class="text-gray-800 font-semibold ml-1">
+                    {{ calculateEndTime(event.date_event, event.duration) }}
+                  </p>
+
+                  <p class="text-gray-500 ml-1">
+                    ({{ formatDuration(event.duration) }})
+                  </p>
+                </div>
+              </div>
+              <div v-if="event.overview" class="flex flex-col">
+                <p class="text-gray-500 mb-4 p-1 text-left" :class="{ 'line-clamp-3': !event.showOverflow }">
+                  {{ formatOverview(event.overview) }}
+                </p>
+                <button @click="toggleOverflow(event)"
+                  class="text-gray-800 font-semibold text-sm focus:outline-none text-center"
+                  v-if="event.overview.length > 150 || showOverflow">
+                  Afficher
+                  {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
+                </button>
+              </div>
+              <div class="flex flex-col justify-between mt-4">
+                <button @click="participate(event, true)" :disabled="event.isParticipating || event.places <= 0"
+                  class="bg-green-600 text-white font-bold py-2 px-4 mb-2 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 ease-in-out active:bg-gray-500"
+                  :class="{
       'opacity-50 cursor-not-allowed':
         event.isParticipating || event.places <= 0,
     }">
-                Je participe
-              </button>
+                  Je participe
+                </button>
 
-              <button @click="participate(event, false)" :disabled="!event.isParticipating"
-                class="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                :class="{
+                <button @click="participate(event, false)" :disabled="!event.isParticipating"
+                  class="bg-red-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  :class="{
       'opacity-50 cursor-not-allowed': !event.isParticipating,
     }">
-                Je ne participe pas
-              </button>
+                  Je ne participe pas
+                </button>
+              </div>
             </div>
           </div>
         </div>

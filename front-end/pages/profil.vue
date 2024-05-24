@@ -8,101 +8,85 @@
         <div class="grid grid-cols-2 gap-x-4 gap-y-2">
           <div class="col-span-2">
             <!-- Avatar -->
-            <NuxtImg
-              v-if="user.avatar"
-              :src="user.avatar"
-              alt="Avatar"
-              class="w-28 h-28 rounded-full mx-auto mb-4"
-            />
+            <NuxtImg v-if="user.avatar" :src="user.avatar" alt="Avatar" class="w-28 h-28 rounded-full mx-auto mb-4" />
             <!-- If Avatar === null -->
-            <div
-              v-else
-              class="w-28 h-28 mb-4 rounded-full bg-gray-300 mx-auto flex items-center justify-center"
-            >
-              <span class="text-gray-600 text-4xl"
-                ><svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="50"
-                  height="50"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
+            <div v-else class="w-28 h-28 mb-4 rounded-full bg-gray-300 mx-auto flex items-center justify-center">
+              <span class="text-gray-600 text-4xl"><svg xmlns="http://www.w3.org/2000/svg" width="50" height="50"
+                  viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
     3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 
     8.5a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8 8.5A3.5 3.5 0 0 1 11.5 5m0 1A2.5 
-    2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6"
-                  />
+    2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6" />
                 </svg>
               </span>
             </div>
             <!-- Name -->
             <p class="text-gray-600 mb-2 capitalize">
-              <strong>Nom:</strong>
+              <strong>Nom :</strong>
               {{ user.name && user.name ? user.name : "Non Renseigné" }}
             </p>
             <!-- FirstName -->
             <p class="text-gray-600 mb-2 capitalize">
-              <strong>Prénom:</strong>
+              <strong>Prénom :</strong>
               {{
-                user.firstname && user.firstname
-                  ? user.firstname
-                  : "Non Renseigné"
+              user.firstname && user.firstname
+              ? user.firstname
+              : "Non Renseigné"
               }}
             </p>
             <!-- Email -->
             <p class="text-gray-600 mb-2">
-              <strong>Email:</strong>
+              <strong>Email :</strong>
               {{ user.email && user.email ? user.email : "Non Renseigné" }}
             </p>
             <!-- Weight -->
             <p class="text-gray-600 mb-2">
-              <strong>Poids:</strong>
-              {{ user.weight && user.weight ? user.weight : "Non Renseigné" }} Kg
+              <strong>Poids :</strong>
+              {{ user.weight ? `${user.weight} Kg` : "Non Renseigné" }}
             </p>
             <!-- license -->
             <p class="text-gray-600 mb-2">
-              <strong>license:</strong>
+              <strong>license :</strong>
               {{
-                user.license && user.license ? user.license : "Non Renseigné"
+              user.license && user.license ? user.license : "Non Renseigné"
               }}
             </p>
             <!-- Gender -->
             <p class="text-gray-600 mb-2">
-              <strong>Genre:</strong> {{ user.gender ? "Homme" : "Femme" }}
+              <strong>Genre :</strong> {{ user.gender ? "Homme" : "Femme" }}
             </p>
             <!-- Phone number -->
             <p class="text-gray-600 mb-2">
-              <strong>Numéro de téléphone:</strong>
+              <strong>Numéro de téléphone :</strong>
               {{
-                user.tel_num && user.tel_num ? user.tel_num : "Non Renseigné"
+              user.tel_num && user.tel_num ? user.tel_num : "Non Renseigné"
               }}
             </p>
             <!-- Tel Medic -->
             <p class="text-gray-600 mb-2">
-              <strong>Téléphone Médical:</strong>
+              <strong>Téléphone Médical :</strong>
               {{
-                user.tel_medic && user.tel_medic
-                  ? user.tel_medic
-                  : "Non Renseigné"
+              user.tel_medic && user.tel_medic
+              ? user.tel_medic
+              : "Non Renseigné"
               }}
             </p>
             <!-- Tel Emergency -->
             <p class="text-gray-600 mb-2">
-              <strong>Téléphone d'urgence:</strong>
+              <strong>Téléphone d'urgence :</strong>
               {{
-                user.tel_emergency && user.tel_emergency
-                  ? user.tel_emergency
-                  : "Non Renseigné"
+              user.tel_emergency && user.tel_emergency
+              ? user.tel_emergency
+              : "Non Renseigné"
               }}
             </p>
             <!-- Date Fin de paiment -->
             <p class="text-gray-600 mb-2">
-              <strong>Date fin de paiment:</strong>
+              <strong>Date fin de paiment :</strong>
               {{
-                user.date_end_pay && user.date_end_pay
-                  ? user.date_end_pay
-                  : "Non Renseigné"
+              user.date_end_pay && user.date_end_pay
+              ? user.date_end_pay
+              : "Non Renseigné"
               }}
             </p>
           </div>
@@ -111,26 +95,18 @@
 
       <div class="flex flex-col">
         <!-- Button Edit Profil -->
-        <button
-          @click="editProfile"
-          v-if="!isEditing"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4"
-        >
+        <button @click="editProfile" v-if="!isEditing"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
           Modifier le profil
         </button>
         <!-- Button open password change -->
-        <button
-          @click="openModal"
-          class="bg-yellow-600 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4"
-        >
+        <button @click="openModal"
+          class="bg-yellow-600 w-full hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mt-4">
           Changer le mot de passe
         </button>
         <!-- Button Delete Profil -->
-        <button
-          @click="confirmDelete"
-          v-if="!isEditing"
-          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4"
-        >
+        <button @click="confirmDelete" v-if="!isEditing"
+          class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4">
           Supprimer le compte
         </button>
       </div>
@@ -142,130 +118,67 @@
         <TheAvatar @avatarSaved="avatar = $event" message="Fichier image png, jpeg ou jpg de moins de 3 Mo" />
         <!-- Weight -->
         <p>Poids:</p>
-        <input
-          type="text"
-          v-model="editedWeight"
-          placeholder="Nouveau poids"
-          class="input-field mb-4"
-        />
+        <input type="text" v-model="editedWeight" placeholder="Nouveau poids" class="input-field mb-4" />
         <!-- license -->
         <p>license:</p>
-        <input
-          type="text"
-          v-model="editedlicense"
-          placeholder="Nouvelle license"
-          class="input-field mb-4"
-        />
+        <input type="text" v-model="editedlicense" placeholder="Nouvelle license" class="input-field mb-4" />
         <!-- Phone Number -->
         <p>Téléphone portable:</p>
-        <input
-          type="text"
-          v-model="editedTelNum"
-          placeholder="Nouveau numéro"
-          class="input-field mb-4"
-        />
+        <input type="text" v-model="editedTelNum" placeholder="Nouveau numéro" class="input-field mb-4" />
         <!-- Tel Medic -->
         <p>Téléphone médicale:</p>
-        <input
-          type="text"
-          v-model="editedTelMedic"
-          placeholder="Nouveau téléphone médical"
-          class="input-field mb-4"
-        />
+        <input type="text" v-model="editedTelMedic" placeholder="Nouveau téléphone médical" class="input-field mb-4" />
         <!-- Tel Emergency -->
         <p>Téléphone d'urgence:</p>
-        <input
-          type="text"
-          v-model="editedTelEmergency"
-          placeholder="Nouveau téléphone d'urgence"
-          class="input-field mb-4"
-        />
+        <input type="text" v-model="editedTelEmergency" placeholder="Nouveau téléphone d'urgence"
+          class="input-field mb-4" />
 
         <div class="flex justify-center space-x-4">
           <!-- Button For saving changes -->
-          <button
-            @click="saveChanges"
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded mt-4"
-          >
+          <button @click="saveChanges"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded mt-4">
             Enregistrer les modifications
           </button>
         </div>
       </TheModal>
-      <TheModal
-        :isOpen="showChangePasswordModal"
-        title="Changement du mot de passe"
-        @close="closeModal"
-      >
+      <TheModal :isOpen="showChangePasswordModal" title="Changement du mot de passe" @close="closeModal">
         <!-- Contenu de la modale -->
         <!-- Modal de changement de mot de passe -->
         <form @submit.prevent="changePassword" method="post">
           <div class="mb-4">
-            <inputPassword
-              v-model="currentPassword"
-              label="Mot de passe actuel : "
-              id="currentPassword"
-              :isValid="null"
-            />
+            <inputPassword v-model="currentPassword" label="Mot de passe actuel : " id="currentPassword"
+              :isValid="null" />
           </div>
           <div class="mb-4">
-            <inputPassword
-              v-model="newPassword"
-              :regex="regexPassword"
-              label="Nouveau mot de passe : "
-              id="newPassword"
-              :isValid="validerNewPassword"
-            />
+            <inputPassword v-model="newPassword" :regex="regexPassword" label="Nouveau mot de passe : " id="newPassword"
+              :isValid="validerNewPassword" />
 
             <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
-            <check-password
-              :isLength="isLength"
-              :isSpecial="isSpecial"
-              :isMaj="isMaj"
-              :isMin="isMin"
-              :isNumber="isNumber"
-            />
+            <check-password :isLength="isLength" :isSpecial="isSpecial" :isMaj="isMaj" :isMin="isMin"
+              :isNumber="isNumber" />
           </div>
           <div class="mb-4">
-            <inputPassword
-              label="Confirmer votre mot de passe : "
-              id="confirmNewPassword"
-              v-model="confirmNewPassword"
-              :isValid="validerConfirmPassword"
-            />
+            <inputPassword label="Confirmer votre mot de passe : " id="confirmNewPassword" v-model="confirmNewPassword"
+              :isValid="validerConfirmPassword" />
           </div>
           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            <button
-              type="submit"
-              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-            >
+            <button type="submit"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-500 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
               Changer
             </button>
           </div>
         </form>
       </TheModal>
-      <TheModal
-        :isOpen="showErrorModal"
-        title="Message"
-        @close="closeErrorModal"
-        >{{ this.errorMessage }}</TheModal
-      >
+      <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{ this.errorMessage }}</TheModal>
     </div>
-    <TheModal
-      :isOpen="showConfirmationModal"
-      :title="confirmationMessage"
-      @close="showConfirmationModal = false"
-    >
+    <TheModal :isOpen="showConfirmationModal" :title="confirmationMessage" @close="showConfirmationModal = false">
       <div class="flex justify-center space-x-4">
-        <button
-          @click="deleteUser"
-          class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
+        <button @click="deleteUser"
+          class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
           Confirmer
         </button>
-        <button
-          @click="showConfirmationModal = false"
-          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-        >
+        <button @click="showConfirmationModal = false"
+          class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
           Annuler
         </button>
       </div>

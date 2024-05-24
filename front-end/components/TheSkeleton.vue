@@ -1,18 +1,10 @@
 <template>
-  <div class="loading-dots">
+  <div class="loading-dots flex justify-center h-[100px] items-center min-h-screen">
     <div class="dot" v-for="(dot, index) in dots" :key="index" :style="{ animationDelay: `${index * 0.1}s` }"></div>
   </div>
 </template>
 
 <style>
-.loading-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
-  min-height: 80vh;
-}
-
 .dot {
   width: 10px;
   height: 10px;

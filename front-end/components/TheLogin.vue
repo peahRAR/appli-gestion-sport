@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-80">
+  <div>
     <!-- Login Form -->
     <form @submit.prevent="signIn">
       <!-- Email input -->
       <div class="mb-4">
         <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
-          >Email</label
+          >Email :</label
         >
         <input
           v-model="user.email"
@@ -13,7 +13,8 @@
           id="email"
           name="email"
           placeholder="Votre email"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          autocomplete="email"
         />
       </div>
       <!-- Password input -->

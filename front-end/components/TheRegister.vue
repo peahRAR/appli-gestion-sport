@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent="signUp">
-    <div class="mb-4">
+    <div>
       <label class="block text-gray-700 text-sm font-bold mb-2">Genre</label>
       <div class="flex">
         <label class="inline-flex items-center mr-4">

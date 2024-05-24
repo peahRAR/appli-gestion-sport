@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center p-2 bg-white text-white border-b-2 border-gray-400">
+  <div class="flex justify-between relative top-0 left-0  z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400">
     <nuxt-picture src="MMABsxLogo.png" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16" />
 
     <div v-if="isAuthenticated">

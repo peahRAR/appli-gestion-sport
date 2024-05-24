@@ -1,20 +1,22 @@
 <template>
-  <div class="background container mx-auto mb-12">
+  <div class="background min-h-screen container mx-auto py-4">
 
-    <div class="border rounded-lg p-4 ">
+    <div class="border border-gray-400 border-opacity-50 rounded-lg p-4 mx-4 ">
 
       <p class="font-bold text-2xl mb-4">
         {{ openLabel }}
       </p>
-      <hr class="separator mb-4" />
+      <div class="mb-4 border-b border-gray-400 border-opacity-50" ></div>
 
 
       <keep-alive>
         <component v-bind:is="component"></component>
       </keep-alive>
-      <p class=" mt-4 text-center underline cursor-pointer" v-on:click="changeTarget()">
-        {{ buttonLabel }}
-      </p>
+      <div class="w-full flex justify-center">
+        <p class=" mt-4 text-center w-full inline underline cursor-pointer" v-on:click="changeTarget()">
+          {{ buttonLabel }}
+        </p>
+      </div>
 
     </div>
   </div>

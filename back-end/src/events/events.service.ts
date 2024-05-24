@@ -16,7 +16,21 @@ export class EventsService {
   ) {}
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    const newEvent = this.eventRepository.create(createEventDto);
+    // Convertir la durée de chaîne de caractères en entier
+    const durationInMinutes = parseInt(createEventDto.duration, 10);
+
+    if (isNaN(durationInMinutes)) {
+      throw new Error('Invalid duration format');
+    }
+
+    // Convertir la durée en intervalle PostgreSQL
+    const durationInterval = `PT${durationInMinutes}M`;
+
+    const newEvent = this.eventRepository.create({
+      ...createEventDto,
+      duration: durationInterval, // Enregistrer la durée en tant qu'intervalle
+    });
+
     await this.eventRepository.save(newEvent);
     return newEvent;
   }

@@ -410,7 +410,7 @@ export default {
     async createCourse(newCourseData) {
       try {
         newCourseData.places = newCourseData.totalPlaces;
-        const duration = newCourseData.duration * 60;
+        console.log(newCourseData)
         const url = this.getUrl();
         const token = localStorage.getItem("accessToken");
         // Request Post for create new Event

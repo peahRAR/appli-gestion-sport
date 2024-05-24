@@ -634,6 +634,8 @@ export default {
 
     calculateEndTime(startTime, duration) {
       // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
+      console.log(startTime)
+      console.log(duration)
       const startDate = new Date(startTime);
 
       // Convertir la durée en minutes totales
@@ -647,6 +649,7 @@ export default {
 
       return formattedEndTime;
     },
+    
     checkUserRole() {
       const accessToken = localStorage.getItem("accessToken");
       if (accessToken) {

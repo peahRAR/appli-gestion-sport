@@ -2,7 +2,7 @@ import {User} from './../../users/users.entity'
 
 export class CreateEventDto {
   date_event: Date;
-  duration: string;
+  duration: string; 
   places: number;
   name_event: string;
   coach: string;

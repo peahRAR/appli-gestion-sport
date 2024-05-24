@@ -5,69 +5,41 @@
       <!-- Name Event -->
       <div class="flex flex-col">
         <label for="title" class="font-semibold">Titre du cours</label>
-        <input
-          type="text"
-          v-model="newCourse.name_event"
-          id="title"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
+        <input type="text" v-model="newCourse.name_event" id="title"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Overview -->
       <div class="flex flex-col">
-        <label for="description" class="font-semibold"
-          >Description du cours</label
-        >
-        <textarea
-          v-model="newCourse.overview"
-          id="description"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        ></textarea>
+        <label for="description" class="font-semibold">Description du cours</label>
+        <textarea v-model="newCourse.overview" id="description"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"></textarea>
       </div>
       <!-- Date -->
       <div class="flex flex-col">
         <label class="font-semibold" for="date">Date et heure de début</label>
-        <input
-          type="datetime-local"
-          v-model="newCourse.date_event"
-          id="date"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
+        <input type="datetime-local" v-model="newCourse.date_event" id="date"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Coach -->
       <div class="flex flex-col">
         <label class="font-semibold" for="coach">Nom du coach</label>
-        <input
-          type="text"
-          v-model="newCourse.coach"
-          id="coach"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
+        <input type="text" v-model="newCourse.coach" id="coach"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Duration -->
       <div class="flex flex-col">
         <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
-        <input
-          type="number"
-          v-model="newCourse.duration"
-          id="duration"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
+        <input type="number" v-model="newCourse.duration" id="duration"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Total places -->
       <div class="flex flex-col">
         <label class="font-semibold" for="totalSeats">Nombre de places total disponibles</label>
-        <input
-          type="number"
-          v-model="newCourse.totalPlaces"
-          id="totalSeats"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-        />
+        <input type="number" v-model="newCourse.totalPlaces" id="totalSeats"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Submit Button -->
-      <button
-        type="submit"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-      >
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
         Créer le cours
       </button>
     </form>
@@ -90,7 +62,12 @@ export default {
   },
   methods: {
     submitForm() {
-      this.$emit("create", this.newCourse);
+      const formattedCourse = { ...this.newCourse };
+      formattedCourse.date_event = new Date(this.newCourse.date_event).toISOString();
+
+      console.log(formattedCourse.date_event)
+
+      this.$emit("create", formattedCourse);
       this.newCourse = {
         title: "",
         description: "",

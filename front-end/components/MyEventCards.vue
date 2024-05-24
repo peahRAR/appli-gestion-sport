@@ -393,12 +393,14 @@ export default {
       // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
       const startTime = new Date(timeString);
 
-      // Extraire l'heure et les minutes en UTC de l'objet Date
-      const hours = startTime.getUTCHours();
-      const minutes = startTime.getUTCMinutes();
+      // Extraire l'heure et les minutes de l'objet Date
+      const hours = startTime.getHours();
+      const minutes = startTime.getMinutes();
 
       // Formater l'heure au format HH:MM
-      const formattedTime = `${hours.toString().padStart(2, "0")}h${minutes.toString().padStart(2, "0")}`;
+      const formattedTime = `${hours.toString().padStart(2, "0")}h${minutes
+        .toString()
+        .padStart(2, "0")}`;
 
       return formattedTime;
     },

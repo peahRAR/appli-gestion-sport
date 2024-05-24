@@ -653,6 +653,7 @@ export default {
 
       // Formater l'heure de fin pour l'affichage
       const formattedEndTime = this.formatTime(endTime);
+      console.log(formattedEndTime)
 
       return formattedEndTime;
     },

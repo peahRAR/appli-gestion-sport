@@ -63,11 +63,18 @@ export default {
   methods: {
     submitForm() {
       const formattedCourse = { ...this.newCourse };
-      formattedCourse.date_event = new Date(this.newCourse.date_event).toISOString();
 
-      console.log(formattedCourse.date_event)
+      // Convertir la date de l'événement en UTC
+      const localDate = new Date(this.newCourse.date_event);
+      const utcDate = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000));
+
+      // Convertir la date UTC en format ISO 8601
+      formattedCourse.date_event = utcDate.toISOString();
+
+      console.log(formattedCourse.date_event);
 
       this.$emit("create", formattedCourse);
+
       this.newCourse = {
         title: "",
         description: "",
@@ -76,7 +83,7 @@ export default {
         coach: "",
         duration: "",
       };
-    },
+    }
   },
 };
 </script>

@@ -58,32 +58,35 @@ export default {
         duration: 0,
         totalPlaces: 0,
       },
+      utcDateTime: ''
     };
   },
   methods: {
+    convertToUTC(localDateTime) {
+      const localDate = new Date(localDateTime);
+      const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+      return utcDate.toISOString();
+    },
+
     submitForm() {
       const formattedCourse = { ...this.newCourse };
+      formattedCourse.date_event = this.convertToUTC(this.newCourse.date_event);
 
-      // Convertir la date de l'événement en UTC
-      const localDate = new Date(this.newCourse.date_event);
-      const utcDate = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000));
-
-      // Convertir la date UTC en format ISO 8601
-      formattedCourse.date_event = utcDate.toISOString();
-
-      console.log(formattedCourse.date_event);
-
+      console.log('Date en UTC à envoyer :', formattedCourse.date_event); 
       this.$emit("create", formattedCourse);
 
+      // Reset the form
       this.newCourse = {
-        title: "",
-        description: "",
-        totalSeats: "",
+        name_event: "",
+        overview: "",
         date_event: "",
         coach: "",
-        duration: "",
+        duration: 0,
+        totalPlaces: 0,
       };
+      this.utcDateTime = '';
     }
-  },
+
+  }
 };
 </script>

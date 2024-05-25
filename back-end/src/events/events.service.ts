@@ -17,6 +17,7 @@ export class EventsService {
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
     // Convertir la durée de chaîne de caractères en entier
+    console.log(createEventDto.date_event)
     const durationInMinutes = parseInt(createEventDto.duration, 10);
 
     if (isNaN(durationInMinutes)) {
@@ -41,6 +42,9 @@ export class EventsService {
         date_event: 'ASC',
       },
     };
+
+    const result = this.eventRepository.find(options)
+    console.log(await result)
 
     return this.eventRepository.find(options);
   }

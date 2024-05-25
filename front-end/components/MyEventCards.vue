@@ -350,6 +350,7 @@ export default {
           },
         });
 
+        console.log(response.data)
         // Stocker les événements dans la variable events
         return response.data;
       } catch (error) {
@@ -395,6 +396,7 @@ export default {
 
       return formattedDate;
     },
+
     formatTime(timeString) {
       // Créer un nouvel objet Date à partir de la chaîne de caractères de l'heure de début
       const startTime = new Date(timeString);

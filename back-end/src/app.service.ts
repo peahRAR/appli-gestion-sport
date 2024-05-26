@@ -18,14 +18,14 @@ export class AppService {
     if (users.length < 1) {
 
       const superAdmin = {
-        email: await this.secretsService.getSecret('EMAILSUPERADMIN'),
-        password: await this.secretsService.getSecret('PASSWORDSUPERADMIN'),
-        birthday: new Date(await this.secretsService.getSecret('BIRTHDAYSUPERADMIN')),
-        name: await this.secretsService.getSecret('NAMESUPERADMIN'),
-        firstname: await this.secretsService.getSecret('FIRSTNAMESUPERADMIN'),
+        email: this.configService.get<string>('EMAILSUPERADMIN'),
+        password: this.configService.get<string>('PASSWORDSUPERADMIN'),
+        birthday: new Date(this.configService.get<string>('BIRTHDAYSUPERADMIN')),
+        name: this.configService.get<string>('NAMESUPERADMIN'),
+        firstname: this.configService.get<string>('FIRSTNAMESUPERADMIN'),
         date_subscribe: new Date(),
-        gender: (await this.secretsService.getSecret('GENDERSUPERADMIN')) === 'true', 
-        role: parseInt(await this.secretsService.getSecret('ROLESUPERADMIN')),
+        gender: this.configService.get<string>('GENDERSUPERADMIN') === 'true',
+        role: parseInt(this.configService.get<string>('ROLESUPERADMIN')),
         isActive: true,
         license: null,
         tel_num: null,

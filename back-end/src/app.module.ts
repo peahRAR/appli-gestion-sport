@@ -1,50 +1,40 @@
-import { Module, OnModuleInit } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/users.entity';
-import { Event } from './events/events.entity';
-import { ListsMember } from './lists-members/lists-member.entity';
-
-import { UsersModule } from './users/users.module';
-import { EventsModule } from './events/events.module';
-import { ListsMembersModule } from './lists-members/lists-members.module';
-import { AuthModule } from './auth/auth.module';
-import { AdminModule } from './admin/admin.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { AlertModule } from './alert/alert.module';
-import { PassportModule } from '@nestjs/passport';
-
-import { ScheduleModule } from '@nestjs/schedule';
-import { CronjobsModule } from './cronjobs/cronjobs.module';
-
-import { SecretsService } from './secrets/secrets.service';
-import { SecretsModule } from './secrets/secrets.module';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-
+import { MailerModule } from "@nestjs-modules/mailer";
+import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import { Module, OnModuleInit } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { User } from "./users/users.entity";
+import { ListsMember } from "./lists-members/lists-member.entity";
+import { UsersModule } from "./users/users.module";
+import { EventsModule } from "./events/events.module";
+import { ListsMembersModule } from "./lists-members/lists-members.module";
+import { AuthModule } from "./auth/auth.module";
+import { AdminModule } from "./admin/admin.module";
+import { AlertModule } from "./alert/alert.module";
+import { CronjobsModule } from "./cronjobs/cronjobs.module";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
 
 @Module({
   imports: [
-    SecretsModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     MailerModule.forRootAsync({
-      imports: [SecretsModule], // Assurez-vous que SecretsModule est importé
-      inject: [SecretsService], // Injectez SecretsService pour l'utiliser dans useFactory
-      useFactory: async (secretsService: SecretsService) => ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
         transport: {
-          host: await secretsService.getSecret('SMTP_HOST'),
-          port: parseInt(await secretsService.getSecret('SMTP_PORT'), 10),
+          host: configService.get<string>('SMTP_HOST'),
+          port: configService.get<number>('SMTP_PORT'),
           secure: false, // Note: Set to true if using port 465, or if explicitly needed
           auth: {
-            user: await secretsService.getSecret('SMTP_USER'),
-            pass: await secretsService.getSecret('SMTP_PASS'),
+            user: configService.get<string>('SMTP_USER'),
+            pass: configService.get<string>('SMTP_PASS'),
           },
         },
         defaults: {
-          from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
+          from: '"Association MMA Baisieux" <no-reply@mmabaisieux.fr>',
         },
         template: {
           dir: process.cwd() + '/templates/email/',
@@ -55,26 +45,23 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         },
       }),
     }),
-    ScheduleModule.forRoot(),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService, SecretsService],
-
-      useFactory: async (configService: ConfigService, secretsService: SecretsService) => ({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
         type: 'postgres',
-        host: await secretsService.getSecret('DATABASE_HOST'),
-        port: parseInt(await secretsService.getSecret('DATABASE_PORT'), 10),
-        username: await secretsService.getSecret('DATABASE_USERNAME'),
-        password: await secretsService.getSecret('DATABASE_PASSWORD'),
-        database: await secretsService.getSecret('DATABASE_NAME'),
+        host: configService.get<string>('DATABASE_HOST'),
+        port: configService.get<number>('DATABASE_PORT'),
+        username: configService.get<string>('DATABASE_USERNAME'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
         autoLoadEntities: true,
         entities: [User, Event, ListsMember],
         ssl: {
           rejectUnauthorized: false,
-          ca: await secretsService.getSecret('DATABASE_SSL_CA')
+          ca: configService.get<string>('DATABASE_SSL_CA')
         },
-        synchronize: configService.get('TYPEORM_SYNC', 'false') === 'true',
+        synchronize: configService.get<boolean>('TYPEORM_SYNC'),
       }),
     }),
     UsersModule,
@@ -89,10 +76,10 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
   providers: [AppService],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private secretsService: SecretsService) { }
+  constructor(private configService: ConfigService) { }
 
   async onModuleInit() {
-    const databaseHost = await this.secretsService.getSecret('DATABASE_HOST');
+    const databaseHost = this.configService.get<string>('DATABASE_HOST');
     console.log(`Database Host: ${databaseHost}`);
   }
 }

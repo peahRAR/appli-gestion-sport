@@ -13,7 +13,7 @@ import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
 import { JwtService } from '@nestjs/jwt';
-import { SecretsService } from 'src/secrets/secrets.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
     private readonly resetPasswordRepository: Repository<ResetPassword>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly secretsService: SecretsService,
+    private readonly configService: ConfigService, 
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
   ) {
@@ -32,23 +32,23 @@ export class UsersService {
   }
 
   async initialize() {
-    this.salt = await this.secretsService.getSecret('SALT');
+    this.salt = this.configService.get<string>('SALT');
   }
 
   private async createIdentifier(email: string): Promise<string> {
-    const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+    const secretKey = this.configService.get<string>('PASSWORDMAIL');
     return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
   private async createEncryptedField(data: string, isEmail: boolean = false): Promise<string> {
     // Initialisation par défaut avec la clé et l'IV pour les cas généraux
-    const secret = await this.secretsService.getSecret('ENCRYPTION_KEY');
+    const secret = this.configService.get<string>('ENCRYPTION_KEY');
     let key = crypto.scryptSync(secret, this.salt, 32);
     let iv = crypto.randomBytes(16);
 
     // Si c'est un email, utiliser une clé spécifique et un IV fixe
     if (isEmail) {
-      const secretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+      const secretKey = this.configService.get<string>('PASSWORDMAIL');
       key = crypto.scryptSync(secretKey, this.salt, 32);
       iv = Buffer.from('unIVfixe16octets'); // Corrigé pour être exactement 16 octets
     }
@@ -69,13 +69,13 @@ export class UsersService {
     const { identifier, data } = encryptedObj;
 
     // Initialisation par défaut en utilisant la clé de cryptage générale
-    const defaultSecret = await this.secretsService.getSecret('ENCRYPTION_KEY');
+    const defaultSecret = this.configService.get<string>('ENCRYPTION_KEY');
     let key = crypto.scryptSync(defaultSecret, this.salt, 32);
     const iv = Buffer.from(identifier, 'hex');  // Convertir l'IV hexadécimal en Buffer
 
     // Condition spécifique pour les emails
     if (isEmail) {
-      const emailSecretKey = await this.secretsService.getSecret('PASSWORDMAIL');
+      const emailSecretKey = this.configService.get<string>('PASSWORDMAIL');
       key = crypto.scryptSync(emailSecretKey, this.salt, 32);
       // L'IV est déjà fixé lors du cryptage pour les emails
     }
@@ -340,7 +340,7 @@ export class UsersService {
       const isPasswordValid =
         (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
         updateUserDto.currentPassword ===
-        this.secretsService.getSecret('REINITIALIZATIONKEY');
+        this.configService.get<string>('REINITIALIZATIONKEY');
       if (!isPasswordValid) {
         throw new UnauthorizedException('Mot de passe actuel incorrect.');
       }

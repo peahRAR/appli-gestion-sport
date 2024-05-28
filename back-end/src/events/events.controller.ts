@@ -6,8 +6,6 @@ import { AdminRoleGuard } from 'src/auth/admin.guard';
 
 
 
-
-
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}

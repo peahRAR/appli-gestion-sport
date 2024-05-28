@@ -6,19 +6,17 @@ import { User } from './users.entity';
 import { ResetPassword } from './reset-password.entity';
 import { ListsMembersModule } from 'src/lists-members/lists-members.module';
 import { JwtModule } from '@nestjs/jwt';
-import { SecretsModule } from 'src/secrets/secrets.module';
-import { SecretsService } from 'src/secrets/secrets.service';
-
+import { ConfigService, ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, ResetPassword]),
     JwtModule.registerAsync({
-      imports: [SecretsModule], 
-      inject: [SecretsService], 
-      useFactory: async (secretsService: SecretsService) => {
-        const secret = await secretsService.getSecret('JWT_SECRET'); 
-        const expiresIn = await secretsService.getSecret('JWT_EXP'); 
+      imports: [ConfigModule], // S'assurer que ConfigModule est importé
+      inject: [ConfigService], // Injecter ConfigService
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET'); // Utiliser ConfigService pour obtenir JWT_SECRET
+        const expiresIn = configService.get<string>('JWT_EXP'); // Utiliser ConfigService pour obtenir JWT_EXP
         return {
           secret: secret,
           signOptions: { expiresIn: expiresIn }

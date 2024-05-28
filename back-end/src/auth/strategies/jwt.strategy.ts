@@ -1,26 +1,18 @@
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { SecretsService } from 'src/secrets/secrets.service';
-
+import { ConfigService } from '@nestjs/config'; // Importez ConfigService
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly secretsService: SecretsService,
+    private readonly configService: ConfigService, // Injectez ConfigService au lieu de SecretsService
     private readonly usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKeyProvider: async (request, rawJwtToken, callback) => {
-        try {
-          const secretKey = await secretsService.getSecret('JWT_SECRET');
-          callback(null, secretKey); // Assurez-vous que cette fonction callback est bien appelée avec les bons paramètres.
-        } catch (error) {
-          callback(error, null);
-        }
-      },
+      secretOrKey: configService.get<string>('JWT_SECRET'), // Utilisez directement ConfigService pour obtenir la clé secrète
       ignoreExpiration: false,
     });
   }

@@ -14,10 +14,12 @@ import { AlertModule } from "./alert/alert.module";
 import { CronjobsModule } from "./cronjobs/cronjobs.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import configuration from "./config/configuration";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      load: [configuration],
       isGlobal: true,
     }),
     MailerModule.forRootAsync({

@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from './users/users.service';
 import { User } from './users/users.entity';
 import { ConfigService } from '@nestjs/config';
-import { SecretsService } from './secrets/secrets.service';
+
 
 @Injectable()
 export class AppService {
   constructor(
     private usersService: UsersService,
     private readonly configService: ConfigService,
-    private readonly secretsService: SecretsService,
+    
   ) {}
 
   async initApp(): Promise<User> {

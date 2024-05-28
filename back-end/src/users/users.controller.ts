@@ -20,8 +20,9 @@ import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
-import { SecretsService } from 'src/secrets/secrets.service';
+import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { readFileSync } from 'fs';
 
 
 
@@ -36,7 +37,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => ListsMembersService))
     private listsMembersService: ListsMembersService,
-    private readonly secretsService: SecretsService,
+    private readonly configService: ConfigService,
   ) { }
 
 
@@ -46,19 +47,15 @@ export class UsersController {
 
   private async initializeStorage(): Promise<void> {
     try {
-      const projectId = await this.secretsService.getSecret('PROJECT_ID');
-      const credentialsJson = await this.secretsService.getSecret('GOOGLE_APPLICATION_CREDENTIALS');
-      const bucketName = await this.secretsService.getSecret('BUCKET_NAME');
-
-
-      const credentials = JSON.parse(credentialsJson);
+      const credentialsPath = this.configService.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
+      const credentials = JSON.parse(readFileSync(credentialsPath, 'utf8'));
 
       this.storage = new Storage({
-        projectId: projectId,
+        projectId: this.configService.get<string>('PROJECT_ID'),
         credentials: credentials,
       });
 
-      this.bucketName = bucketName;
+      this.bucketName = this.configService.get<string>('BUCKET_NAME');
 
       console.log('Storage initialized successfully');
     } catch (error) {
@@ -90,7 +87,7 @@ export class UsersController {
       });
 
       stream.on('finish', async () => {
-        let publicUrl = await this.secretsService.getSecret('PUBLIC_URL');
+        let publicUrl = this.configService.get<string>('PUBLIC_URL');
         publicUrl = publicUrl.replace(/'/g, ""); // Supprimer les apostrophes
 
         const fullUrl = `https://${publicUrl}/${bucketName}/${destination}`;

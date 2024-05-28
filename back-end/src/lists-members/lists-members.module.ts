@@ -2,21 +2,20 @@ import { Module, forwardRef } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { ListsMembersController } from './lists-members.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ListsMember } from './lists-member.entity';import { JwtModule } from '@nestjs/jwt';
+import { ListsMember } from './lists-member.entity';
+import { JwtModule } from '@nestjs/jwt';
 import { EventsModule } from 'src/events/events.module';
-import { SecretsModule } from 'src/secrets/secrets.module';
-import { SecretsService } from 'src/secrets/secrets.service';
-
+import { ConfigModule, ConfigService } from '@nestjs/config'; // Importez ConfigService et ConfigModule
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ListsMember]),
     JwtModule.registerAsync({
-      imports: [SecretsModule], // Utilisez SecretsModule au lieu de ConfigModule
-      inject: [SecretsService], // Injectez SecretsService au lieu de ConfigService
-      useFactory: async (secretsService: SecretsService) => {
-        const secret = await secretsService.getSecret('JWT_SECRET'); // Utilisez secretsService pour obtenir le secret
-        const expiresIn = await secretsService.getSecret('JWT_EXP'); // Utilisez secretsService pour obtenir la durée d'expiration
+      imports: [ConfigModule], // Remplacez SecretsModule par ConfigModule
+      inject: [ConfigService], // Injectez ConfigService au lieu de SecretsService
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET'); // Utilisez ConfigService pour obtenir le secret
+        const expiresIn = configService.get<string>('JWT_EXP'); // Utilisez ConfigService pour obtenir la durée d'expiration avec une valeur par défaut
         return {
           secret: secret,
           signOptions: { expiresIn: expiresIn }

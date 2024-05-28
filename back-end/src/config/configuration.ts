@@ -26,6 +26,10 @@ async function loadSecrets() {
             const [version] = await client.accessSecretVersion({ name: `${secretFullName}/versions/latest` });
             secrets[secretId] = version.payload.data.toString();
             logger.debug(`Secret loaded successfully: ${secretId}`);
+
+            // A supprimer
+            const secretValue = version.payload.data.toString();
+            logger.debug(`Value of ${secretId}: ${secretValue}`);
         }
     } catch (error) {
         logger.error('Failed to load secrets:', error.stack);

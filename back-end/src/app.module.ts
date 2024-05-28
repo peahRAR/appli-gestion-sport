@@ -66,7 +66,7 @@ import configuration from "./config/configuration";
           },
           synchronize: configService.get<boolean>('TYPEORM_SYNC'),
         };
-        console.log('LOG Database Config:', dbConfig); 
+        console.log('LOG Database Config Host:', dbConfig.host); 
         return dbConfig;
       },
     }),

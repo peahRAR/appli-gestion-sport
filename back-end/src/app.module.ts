@@ -51,22 +51,38 @@ import configuration from "./config/configuration";
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
+        const host = configService.get<string>('DATABASE_HOST');
+        const port = configService.get<number>('DATABASE_PORT');
+        const username = configService.get<string>('DATABASE_USERNAME');
+        const password = configService.get<string>('DATABASE_PASSWORD');
+        const database = configService.get<string>('DATABASE_NAME');
+        const sslCa = configService.get<string>('DATABASE_SSL_CA');
+        const typeOrmSync = configService.get<boolean>('TYPEORM_SYNC');
+
+        console.log('LOG - DATABASE_HOST:', host);
+        console.log('LOG - DATABASE_PORT:', port);
+        console.log('LOG - DATABASE_USERNAME:', username);
+        console.log('LOG - DATABASE_PASSWORD:', password);
+        console.log('LOG - DATABASE_NAME:', database);
+        console.log('LOG - DATABASE_SSL_CA:', sslCa);
+        console.log('LOG - TYPEORM_SYNC:', typeOrmSync);
+
         const dbConfig: TypeOrmModuleOptions = {
           type: 'postgres',
-          host: configService.get<string>('DATABASE_HOST'),
-          port: configService.get<number>('DATABASE_PORT'),
-          username: configService.get<string>('DATABASE_USERNAME'),
-          password: configService.get<string>('DATABASE_PASSWORD'),
-          database: configService.get<string>('DATABASE_NAME'),
+          host,
+          port,
+          username,
+          password,
+          database,
           autoLoadEntities: true,
-          entities: [User, ListsMember], 
+          entities: [User, ListsMember],
           ssl: {
             rejectUnauthorized: false,
-            ca: configService.get<string>('DATABASE_SSL_CA')
+            ca: sslCa
           },
-          synchronize: configService.get<boolean>('TYPEORM_SYNC'),
+          synchronize: typeOrmSync,
         };
-        console.log('LOG Database Config Host:', dbConfig.host); 
+        console.log('LOG - Database Config:', dbConfig);
         return dbConfig;
       },
     }),

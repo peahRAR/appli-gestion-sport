@@ -4,25 +4,15 @@ import { Logger } from '@nestjs/common';
 const client = new SecretManagerServiceClient();
 const logger = new Logger('SecretsLoader');
 
-async function listSecretNames() {
-    try {
-        const [secrets] = await client.listSecrets({
-            parent: `projects/941748508363`
-        });
-        logger.log(`Fetched ${secrets.length} secrets.`);
-        return secrets.map(secret => secret.name);
-    } catch (error) {
-        logger.error('Failed to list secrets:', error);
-        throw error;
-    }
-}
-
 async function loadSecrets() {
     const secrets = {};
     try {
-        const secretNames = await listSecretNames();
-        for (const secretFullName of secretNames) {
-            const secretId = secretFullName.split('/').pop(); 
+        const [secretNames] = await client.listSecrets({
+            parent: `projects/941748508363`
+        });
+        logger.log(`Fetched ${secretNames.length} secrets.`);
+        for (const secretFullName of secretNames.map(secret => secret.name)) {
+            const secretId = secretFullName.split('/').pop();
             const [version] = await client.accessSecretVersion({ name: `${secretFullName}/versions/latest` });
             secrets[secretId] = version.payload.data.toString();
             logger.debug(`Secret loaded successfully: ${secretId}`);
@@ -34,8 +24,4 @@ async function loadSecrets() {
     return secrets;
 }
 
-export default async () => {
-    const secrets = await loadSecrets();
-    return secrets;
-};
-
+export default loadSecrets;

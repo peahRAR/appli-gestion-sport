@@ -22,7 +22,6 @@ import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { readFileSync } from 'fs';
 
 
 
@@ -46,22 +45,17 @@ export class UsersController {
   }
 
   private async initializeStorage(): Promise<void> {
-    try {
-      const credentialsPath = this.configService.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
-      const credentials = JSON.parse(readFileSync(credentialsPath, 'utf8'));
+    const keyFilename = this.configService.get<string>('GOOGLE_APPLICATION_CREDENTIALS');
+    const projectId = this.configService.get<string>('PROJECT_ID');
+    const bucketName = this.bucketName = this.configService.get<string>('BUCKET_NAME');
 
-      this.storage = new Storage({
-        projectId: this.configService.get<string>('PROJECT_ID'),
-        credentials: credentials,
-      });
+    this.storage = new Storage({
+      projectId: projectId,
+      keyFilename: keyFilename,
+    });
 
-      this.bucketName = this.configService.get<string>('BUCKET_NAME');
-
-      console.log('Storage initialized successfully');
-    } catch (error) {
-      console.error('Error initializing storage:', error);
-      throw error;
-    }
+    console.log(this.bucketName)
+    this.bucketName = bucketName;
   }
 
 

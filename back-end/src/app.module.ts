@@ -2,7 +2,7 @@ import { MailerModule } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmModule, TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { User } from "./users/users.entity";
 import { ListsMember } from "./lists-members/lists-member.entity";
 import { UsersModule } from "./users/users.module";
@@ -50,22 +50,27 @@ import configuration from "./config/configuration";
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST'),
-        port: configService.get<number>('DATABASE_PORT'),
-        username: configService.get<string>('DATABASE_USERNAME'),
-        password: configService.get<string>('DATABASE_PASSWORD'),
-        database: configService.get<string>('DATABASE_NAME'),
-        autoLoadEntities: true,
-        entities: [User, Event, ListsMember],
-        ssl: {
-          rejectUnauthorized: false,
-          ca: configService.get<string>('DATABASE_SSL_CA')
-        },
-        synchronize: configService.get<boolean>('TYPEORM_SYNC'),
-      }),
+      useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
+        const dbConfig: TypeOrmModuleOptions = {
+          type: 'postgres',
+          host: configService.get<string>('DATABASE_HOST'),
+          port: configService.get<number>('DATABASE_PORT'),
+          username: configService.get<string>('DATABASE_USERNAME'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          autoLoadEntities: true,
+          entities: [User, ListsMember], 
+          ssl: {
+            rejectUnauthorized: false,
+            ca: configService.get<string>('DATABASE_SSL_CA')
+          },
+          synchronize: configService.get<boolean>('TYPEORM_SYNC'),
+        };
+        console.log('LOG Database Config:', dbConfig); 
+        return dbConfig;
+      },
     }),
+
     UsersModule,
     EventsModule,
     ListsMembersModule,

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Logger} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -8,11 +8,15 @@ import { AdminRoleGuard } from 'src/auth/admin.guard';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  private readonly logger = new Logger(EventsController.name);
+  
+  constructor(private readonly eventsService: EventsService) { }
+  
 
   @UseGuards(AdminRoleGuard)
   @Post()
   create(@Body() createEventDto: CreateEventDto) {
+    this.logger.debug(`Received UTC Date: ${createEventDto.date_event}`);
     return this.eventsService.create(createEventDto);
   }
 

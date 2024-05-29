@@ -149,7 +149,6 @@ export class UsersController {
   // Liste des Users
   @Get()
   findAll() {
-    console.log("find all")
     return this.usersService.findAll();
   }
 

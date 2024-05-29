@@ -7,7 +7,7 @@ export class Event {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamptz' })
   date_event: Date;
 
   @Column({ type: 'interval' })

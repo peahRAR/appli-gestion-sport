@@ -20,9 +20,6 @@ export class AuthService {
     const user = await this.validateUser(email, password);
     const payload = { sub: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(payload);
-
-    console.log(`User authenticated: ${user.email}, Token: ${token}`);
-
     return { access_token: token };
   }
 

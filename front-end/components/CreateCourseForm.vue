@@ -63,13 +63,10 @@ export default {
   methods: {
     submitForm() {
       // Convertir la date locale en UTC
-      const localDate = new Date(this.newCourse.date_event);
-      console.log("Local Date: ", localDate.toString());
-      const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
-      console.log("UTC Date: ", utcDate.toString());
+      const localDate = new Date(this.newCourse.date_event).toISOString();
 
       // Assigner la date en UTC à newCourse.date_event
-      this.newCourse.date_event = utcDate.toISOString();
+      this.newCourse.date_event = localDate;
 
       // Émettre l'événement avec les données du formulaire
       this.$emit("create", this.newCourse);

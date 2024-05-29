@@ -350,7 +350,6 @@ export default {
           },
         });
 
-        console.log(response.data)
         // Stocker les événements dans la variable events
         return response.data;
       } catch (error) {
@@ -413,9 +412,7 @@ export default {
       return formattedTime;
     },
 
-    nbPlaces(places) {
-      console.log(places);
-    },
+
     formatDuration(duration) {
       // Formater la durée en chaîne de caractères
       let hours = duration.hours;

@@ -90,7 +90,17 @@ export default {
   },
   methods: {
     submitForm() {
+      // Convertir la date locale en UTC
+      const localDate = new Date(this.newCourse.date_event);
+      const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+
+      // Assigner la date en UTC à newCourse.date_event
+      this.newCourse.date_event = utcDate.toISOString();
+
+      // Émettre l'événement avec les données du formulaire
       this.$emit("create", this.newCourse);
+
+      // Réinitialiser le formulaire
       this.newCourse = {
         title: "",
         description: "",
@@ -99,7 +109,7 @@ export default {
         coach: "",
         duration: "",
       };
-    },
+    }
   },
 };
 </script>

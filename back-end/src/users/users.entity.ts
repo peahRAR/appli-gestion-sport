@@ -9,8 +9,8 @@ import { Event } from '../events/events.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column('json')
   email: {

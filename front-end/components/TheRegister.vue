@@ -220,7 +220,7 @@ export default {
       }
 
       try {
-        const { data } = await fetch(`${url}/users`, {
+        const response = await fetch(`${url}/users`, {
           method: "POST",
           mode: "cors",
           body: JSON.stringify(this.user),
@@ -229,16 +229,23 @@ export default {
           },
         });
 
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Erreur lors de la création du compte");
+        }
+
+        const data = await response.json();
+
         // Si l'inscription réussit, vider les champs du formulaire et afficher la modal
         this.clearForm();
         this.openErrorModal();
-        this.errorMessage =
-          "Vérifiez vos emails afin de vous tenir informer de la suite";
+        this.errorMessage = "Vérifiez vos emails afin de vous tenir informer de la suite";
       } catch (error) {
         this.openErrorModal();
-        (this.errorMessage = "Erreur lors de la création du compte :"), error;
+        this.errorMessage = `Erreur lors de la création du compte : ${error.message}`;
       }
     },
+    
     // Close The modal
     closeModal() {
       // Masquer la modal et réinitialiser le formulaire lorsque l'utilisateur ferme la modal

@@ -14,6 +14,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ResetPassword } from './reset-password.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import * as disposableEmailDomains from 'disposable-email-domains';
+
 
 @Injectable()
 export class UsersService {
@@ -33,11 +35,6 @@ export class UsersService {
 
   async initialize() {
     this.salt = this.configService.get<string>('SALT');
-  }
-
-  private async createIdentifier(email: string): Promise<string> {
-    const secretKey = this.configService.get<string>('PASSWORDMAIL');
-    return crypto.createHmac('sha256', secretKey).update(email).digest('hex');
   }
 
   private async createEncryptedField(data: string, isEmail: boolean = false): Promise<string> {
@@ -113,8 +110,14 @@ export class UsersService {
       isActive = +role === 2 ? true : false;
 
       if (existingSuperAdmin) {
-        throw new Error('Un superAdmin existe déjà.');
+        throw new BadRequestException('Un superAdmin existe déjà.');
       }
+    }
+
+    // Vérifier le domaine de l'email
+    const emailDomain = createUserDto.email.split('@')[1];
+    if (disposableEmailDomains.includes(emailDomain)) {
+      throw new BadRequestException('Le domaine de l\'email n\'est pas autorisé.');
     }
 
     // Date anniversaire
@@ -133,34 +136,24 @@ export class UsersService {
     );
     const encryptedEmail = this.splitEncryptedField(await this.createEncryptedField(createUserDto.email, true));
 
-
-
-
     // Verifier que mdp correspond à la regex sinon lever erreur
     if (!this.verifyPasswordRegex(createUserDto.password)) {
-      throw new Error('Le mot de passe ne correspond pas aux critères requis.');
+      throw new BadRequestException('Le mot de passe ne correspond pas aux critères requis.');
     }
 
     // Hashage Mot de passe
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-    console.log(" Email crypt : ")
-    console.log(encryptedEmail)
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
       .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
 
-    console.log("existant : " + existingUser)
-    console.log(existingUser)
-
     // Si un utilisateur existe déjà avec le même identifier, renvoyer une erreur
     if (existingUser) {
-      throw new Error('Cette adresse E-mail est déjà utilisée.');
+      throw new BadRequestException('Cette adresse E-mail est déjà utilisée.');
     }
 
     const decryptedEmail = createUserDto.email;
-
 
     // Créer la nouvelle entité utilisateur
     const newUser = this.userRepository.create({
@@ -175,7 +168,6 @@ export class UsersService {
       isActive: isActive,
     });
 
-    console.log(decryptedEmail)
     await this.mailerService.sendMail({
       to: decryptedEmail,
       subject: 'Confirmation de compte',
@@ -188,6 +180,7 @@ export class UsersService {
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
   }
+
 
   async findAll(): Promise<User[]> {
     // Récupérer tous les utilisateurs depuis la base de données
@@ -246,7 +239,7 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: number): Promise<User | undefined> {
+  async findOne(id: string): Promise<User | undefined> {
     // Récupérer l'utilisateur depuis la base de données
     const user = await this.userRepository.findOne({
       where: { id },
@@ -316,7 +309,7 @@ export class UsersService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User | undefined> {
     // Récupérer l'utilisateur existant
@@ -449,7 +442,7 @@ export class UsersService {
     return user;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
     const userEmail = user.email.toString();
 
@@ -466,7 +459,6 @@ export class UsersService {
 
   async requestPasswordReset(email: string): Promise<void> {
     // Rechercher l'utilisateur par email et récupérer son ID
-    console.log('Request new password');
 
     const user = await this.findByEmail(email);
     if (!user) {
@@ -513,7 +505,7 @@ export class UsersService {
     console.log('Token received:', token);
 
     // Décoder le token JWT pour extraire l'ID de l'utilisateur
-    let userId: number;
+    let userId: string;
     try {
       const payload = this.jwtService.verify(token);
       userId = payload.sub; // Assurez-vous que le token contient l'ID utilisateur dans le champ `sub`

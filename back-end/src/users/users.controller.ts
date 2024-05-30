@@ -155,7 +155,7 @@ export class UsersController {
   // Trouver un User
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   // Modifier un User
@@ -191,7 +191,7 @@ export class UsersController {
       data.avatar = avatarUrl;
     }
     // Mettez à jour l'utilisateur dans la base de données
-    return this.usersService.update(+id, data);
+    return this.usersService.update(id, data);
   }
 
   // Supprimer un User
@@ -199,7 +199,7 @@ export class UsersController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image
-    const user = await this.usersService.findOne(+id);
+    const user = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException('Utilisateur non trouvé');
     }
@@ -216,7 +216,7 @@ export class UsersController {
     }
 
     // Supprimer l'utilisateur de la base de données
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 
   private async deleteFolderFromGCS(folderPath: string): Promise<void> {

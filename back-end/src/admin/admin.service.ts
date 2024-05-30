@@ -18,7 +18,7 @@ export class AdminService {
   ) {}
 
 
-  async activateUser(id: number): Promise<void> {
+  async activateUser(id: string): Promise<void> {
     // Récupérer l'utilisateur à partir de l'ID
     const user = await this.userRepository.findOne({ where: { id: id} });
 
@@ -50,7 +50,7 @@ export class AdminService {
     });
   }
 
-  async changeUserRole(id: number, newRole: number): Promise<void> {
+  async changeUserRole(id: string, newRole: number): Promise<void> {
     // Récupérer l'utilisateur à partir de l'ID
     const user = await this.userRepository.findOne({ where: { id: id} });
 

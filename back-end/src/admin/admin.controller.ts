@@ -12,14 +12,14 @@ export class AdminController {
 
   @UseGuards(AdminRoleGuard)
   @Patch(':id')
-  async activateUser(@Param('id') id: number): Promise<void> {
+  async activateUser(@Param('id') id: string): Promise<void> {
     await this.adminService.activateUser(id);
   }
 
   @Put(':id/:newRole')
   @UseGuards(SuperadminRoleGuard)
   async changeUserRole(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Param('newRole') newRole: number,
   ): Promise<void> {
     await this.adminService.changeUserRole(id, newRole);

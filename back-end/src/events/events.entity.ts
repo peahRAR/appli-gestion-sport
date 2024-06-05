@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import { User} from '../users/users.entity';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { ListsMember } from 'src/lists-members/lists-member.entity';
 
 @Entity()
 export class Event {
@@ -28,8 +27,6 @@ export class Event {
   @Column({ nullable: true })
   overview: string;
 
-  @ManyToMany(() => User)
-  @JoinTable()
-  participants: User[];
-  listsMembers: any;
+  @OneToMany(() => ListsMember, listsMember => listsMember.event, { cascade: ['remove'] })
+  listsMembers: ListsMember[];
 }

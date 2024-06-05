@@ -104,4 +104,8 @@ export class ListsMembersService {
   async remove(eventId: number, userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ eventId, userId });
   }
+
+  async removeAllByUserId(userId: string): Promise<void> {
+    await this.listsMemberRepository.delete({ userId });
+  }
 }

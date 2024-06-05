@@ -1,8 +1,11 @@
 import * as bcrypt from 'bcrypt';
 import {
   BadRequestException,
+  Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,6 +18,7 @@ import { ResetPassword } from './reset-password.entity';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as disposableEmailDomains from 'disposable-email-domains';
+import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
 
 @Injectable()
@@ -26,9 +30,11 @@ export class UsersService {
     private readonly resetPasswordRepository: Repository<ResetPassword>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly configService: ConfigService, 
+    private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
     private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => ListsMembersService))
+    private readonly listsMembersService: ListsMembersService,
   ) {
     this.initialize();
   }
@@ -444,18 +450,12 @@ export class UsersService {
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
-    const userEmail = user.email.toString();
-
-    await this.mailerService.sendMail({
-      to: userEmail,
-      subject: 'Suppression de compte',
-      template: 'suppression',
-      context: {
-        email: user.email,
-      },
-    });
-    await this.userRepository.delete(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.userRepository.remove(user);
   }
+
 
   async requestPasswordReset(email: string): Promise<void> {
     // Rechercher l'utilisateur par email et récupérer son ID

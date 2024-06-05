@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -58,12 +58,11 @@ export class EventsService {
   }
 
   async remove(id: number): Promise<void> {
-    const lists = await this.listsMembersService.findAllByIdEvent(id);
-    lists.forEach((element) => {
-      this.listsMembersService.remove(element.eventId, element.userId);
-    });
-
-    await this.eventRepository.delete(id);
+    const event = await this.findOne(id);
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    await this.eventRepository.remove(event);
   }
 
   async deleteExpiredEvents(): Promise<void> {

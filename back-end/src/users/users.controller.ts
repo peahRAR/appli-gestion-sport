@@ -22,6 +22,8 @@ import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Repository } from 'typeorm';
+import { User } from './users.entity';
 
 
 
@@ -31,11 +33,10 @@ export class UsersController {
   private storage: Storage;
   private bucketName: string;
 
-
   constructor(
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => ListsMembersService))
-    private listsMembersService: ListsMembersService,
+    private readonly listsMembersService: ListsMembersService,
     private readonly configService: ConfigService,
   ) { }
 
@@ -179,11 +180,10 @@ export class UsersController {
     return this.usersService.update(id, data);
   }
 
-  // Supprimer un User
+   // Supprimer un User
   @UseGuards(UserIdOradminRoleGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    // Récupérer l'utilisateur à partir de la base de données pour obtenir le chemin de l'image
     const user = await this.usersService.findOne(id);
     if (!user) {
       throw new NotFoundException('Utilisateur non trouvé');
@@ -194,13 +194,11 @@ export class UsersController {
       this.listsMembersService.remove(element.eventId, element.userId);
     });
 
-    // Vérifier si l'utilisateur a une photo avant de tenter de la supprimer
     if (user.avatar) {
-      const avatarPath = `avatars/${id}`; // Chemin de l'image sur GCS
+      const avatarPath = `avatars/${id}`;
       await this.deleteFolderFromGCS(avatarPath);
     }
 
-    // Supprimer l'utilisateur de la base de données
     return this.usersService.remove(id);
   }
 

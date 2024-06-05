@@ -1,21 +1,24 @@
-import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { Event } from '../events/events.entity';
 import { User } from '../users/users.entity';
 
 @Entity()
 export class ListsMember {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => Event, event => event.listsMembers, { onDelete: 'CASCADE' })
+  event: Event;
+
+  @ManyToOne(() => User, user => user.listsMembers, { onDelete: 'CASCADE' })
+  user: User;
+
+  @Column()
   eventId: number;
 
-  @PrimaryColumn()
+  @Column()
   userId: string;
 
   @Column({ default: false })
   isParticipant: boolean;
-
-  @ManyToOne(() => Event, event => event.listsMembers)
-  event: Event;
-
-  @ManyToOne(() => User, user => user.listsMembers)
-  user: User;
 }

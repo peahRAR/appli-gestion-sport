@@ -3,6 +3,7 @@
     <TheSkeleton v-if="loading" />
     <div class=" min-h-screen" v-else>
       <TheAlert class="mx-2 rounded mb-4" :alerts="alerts" />
+      <!-- Si aucun cours -->
       <div class="no-events min-h-screen m-auto w-full h-full text-center flex align-middle" v-if="events.length < 1">
         <p class="inline m-auto p-4 bg-white border rounded-full">Aucun cours prévu</p>
       </div>

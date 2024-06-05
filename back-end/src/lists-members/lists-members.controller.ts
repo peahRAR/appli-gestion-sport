@@ -27,18 +27,18 @@ export class ListsMembersController {
 
   @Get(':eventId/:userId')
   findOne(@Param('eventId') eventId: string, @Param('userId') userId: string) {
-    return this.listsMembersService.findOne(+eventId, +userId);
+    return this.listsMembersService.findOne(+eventId, userId);
   }
 
   @Patch(':eventId/:userId')
   update(
-    @Param('eventId') eventId: string,
+    @Param('eventId') eventId: number,
     @Param('userId') userId: string,
     @Body() updateListsMemberDto: UpdateListsMemberDto,
   ) {
     return this.listsMembersService.update(
-      +eventId,
-      +userId,
+      eventId,
+      userId,
       updateListsMemberDto,
     );
   }
@@ -46,6 +46,6 @@ export class ListsMembersController {
   @UseGuards(AdminRoleGuard)
   @Delete(':eventId/:userId')
   remove(@Param('eventId') eventId: string, @Param('userId') userId: string) {
-    return this.listsMembersService.remove(+eventId, +userId);
+    return this.listsMembersService.remove(+eventId, userId);
   }
 }

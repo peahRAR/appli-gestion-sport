@@ -8,7 +8,7 @@ export class ListsMember {
   eventId: number;
 
   @PrimaryColumn()
-  userId: number;
+  userId: string;
 
   @Column({ default: false })
   isParticipant: boolean;

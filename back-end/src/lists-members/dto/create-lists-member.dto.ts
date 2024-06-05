@@ -1,6 +1,6 @@
 export class CreateListsMemberDto {
     eventId: number;
-    userId: number;
+    userId: string;
     isParticipant: boolean;
   }
   

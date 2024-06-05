@@ -25,7 +25,6 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersService.findByEmail(email);
-    console.log(user)
     if (user) {
       if (!user.isActive) {
         throw new UnauthorizedException('Compte non active');

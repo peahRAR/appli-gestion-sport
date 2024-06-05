@@ -54,7 +54,6 @@ export class UsersController {
       keyFilename: keyFilename,
     });
 
-    console.log(this.bucketName)
     this.bucketName = bucketName;
   }
 
@@ -77,7 +76,6 @@ export class UsersController {
     return new Promise<string>((resolve, reject) => {
       stream.on('error', (err) => {
         reject(err);
-        console.log(err);
       });
 
       stream.on('finish', async () => {
@@ -85,7 +83,6 @@ export class UsersController {
         publicUrl = publicUrl.replace(/'/g, ""); // Supprimer les apostrophes
 
         const fullUrl = `https://${publicUrl}/${bucketName}/${destination}`;
-        console.log(fullUrl);
         resolve(fullUrl);
       });
 
@@ -100,29 +97,18 @@ export class UsersController {
 
 
   private async emptyGCSFolder(folderPath: string): Promise<void> {
-    console.log("Début de la vidange du dossier...");
-
     // Enlever les apostrophes du nom du bucket
     const bucketName = this.bucketName.replace(/'/g, "");
 
     const bucket = this.storage.bucket(bucketName);
 
-    console.log("Nom du bucket :", bucketName);
-    console.log("Chemin du dossier :", folderPath);
-
     const options = {
       prefix: folderPath,
     };
 
-    console.log("Options :", options);
-
     try {
       const [files] = await bucket.getFiles(options);
-
-      console.log("Fichiers à supprimer :", files);
-
       await Promise.all(files.map((file) => file.delete()));
-      console.log("Dossier vidé avec succès.");
     } catch (error) {
       console.error("Erreur lors de la vidange du dossier :", error.message);
       console.error("Détails de l'erreur :", error);
@@ -134,7 +120,6 @@ export class UsersController {
   @Public()
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    console.log("CREATE")
     return this.usersService.create(createUserDto);
   }
 

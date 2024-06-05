@@ -501,9 +501,6 @@ export class UsersService {
 
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    // Log the token for debugging
-    console.log('Token received:', token);
-
     // Décoder le token JWT pour extraire l'ID de l'utilisateur
     let userId: string;
     try {
@@ -517,9 +514,6 @@ export class UsersService {
     const resetRecord = await this.resetPasswordRepository.findOne({
       where: { token },
     });
-
-    // Log the resetRecord for debugging
-    console.log('Reset record found:', resetRecord);
 
     if (!resetRecord || resetRecord.expires < new Date()) {
       throw new Error('Token de réinitialisation invalide ou expiré.');

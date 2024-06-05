@@ -35,7 +35,7 @@ export class ListsMembersService {
     return this.listsMemberRepository.find({ where: { userId } });
   }
 
-  async findOne(eventId: number, userId: number): Promise<any> {
+  async findOne(eventId: number, userId: string): Promise<any> {
     const listsMember = await this.listsMemberRepository.findOne({
       where: { eventId, userId },
     });
@@ -48,7 +48,7 @@ export class ListsMembersService {
 
   async update(
     eventId: number,
-    userId: number,
+    userId: string,
     updateListsMemberDto: UpdateListsMemberDto,
   ): Promise<ListsMember | undefined> {
     const response = await this.eventsService.findOne(eventId);
@@ -101,7 +101,7 @@ export class ListsMembersService {
     return this.listsMemberRepository.findOne({ where: { eventId, userId } });
   }
 
-  async remove(eventId: number, userId: number): Promise<void> {
+  async remove(eventId: number, userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ eventId, userId });
   }
 }

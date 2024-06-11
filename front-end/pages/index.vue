@@ -1,6 +1,6 @@
 <template>
   <div>
-    <MyEventCards v-if="isAuthenticated" />
+    <CardsList v-if="isAuthenticated" />
     <TheAuth v-else />
   </div>
 </template>

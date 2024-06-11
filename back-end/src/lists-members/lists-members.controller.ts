@@ -20,9 +20,14 @@ export class ListsMembersController {
     return this.listsMembersService.findAll();
   }
 
-  @Get('by-event/:eventId') // Ajoutez un chemin d'accès distinct pour findAllByIdEvent
-  findAllByIdEvent(@Param('eventId') eventId: string) {
-    return this.listsMembersService.findAllByIdEvent(+eventId);
+  @Get('by-event/:eventId')
+  findAllByIdEvent(@Param('eventId') eventId: number) {
+    return this.listsMembersService.findAllByIdEvent(eventId);
+  }
+
+  @Get('participants/:eventId') //Retourne uniquement la liste des participants
+  findParticipant(@Param('eventId') eventId: number) {
+    return this.listsMembersService.findParticipants(eventId)
   }
 
   @Get(':eventId/:userId')

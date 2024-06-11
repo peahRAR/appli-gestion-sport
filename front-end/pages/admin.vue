@@ -8,25 +8,13 @@
         </h1>
         <!-- Inactive Users Table -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-          <inactive-users-table
-            :inactive-users="filterUsers(false)"
-            :pageSize="10"
-            @reactivate="reactivateUser"
-            @delete="deleteUser"
-          />
+          <inactive-users-table :inactive-users="filterUsers(false)" :pageSize="10" @reactivate="reactivateUser"
+            @delete="deleteUser" />
         </div>
         <!-- USERS List -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-         <UserList
-            :users="preprocessUsers(filterUsers(true))"
-            :sortByList
-            :filterList
-            :activeColumns
-            :defaultColumns
-            :columnsNames
-            @update:users="updateUsers"
-            @open-modal="openModal"
-          /> 
+          <UserList :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns :defaultColumns
+            :columnsNames @update:users="updateUsers" @open-modal="openModal" />
         </div>
         <!-- Add Alert Form -->
         <div class="bg-white mx-2 rounded p-2 mb-10">
@@ -43,232 +31,62 @@
 
         <!-- Event Table -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-          <event-list
-            :events="events"
-            @edit-event="editEvent"
-            @delete-event="deleteEvent"
-          />
+          <event-list :events="events" @edit-event="editEvent" @delete-event="deleteEvent" />
         </div>
       </div>
 
-      <TheModal
-        :isOpen="showModalSelectedUser"
-        title="Informations utilisateurs"
-        @close="closeModalUser"
-      >
-        <!-- Modale Utilisateur  -->
-        <!-- Input Name -->
-        <div class="mb-2 mt-4">
-          <NuxtImg
-            v-if="selectedUser.avatar"
-            :src="selectedUser.avatar"
-            alt="Avatar"
-            class="w-28 h-28 rounded-full mx-auto mb-4"
-          />
-          <!-- If Avatar === null -->
-          <div
-            v-else
-            class="w-28 h-28 mb-4 rounded-full bg-gray-300 mx-auto flex items-center justify-center"
-          >
-            <span class="text-gray-600 text-4xl"
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="50"
-                height="50"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
-    3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 
-    8.5a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8 8.5A3.5 3.5 0 0 1 11.5 5m0 1A2.5 
-    2.5 0 0 0 9 8.5a2.5 2.5 0 0 0 2.5 2.5A2.5 2.5 0 0 0 14 8.5A2.5 2.5 0 0 0 11.5 6"
-                />
-              </svg>
-            </span>
-          </div>
-          <label for="username"><strong>Nom:</strong></label>
-          <input
-            class="border border-gray-500 p-1"
-            type="text"
-            v-model="selectedUser.name"
-            id="username"
-          />
-        </div>
-        <!-- Input Firstname -->
-        <div class="mb-2">
-          <label for="userfirstname"><strong>Prénom:</strong></label>
-          <input
-            class="border border-gray-500 p-1"
-            type="text"
-            v-model="selectedUser.firstname"
-            id="userfirstname"
-          />
-        </div>
+      <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" @close="closeModalUser"
+        @update-user="updateUser" @delete-user="deleteUser" @change-role="changeUserRole" />
 
-        <p class="mb-2"><strong>E-mail:</strong> {{ selectedUser.email }}</p>
-        <!-- Birthday -->
-        <p class="mb-2">
-          <strong>Date de naissance:</strong>
-          {{ formatDate(selectedUser.birthday) }}
-        </p>
-        <!-- Gender -->
-        <p class="mb-2">
-          <strong>Genre:</strong> {{ selectedUser.gender ? "Homme" : "Femme" }}
-        </p>
-        <!-- Weight -->
-        <p>
-          <strong>Poids:</strong>
-          {{
-            (selectedUser.weight && selectedUser.weight + "Kg") ||
-            "Non renseigné"
-          }}
-        </p>
-        <p class="mb-2">
-          <strong>Numéro de téléphone:</strong>
-          {{
-            (selectedUser.tel_num && selectedUser.tel_num) || "Non renseigné"
-          }}
-        </p>
-        <!-- Tel Medic -->
-        <p class="mb-2">
-          <strong>Téléphone médical:</strong>
-          {{
-            (selectedUser.tel_medic && selectedUser.tel_medic) ||
-            "Non renseigné"
-          }}
-        </p>
-        <!-- Tel emergency -->
-        <p class="mb-2">
-          <strong>Téléphone d'urgence:</strong>
-          {{
-            (selectedUser.tel_emergency && selectedUser.tel_emergency) ||
-            "Non renseigné"
-          }}
-        </p>
-        <!-- Add Input for change the dates -->
-        <!-- Payment input -->
-        <div class="mb-2">
-          <label for="datePayment"><strong>Date de paiement:</strong></label>
-          <input
-            class="border border-gray-500 p-1"
-            type="date"
-            v-model="selectedUser.date_payment"
-            id="datePayment"
-          />
-          <span v-if="!selectedUser.date_payment">Aucun paiement en cours</span>
-        </div>
-        <!-- End Pay input -->
-        <div class="mb-2">
-          <label for="dateEndPay"
-            ><strong> Date de fin de paiement:</strong></label
-          >
-          <input
-            class="border border-gray-500 p-1"
-            type="date"
-            v-model="selectedUser.date_end_pay"
-            id="dateEndPay"
-          />
-          <span v-if="!selectedUser.date_end_pay">Aucun paiement en cours</span>
-        </div>
-        <!-- Div For Place the buttons -->
-        <div class="flex flex-row justify-between">
-          <!-- Button For Update User -->
-          <button
-            @click="updateUser"
-            class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-          >
-            Enregistrer
-          </button>
-          <!-- Button fro delete user -->
-          <button
-            @click="deleteUser(selectedUser)"
-            class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-          >
-            Supprimer Utilisateur
-          </button>
-          <!-- Button For change role user -->
-          <div v-if="getUserRole() === 2">
-            <button
-              v-if="selectedUser.role === 0"
-              @click="changeUserRole(selectedUser.id)"
-              class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-            >
-              Passer Admin
-            </button>
-          </div>
-        </div>
-      </TheModal>
       <!-- Modal For Editing Event -->
-      <TheModal
-        :isOpen="showModal"
-        title="Modifier l'évenement"
-        @close="closeModal"
-      >
-        <!-- Modale pour l'édition de l'événement -->
-
-        <form
-          @submit.prevent="saveChanges(editedEvent.id)"
-          data-event-id="editedEvent.id"
-        >
-          <!-- Event Name -->
+      <TheModal :isOpen="showModal" title="Modifier l'évenement" @close="closeModal">
+        <form @submit.prevent="saveChanges(editedEvent.id)" data-event-id="editedEvent.id">
+          <!-- Nom de l'événement -->
           <div class="flex flex-col mb-4">
             <label for="title">Titre du cours : </label>
-            <input
-              type="text"
-              v-model="editedEvent.name_event"
-              id="title"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-            />
+            <input type="text" v-model="editedEvent.name_event" id="title"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
           </div>
-          <!-- Overview -->
+          <!-- Description -->
           <div class="flex flex-col mb-4">
             <label for="description">Description du cours : </label>
-            <textarea
-              v-model="editedEvent.overview"
-              id="description"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-              placeholder=""
-            ></textarea>
+            <textarea v-model="editedEvent.overview" id="description"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" placeholder=""></textarea>
           </div>
           <!-- Coach -->
           <div class="flex flex-col mb-4">
             <label for="coach">Nom du coach : </label>
-            <input
-              type="text"
-              v-model="editedEvent.coach"
-              id="coach"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-            />
+            <input type="text" v-model="editedEvent.coach" id="coach"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
           </div>
-          <!-- Seats -->
+          <!-- Date -->
+          <div class="flex flex-col">
+            <label class="font-semibold" for="date">Date et heure de début</label>
+            <input type="datetime-local" v-model="editedEvent.date_event" id="date"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+          </div>
+          <!-- Duration -->
+          <div class="flex flex-col">
+            <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
+            <input type="number" v-model="editedEvent.duration" id="duration"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+          </div>
+          <!-- Places -->
           <div class="flex flex-col mb-4">
-            <label for="totalSeats"
-              >Nombre de places total disponibles :
+            <label for="totalSeats">Nombre de places total disponibles :
             </label>
-            <input
-              type="number"
-              v-model="editedEvent.totalPlaces"
-              id="totalSeats"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"
-            />
+            <input type="number" v-model="editedEvent.totalPlaces" id="totalSeats"
+              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
           </div>
 
-          <!-- Button Save Changes -->
-          <button
-            type="submit"
-            class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
+          <!-- Save -->
+          <button type="submit"
+            class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
             Sauvegarder
           </button>
         </form>
       </TheModal>
-      <TheModal
-        :isOpen="showErrorModal"
-        title="Message"
-        @close="closeErrorModal"
-        >{{ this.errorMessage }}</TheModal
-      >
+      <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{ this.errorMessage }}</TheModal>
     </div>
   </div>
 </template>
@@ -410,7 +228,6 @@ export default {
     async createCourse(newCourseData) {
       try {
         newCourseData.places = newCourseData.totalPlaces;
-        console.log(newCourseData)
         const url = this.getUrl();
         const token = localStorage.getItem("accessToken");
         // Request Post for create new Event
@@ -627,8 +444,7 @@ export default {
       }
     },
     // Change the user role
-    async changeUserRole(userId) {
-      console.log(this.selectedUser.id)
+    async changeUserRole(userId, newRole) {
       try {
         const token = localStorage.getItem("accessToken");
         if (token) {
@@ -638,33 +454,39 @@ export default {
             const payload = JSON.parse(atob(tokenParts[1]));
 
             if (payload.role === 2) {
-              const newRole = 1;
               const url = this.getUrl();
-              const response = await fetch(
-                `${url}/admin/${userId}/${newRole}`,
-                {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                }
-              );
+              const response = await fetch(`${url}/admin/${userId}/${newRole}`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              let responseData = null;
+
               if (response.ok) {
+                // Only attempt to parse JSON if there is a body
+                const text = await response.text();
+                responseData = text ? JSON.parse(text) : {};
+
+                console.log("Réponse de l'API :", responseData); // Log response data
                 this.openErrorModal();
-                this.errorMessage =
-                  "Le rôle de l'utilisateur a été modifié avec succès";
-                this.loadAllUSers();
-                this.closeModal();
+                this.errorMessage = "Le rôle de l'utilisateur a été modifié avec succès";
+                this.loadAllUsers(); // Corrected typo from loadAllUSers to loadAllUsers
+                this.closeModalUser(); // Corrected typo from closeModal to closeModalUser
               } else {
+                // Only attempt to parse JSON if there is a body
+                const text = await response.text();
+                responseData = text ? JSON.parse(text) : {};
+
+                console.error("Erreur lors de la réponse de l'API :", responseData); // Log response data on error
                 this.openErrorModal();
-                this.errorMessage =
-                  "Erreur lors de la modification du rôle de l'utilisateur";
+                this.errorMessage = "Erreur lors de la modification du rôle de l'utilisateur";
               }
             } else {
               this.openErrorModal();
-              this.errorMessage =
-                "Vous n'avez pas les permissions nécessaires pour effectuer cette action";
+              this.errorMessage = "Vous n'avez pas les permissions nécessaires pour effectuer cette action";
             }
           } else {
             throw new Error("Token JWT invalide");
@@ -673,12 +495,13 @@ export default {
           throw new Error("Token JWT introuvable dans le localStorage");
         }
       } catch (error) {
+        console.error("Erreur :", error); // Log the error
         this.openErrorModal();
-        (this.errorMessage =
-          "Erreur lors de la modification du rôle de l'utilisateur :"),
-          error;
+        this.errorMessage = "Erreur lors de la modification du rôle de l'utilisateur ";
       }
     },
+
+
     // Delete Event
     async deleteEvent(eventId) {
       try {

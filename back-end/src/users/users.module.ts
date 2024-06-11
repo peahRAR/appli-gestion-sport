@@ -11,22 +11,18 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, ResetPassword]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule], // S'assurer que ConfigModule est importé
-      inject: [ConfigService], // Injecter ConfigService
-      useFactory: async (configService: ConfigService) => {
-        const secret = configService.get<string>('JWT_SECRET'); // Utiliser ConfigService pour obtenir JWT_SECRET
-        const expiresIn = configService.get<string>('JWT_EXP'); // Utiliser ConfigService pour obtenir JWT_EXP
-        return {
-          secret: secret,
-          signOptions: { expiresIn: expiresIn }
-        };
-      },
-    }),
     forwardRef(() => ListsMembersModule),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXP') },
+      }),
+    }),
   ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

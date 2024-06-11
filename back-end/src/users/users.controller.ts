@@ -22,10 +22,6 @@ import { UserIdOradminRoleGuard } from './users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { Repository } from 'typeorm';
-import { User } from './users.entity';
-
-
 
 @Controller('users')
 export class UsersController {
@@ -153,9 +149,6 @@ export class UsersController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
   ) {
-    if (!file) {
-      console.log('Aucun fichier reçu.');
-    }
     let data;
     // On parse le body user pour récuperer un objet
     if (body.user) {

@@ -5,14 +5,17 @@ import { ListsMember } from './lists-member.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { EventsService } from 'src/events/events.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class ListsMembersService {
   constructor(
     @InjectRepository(ListsMember)
     private readonly listsMemberRepository: Repository<ListsMember>,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
     @Inject(forwardRef(() => EventsService))
-    private eventsService: EventsService,
+    private readonly eventsService: EventsService,
   ) {}
 
   async create(
@@ -33,6 +36,36 @@ export class ListsMembersService {
 
   async findAllByIdUser(userId): Promise<ListsMember[]> {
     return this.listsMemberRepository.find({ where: { userId } });
+  }
+
+  async findParticipants(eventId: number): Promise<any[]> {
+    // Find all participants for the given event
+    const participants = await this.listsMemberRepository.find({
+      where: { eventId, isParticipant: true },
+      relations: ['user'],
+    });
+
+    // Fetch and map participant details to the required format
+    const participantDetails = await Promise.all(
+      participants.map(async participant => {
+        const user = await this.usersService.findOne(participant.user.id);
+        if (user) {
+          return {
+            id: user.id,
+            license: user.license,
+            date_end_pay: user.date_end_pay,
+            avatar: user.avatar,
+            firstname: user.firstname,
+            name: user.name,
+          };
+        } else {
+          return null;
+        }
+      })
+    );
+
+    // Filter out any null values in case some users were not found
+    return participantDetails.filter(participant => participant !== null);
   }
 
   async findOne(eventId: number, userId: string): Promise<any> {

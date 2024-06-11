@@ -5,24 +5,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ListsMember } from './lists-member.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { EventsModule } from 'src/events/events.module';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // Importez ConfigService et ConfigModule
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ListsMember]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule], // Remplacez SecretsModule par ConfigModule
-      inject: [ConfigService], // Injectez ConfigService au lieu de SecretsService
-      useFactory: async (configService: ConfigService) => {
-        const secret = configService.get<string>('JWT_SECRET'); // Utilisez ConfigService pour obtenir le secret
-        const expiresIn = configService.get<string>('JWT_EXP'); // Utilisez ConfigService pour obtenir la durée d'expiration avec une valeur par défaut
-        return {
-          secret: secret,
-          signOptions: { expiresIn: expiresIn }
-        };
-      },
-    }),
+    forwardRef(() => UsersModule),
     forwardRef(() => EventsModule),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXP') },
+      }),
+    }),
   ],
   controllers: [ListsMembersController],
   providers: [ListsMembersService],

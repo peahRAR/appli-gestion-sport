@@ -14,16 +14,16 @@
         <textarea v-model="newCourse.overview" id="description"
           class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md"></textarea>
       </div>
-      <!-- Date -->
-      <div class="flex flex-col">
-        <label class="font-semibold" for="date">Date et heure de début</label>
-        <input type="datetime-local" v-model="newCourse.date_event" id="date"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-      </div>
       <!-- Coach -->
       <div class="flex flex-col">
         <label class="font-semibold" for="coach">Nom du coach</label>
         <input type="text" v-model="newCourse.coach" id="coach"
+          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+      </div>
+      <!-- Date -->
+      <div class="flex flex-col">
+        <label class="font-semibold" for="date">Date et heure de début</label>
+        <input type="datetime-local" v-model="newCourse.date_event" id="date"
           class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
       </div>
       <!-- Duration -->

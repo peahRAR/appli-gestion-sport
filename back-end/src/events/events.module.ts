@@ -5,8 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Event } from './events.entity';
 import { ListsMembersModule } from 'src/lists-members/lists-members.module';
 
-
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([Event]),
@@ -16,4 +14,4 @@ import { ListsMembersModule } from 'src/lists-members/lists-members.module';
   providers: [EventsService],
   exports: [EventsService],
 })
-export class EventsModule {}
+export class EventsModule { }

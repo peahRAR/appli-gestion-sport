@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h2 class="text-xl font-semibold mb-2">Liste des événements</h2>
-    <div class="max-w-screen-lg mx-auto">
+    <h2 class="text-xl font-semibold mb-2">Liste des cours</h2>
+    <div class="w-full">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr class="bg-gray-200">

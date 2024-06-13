@@ -73,7 +73,6 @@ export default {
     },
     alertColor() {
       const incorrectParams = [this.paramAlertColor1, this.paramAlertColor2].filter(param => !param).length;
-      console.log(incorrectParams)
       if (incorrectParams === 1) {
         return 'orange';
       } else if (incorrectParams > 1) {
@@ -286,7 +285,6 @@ export default {
         // Mise à jour de l'état de participation dans l'événement local
         const eventIndex = this.events.findIndex(e => e.id === event.id);
         if (eventIndex !== -1) {
-          console.log(this.events[eventIndex].isParticipating)
           const isParticipating = this.events[eventIndex].isParticipating;
           // Mettre à jour le nombre de participants
           if (isParticipating) {
@@ -372,9 +370,6 @@ export default {
         // Vérifier les conditions nécessaires pour afficher l'alerte
         this.noLicense = !userData.license;
         this.paymentExpired = new Date(userData.date_end_pay) < new Date();
-
-        console.log(this.noLicense);
-
 
         // Définir le message d'alerte en fonction des conditions
         if (this.noLicense) {

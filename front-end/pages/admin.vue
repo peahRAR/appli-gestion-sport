@@ -4,7 +4,7 @@
     <div v-else>
       <div class="container mx-auto py-8">
         <h1 class="text-3xl ml-2 font-semibold mb-4">
-          Administration de l'application
+          Administration
         </h1>
         <!-- Inactive Users Table -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
@@ -16,7 +16,7 @@
           <UserList :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns :defaultColumns
             :columnsNames @update:users="updateUsers" @open-modal="openModal" />
         </div>
-        <!-- Add Alert Form -->
+        <!-- Ajouté une alerte -->
         <div class="bg-white mx-2 rounded p-2 mb-10">
           <add-alert-form @new-alert="submitAlert" />
         </div>
@@ -24,12 +24,12 @@
         <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden">
           <AlertList :alerts="alerts" @delete-alert="deleteAlert" />
         </div>
-        <!-- Create Event Form  -->
+        <!-- Creer un cour  -->
         <div class="bg-white mx-2 rounded p-2">
           <create-course-form @create="createCourse" />
         </div>
 
-        <!-- Event Table -->
+        <!-- Liste des cours -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
           <event-list :events="events" @edit-event="editEvent" @delete-event="deleteEvent" />
         </div>
@@ -39,53 +39,8 @@
         @update-user="updateUser" @delete-user="deleteUser" @change-role="changeUserRole" />
 
       <!-- Modal For Editing Event -->
-      <TheModal :isOpen="showModal" title="Modifier l'évenement" @close="closeModal">
-        <form @submit.prevent="saveChanges(editedEvent.id)" data-event-id="editedEvent.id">
-          <!-- Nom de l'événement -->
-          <div class="flex flex-col mb-4">
-            <label for="title">Titre du cours : </label>
-            <input type="text" v-model="editedEvent.name_event" id="title"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-          </div>
-          <!-- Description -->
-          <div class="flex flex-col mb-4">
-            <label for="description">Description du cours : </label>
-            <textarea v-model="editedEvent.overview" id="description"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" placeholder=""></textarea>
-          </div>
-          <!-- Coach -->
-          <div class="flex flex-col mb-4">
-            <label for="coach">Nom du coach : </label>
-            <input type="text" v-model="editedEvent.coach" id="coach"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-          </div>
-          <!-- Date -->
-          <div class="flex flex-col">
-            <label class="font-semibold" for="date">Date et heure de début</label>
-            <input type="datetime-local" v-model="editedEvent.date_event" id="date"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-          </div>
-          <!-- Duration -->
-          <div class="flex flex-col">
-            <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
-            <input type="number" v-model="editedEvent.duration" id="duration"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-          </div>
-          <!-- Places -->
-          <div class="flex flex-col mb-4">
-            <label for="totalSeats">Nombre de places total disponibles :
-            </label>
-            <input type="number" v-model="editedEvent.totalPlaces" id="totalSeats"
-              class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
-          </div>
+      <EditEventModal :isOpen="showModal" :event="editedEvent" @close="closeModal" @save-changes="saveChanges" />
 
-          <!-- Save -->
-          <button type="submit"
-            class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-            Sauvegarder
-          </button>
-        </form>
-      </TheModal>
       <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{ this.errorMessage }}</TheModal>
     </div>
   </div>
@@ -384,7 +339,7 @@ export default {
 
         // Check the response and showw error message if it's not ok
         this.openErrorModal();
-        (this.errorMessage = "Utilisateur réactivé avec succès :"), response;
+        (this.errorMessage = "Utilisateur réactivé avec succès"), response;
         await this.loadAllUsers();
       } catch (error) {
         this.openErrorModal();
@@ -542,7 +497,7 @@ export default {
       this.showModal = true;
     },
     // Update Event
-    async saveChanges(eventId) {
+    async saveChanges(eventId, updatedEvent) {
       const token = localStorage.getItem("accessToken");
       const url = this.getUrl();
       try {
@@ -553,7 +508,7 @@ export default {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(this.editedEvent),
+            body: JSON.stringify(updatedEvent),
           });
 
           if (response.ok) {

@@ -25,12 +25,34 @@
             </strong>
 
             <ul>
-                <li> Poids : {{ userDetails.weigth || "--" }} Kg</li>
-                <li>License : {{ userDetails.license || "Non Renseigné" }}</li>
-                <li>Téléphone : {{ userDetails.tel_num || "Non Renseigné" }}</li>
-                <li>Numéro d'urgence : {{ userDetails.tel_emergency || "Non Renseigné" }}</li>
-                <li>Téléphone Médecin : {{ userDetails.tel_medic || "Non Renseigné" }}</li>
-                <li>Date de fin de paiment : {{ userDetails.date_end_pay || "Non Renseigné" }}</li>
+                <li> Date de naissance : <strong>
+                        {{ formatBirthday(userDetails.birthday) || "Non Renseigné" }}
+                    </strong>
+                </li>
+                <li> Poids : <strong>
+                        {{ userDetails.weight || "--" }} Kg
+                    </strong>
+                </li>
+                <li>License : <strong>
+                        {{ userDetails.license || "Non Renseigné" }}
+                    </strong>
+                </li>
+                <li>Téléphone : <strong>
+                        {{ userDetails.tel_num || "Non Renseigné" }}
+                    </strong>
+                </li>
+                <li>Numéro d'urgence : <strong>
+                        {{ userDetails.tel_emergency || "Non Renseigné" }}
+                    </strong>
+                </li>
+                <li>Téléphone Médecin : <strong>
+                        {{ userDetails.tel_medic || "Non Renseigné" }}
+                    </strong>
+                </li>
+                <li>Date de fin de paiment : <strong>
+                        {{ userDetails.date_end_pay || "Non Renseigné" }}
+                    </strong>
+                </li>
             </ul>
         </div>
     </TheModal>
@@ -46,6 +68,18 @@ export default {
     methods: {
         close() {
             this.$emit('close');
+        },
+        formatBirthday(dateString) {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+
+            const now = new Date();
+            const age = now.getFullYear() - year - (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate()) ? 1 : 0);
+
+            return `${day}/${month}/${year} (${age} ans)`;
         }
     }
 }

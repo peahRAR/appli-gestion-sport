@@ -5,46 +5,31 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr class="bg-gray-200">
-            <th
-              scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th scope="col"
+              class="px-3 py-1 text-center w-4/12 text-xs font-medium text-gray-500 uppercase tracking-wider">
               Titre
             </th>
-            <th
-              scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th scope="col" class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Date de fin
             </th>
-            <th
-              scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th scope="col"
+              class="px-3 py-1 text-center text-xs font-medium w-2/12 text-gray-500 uppercase tracking-wider">
               Supprimer
             </th>
           </tr>
         </thead>
         <tbody class="bg-gray-300 divide-y divide-gray-200">
           <tr v-for="(alert, index) in alerts" :key="alert.id" class="w-full justify-between items-center">
-            <td class="w-3 px-3 py-4 text-black font-bold">{{ alert.titre }}</td>
-            <td class="w-3 px-3 py-4 text-black font-bold whitespace-nowrap">{{ formatAlertDate(alert.dateFin) }}</td>
+            <td class="w-3 px-3 py-4 text-black text-center font-bold">{{ alert.titre }}</td>
+            <td class="w-3 px-3 py-4 text-black text-center font-bold whitespace-nowrap">{{
+              formatAlertDate(alert.dateFin) }}</td>
             <td class="px-3 py-4 whitespace-nowrap text-center">
-              <button @click="deleteAlert(alert.id)" class="bg-red-500 text-white p-1 rounded-md hover:bg-red-600">
+              <button @click="deleteAlert(alert.id)"
+                class="bg-red-500 text-center text-white p-1 rounded-md hover:bg-red-600">
                 <!-- Icône de suppression -->
-                <svg
-                  class="h-4 w-4 inline-block"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
+                <svg class="h-4 w-4 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
               </button>
             </td>

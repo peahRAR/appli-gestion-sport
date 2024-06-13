@@ -13,7 +13,7 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     @Inject(forwardRef(() => ListsMembersService))
     private listsMembersService: ListsMembersService,
-  ) {}
+  ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
     // Convertir la durée de chaîne de caractères en entier
@@ -51,9 +51,26 @@ export class EventsService {
 
   async update(
     id: number,
-    updateeventDto: UpdateEventDto,
+    updateEventDto: UpdateEventDto,
   ): Promise<Event | undefined> {
-    await this.eventRepository.update(id, updateeventDto);
+    // Cloner l'objet updateEventDto pour éviter de modifier l'original
+    const updatedEvent: Partial<UpdateEventDto> = { ...updateEventDto };
+
+    // Vérifier si la durée est fournie
+    if (updateEventDto.duration) {
+      // Convertir la durée de chaîne de caractères en entier
+      const durationInMinutes = parseInt(updateEventDto.duration, 10);
+
+      if (isNaN(durationInMinutes)) {
+        throw new Error('Invalid duration format');
+      }
+
+      // Convertir la durée en intervalle PostgreSQL
+      const durationInterval = `PT${durationInMinutes}M`;
+      updatedEvent.duration = durationInterval;
+    }
+
+    await this.eventRepository.update(id, updatedEvent);
     return this.eventRepository.findOne({ where: { id } });
   }
 

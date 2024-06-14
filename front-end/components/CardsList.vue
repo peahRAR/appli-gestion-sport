@@ -31,6 +31,11 @@
 </template>
 
 <script>
+import NoEvents from './NoEvents.vue';
+import EventCard from './EventCard.vue';
+import ParticipantsListModal from './ParticipantsListModal.vue';
+import ParticipantDetailsModal from './ParticipantDetailsModal.vue';
+import AlertBubble from './AlertBubble.vue';
 
 export default {
   data() {

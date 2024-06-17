@@ -176,10 +176,6 @@ export class UsersService {
       isActive: isActive,
     });
 
-
-    const smtpUrl = process.env.SMTP_HOST;
-    console.log(`URL SMTP: ${smtpUrl}`);
-
     try {
       await this.mailerService.sendMail({
         to: decryptedEmail,

@@ -180,12 +180,11 @@ export class UsersService {
       await this.mailerService.sendMail({
         to: decryptedEmail,
         subject: 'Confirmation de compte',
-        template: 'activation',
+        template: 'confirmation',
         context: {
           email: decryptedEmail,
         },
       });
-      console.log("mail envoyé");
     } catch (error) {
       console.error('Erreur lors de l\'envoi de l\'email :', error);
       throw new InternalServerErrorException('Erreur lors de l\'envoi de l\'email.');

@@ -1,7 +1,7 @@
 <template>
   <div class="mb-8 bg-white rounded" style="overflow-x: auto">
     <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
-    <div class="w-full mx-auto">
+    <div class="max-w-screen-lg mx-auto">
       <table class="mx-auto min-w-full divide-y divide-gray-200">
         <!-- Table header -->
         <thead class="bg-gray-200">

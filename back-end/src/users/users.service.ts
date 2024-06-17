@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
   forwardRef,
@@ -19,7 +20,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as disposableEmailDomains from 'disposable-email-domains';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
-import { logger } from 'handlebars';
 
 
 @Injectable()
@@ -127,7 +127,6 @@ export class UsersService {
       throw new BadRequestException('Le domaine de l\'email n\'est pas autorisé.');
     }
 
-    console.log('le domaine est ok pour créer une adresse')
 
     // Date anniversaire
     const birthdayString = createUserDto.birthday.toString();
@@ -162,8 +161,6 @@ export class UsersService {
       throw new BadRequestException('Cette adresse E-mail est déjà utilisée.');
     }
 
-    console.log('utilisateur non existant')
-
     const decryptedEmail = createUserDto.email;
 
     // Créer la nouvelle entité utilisateur
@@ -179,18 +176,21 @@ export class UsersService {
       isActive: isActive,
     });
 
-    console.log("preparation de l'envoi du mail")
 
-    await this.mailerService.sendMail({
-      to: decryptedEmail,
-      subject: 'Confirmation de compte',
-      template: 'activation',
-      context: {
-        email: decryptedEmail,
-      },
-    });
-
-    console.log("mail envoyer")
+    try {
+      await this.mailerService.sendMail({
+        to: decryptedEmail,
+        subject: 'Confirmation de compte',
+        template: 'activation',
+        context: {
+          email: decryptedEmail,
+        },
+      });
+      console.log("mail envoyé");
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'email :', error);
+      throw new InternalServerErrorException('Erreur lors de l\'envoi de l\'email.');
+    }
 
     // Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);

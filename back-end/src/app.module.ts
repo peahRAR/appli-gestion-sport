@@ -2,7 +2,6 @@ import { Module, DynamicModule, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { User } from './users/users.entity';
 import { ListsMember } from './lists-members/lists-member.entity';
 import { UsersModule } from './users/users.module';
@@ -14,6 +13,7 @@ import { AlertModule } from './alert/alert.module';
 import { CronjobsModule } from './cronjobs/cronjobs.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { mailerConfig } from './mailer.config';
 
 
 @Module({})
@@ -59,27 +59,7 @@ export class AppModule implements OnModuleInit {
         MailerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
-          useFactory: async (configService: ConfigService) => ({
-            transport: {
-              host: configService.get<string>('SMTP_HOST'),
-              port: configService.get<number>('SMTP_PORT'),
-              secure: false,
-              auth: {
-                user: configService.get<string>('SMTP_USER'),
-                pass: configService.get<string>('SMTP_PASS'),
-              },
-            },
-            defaults: {
-              from: '"Association MMA Baisieux" <no-reply@mmabaisieux.fr>',
-            },
-            template: {
-              dir: process.cwd() + '/templates/email/',
-              adapter: new HandlebarsAdapter(),
-              options: {
-                strict: false,
-              },
-            },
-          }),
+          useFactory: async (configService: ConfigService) => mailerConfig(configService),
         }),
         UsersModule,
         EventsModule,

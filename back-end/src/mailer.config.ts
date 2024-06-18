@@ -25,12 +25,13 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
         pass: smtpPass,
       },
       tls: {
-        // Do not fail on invalid certs, needed for self-signed certs
         rejectUnauthorized: false,
       },
+      logger: true,
+      debug: true,
     },
     defaults: {
-      from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
+      from: '"Association MMA Baisieux" <no-reply@mmabaisieux.fr>',
     },
     template: {
       dir: process.cwd() + '/templates/email/',

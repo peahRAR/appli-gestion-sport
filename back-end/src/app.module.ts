@@ -59,7 +59,11 @@ export class AppModule implements OnModuleInit {
         MailerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],
-          useFactory: async (configService: ConfigService) => mailerConfig(configService),
+          useFactory: async (configService: ConfigService) => {
+            const options = mailerConfig(configService);
+            console.log('Mailer Config:', options);
+            return options;
+          },
         }),
         UsersModule,
         EventsModule,

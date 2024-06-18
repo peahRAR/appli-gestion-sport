@@ -176,6 +176,8 @@ export class UsersService {
       isActive: isActive,
     });
 
+    console.log("mail decrypt" + decryptedEmail)
+
     try {
       await this.mailerService.sendMail({
         to: decryptedEmail,

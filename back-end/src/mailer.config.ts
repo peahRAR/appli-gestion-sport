@@ -15,7 +15,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
   logger.log(`SMTP Port: ${smtpPort}`);
   logger.log(`SMTP User: ${smtpUser}`);
 
-  return {
+  const options = {
     transport: {
       host: smtpHost,
       port: smtpPort,
@@ -31,7 +31,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       debug: true,
     },
     defaults: {
-      from: '"Association MMA Baisieux" <no-reply@mmabaisieux.fr>',
+      from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
     },
     template: {
       dir: process.cwd() + '/templates/email/',
@@ -41,4 +41,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       },
     },
   };
+
+  logger.log(`Mailer options: ${JSON.stringify(options, null, 2)}`);
+  return options;
 };

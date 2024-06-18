@@ -176,6 +176,9 @@ export class UsersService {
       isActive: isActive,
     });
 
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    console.log(`SMTP_HOST: ${smtpHost}`);
+
     try {
       await this.mailerService.sendMail({
         to: decryptedEmail,

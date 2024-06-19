@@ -1,17 +1,19 @@
 runtime: nodejs20
 
 automatic_scaling:
-    max_instances: 1
+  max_instances: 1
 
 handlers:
-    - url: /.*
-      secure: always
-      redirect_http_response_code: 301
-      script: auto
-
+  - url: /.*
+    secure: always
+    redirect_http_response_code: 301
+    script: auto
 
 env_variables:
   NODE_ENV: 'production'
 
+entrypoint: 'npm run start:prod'
 
-entrypoint: "npm run start:prod"
+vpc_access_connector:
+  name: projects/YOUR_PROJECT_ID/locations/europe-west9/connectors/YOUR_CONNECTOR_NAME
+  egress_setting: all-traffic

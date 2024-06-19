@@ -15,5 +15,5 @@ env_variables:
 entrypoint: 'npm run start:prod'
 
 vpc_access_connector:
-  name: projects/mma-baisieux/locations/europe-west9/connectors/connector-appengine
+  name: projects/mma-baisieux/locations/europe-west1/connectors/connector-appengine
   egress_setting: all-traffic

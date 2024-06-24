@@ -11,7 +11,7 @@ on:
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.event.head_commit.message, 'front-end') || contains(github.event.head_commit.message, 'all') }}
+    if: contains(github.event.head_commit.message, 'front-end') || contains(github.event.head_commit.message, 'all')
     steps:
     - name: Print event details
       run: echo "${{ toJson(github.event) }}"
@@ -43,7 +43,7 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    if: ${{ contains(github.event.head_commit.message, 'back-end') || contains(github.event.head_commit.message, 'all') }}
+    if: contains(github.event.head_commit.message, 'back-end') || contains(github.event.head_commit.message, 'all')
     steps:
     - name: Print event details
       run: echo "${{ toJson(github.event) }}"

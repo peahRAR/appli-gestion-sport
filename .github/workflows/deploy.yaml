@@ -11,7 +11,7 @@ on:
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'front-end') || contains(github.event.head_commit.message, 'all')
+    if: ${{ contains(github.event.head_commit.message, 'front-end') || contains(github.event.head_commit.message, 'all') }}
     steps:
     - name: Print event details
       run: echo "${{ toJson(github.event) }}"
@@ -35,6 +35,8 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
+        ACTIONS_RUNNER_DEBUG: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
+        ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
@@ -43,7 +45,7 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'back-end') || contains(github.event.head_commit.message, 'all')
+    if: ${{ contains(github.event.head_commit.message, 'back-end') || contains(github.event.head_commit.message, 'all') }}
     steps:
     - name: Print event details
       run: echo "${{ toJson(github.event) }}"
@@ -67,6 +69,8 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
+        ACTIONS_RUNNER_DEBUG: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
+        ACTIONS_STEP_DEBUG: ${{ secrets.ACTIONS_STEP_DEBUG }}
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key

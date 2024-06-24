@@ -22,7 +22,7 @@
       <p>{{ errorMessage }}</p>
     </TheModal>
 
-    <!--ALERT INFO + MODAL-->
+    <!--ALERT INFO  MODAL-->
     <AlertBubble :backgroundColor="alertColor" v-if="showAlertBubble" @click="openAlertModal" />
     <TheModal :isOpen="showAlertModal" v-if="showAlertModal" @close="closeAlertModal" title="Alerte">
       <p v-html="alertMessage"></p>

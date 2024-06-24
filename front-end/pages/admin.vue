@@ -425,7 +425,6 @@ export default {
                 const text = await response.text();
                 responseData = text ? JSON.parse(text) : {};
 
-                console.log("Réponse de l'API :", responseData); // Log response data
                 this.openErrorModal();
                 this.errorMessage = "Le rôle de l'utilisateur a été modifié avec succès";
                 this.loadAllUsers(); // Corrected typo from loadAllUSers to loadAllUsers

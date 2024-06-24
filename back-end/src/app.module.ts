@@ -61,7 +61,6 @@ export class AppModule implements OnModuleInit {
           inject: [ConfigService],
           useFactory: async (configService: ConfigService) => {
             const options = mailerConfig(configService);
-            console.log('Mailer Config:', options);
             return options;
           },
         }),

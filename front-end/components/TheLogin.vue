@@ -104,7 +104,6 @@ export default {
         // Keep AccesToken in localStorage
 
         if (data && data.value) {
-          console.log(data.value.access_token)
           localStorage.setItem("accessToken", data.value.access_token);
           document.location.href = "/";
         } else {

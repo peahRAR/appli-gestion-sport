@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.head_commit.message, 'front-end') || contains(github.event.head_commit.message, 'all')
     steps:
+    - name: Print event details
+      run: echo "Event details: ${{ toJson(github.event) }}"
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
@@ -21,14 +24,12 @@ jobs:
       with:
         node-version: '16'
 
-    # Build front-end
     - name: Install dependencies and build front-end
       working-directory: front-end
       run: |
         npm install
         npm run build
 
-    # Deploy front-end to the server
     - name: Deploy front-end
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -44,29 +45,5 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.head_commit.message, 'back-end') || contains(github.event.head_commit.message, 'all')
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '20'
-
-    # Build back-end
-    - name: Install dependencies and build back-end
-      working-directory: back-end
-      run: |
-        npm install
-        npm run build
-
-    # Deploy back-end to the server
-    - name: Deploy back-end
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-      run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
-        chmod 600 private_key
-        scp -o StrictHostKeyChecking=no -i private_key -r back-end/dist/* $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/dist/
-        ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "pm2 reload backend"
+    - name: Print event details
+      run: echo "Eve

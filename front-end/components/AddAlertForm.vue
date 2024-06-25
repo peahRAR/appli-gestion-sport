@@ -36,7 +36,7 @@
           required
         />
       </div>
-      <!-- Bouton de soumission -->
+      <!-- Bouton de soumission  -->
       <button
         type="submit"
         class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"

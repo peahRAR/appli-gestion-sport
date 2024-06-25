@@ -190,7 +190,7 @@ export class UsersService {
       throw new InternalServerErrorException('Erreur lors de l\'envoi de l\'email.');
     }
 
-    // Enregistrer et retourner l'utilisateur
+    //Enregistrer et retourner l'utilisateur
     return this.userRepository.save(newUser);
   }
 

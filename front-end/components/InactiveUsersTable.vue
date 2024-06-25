@@ -3,7 +3,7 @@
     <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
     <div class="w-full mx-auto">
       <table class="mx-auto min-w-full divide-y divide-gray-200">
-        <!-- Table header -->
+        <!-- Table header  -->
         <thead class="bg-gray-200">
           <tr class="flex justify-between w-full">
             <th

@@ -1,14 +1,14 @@
-name: Deploy Front-End
+name: Deploy Back-End
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'front-end/**'
+      - 'back-end/**'
 
 jobs:
-  deploy-frontend:
+  deploy-backend:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -19,13 +19,16 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install dependencies and build front-end
-      working-directory: front-end
+    - name: Install dependencies and build back-end
+      working-directory: back-end
       run: |
         npm install
         npm run build
 
-    - name: Deploy front-end
+    - name: List files in dist folder for debugging
+      run: ls -la back-end/dist
+
+    - name: Deploy back-end
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
@@ -35,8 +38,8 @@ jobs:
         chmod 600 private_key
         scp -o StrictHostKeyChecking=no -i private_key -r ../back-end/dist/* $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
-          rm -rf /home/$SERVER_USER/appli-gestion-sport/front-end/dist/* && 
-          mv /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/* /home/$SERVER_USER/appli-gestion-sport/front-end/dist/ &&
-          rmdir /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist &&
-          pm2 reload frontend
+          rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/dist/* && 
+          mv /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/* /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
+          rmdir /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
+          pm2 reload backend
         "

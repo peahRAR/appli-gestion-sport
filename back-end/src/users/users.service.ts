@@ -325,6 +325,8 @@ export class UsersService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User | undefined> {
+
+    console.log("update user")
     // Récupérer l'utilisateur existant
     const user = await this.userRepository.findOne({ where: { id } });
 

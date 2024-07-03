@@ -57,7 +57,6 @@ export class AppModule implements OnModuleInit {
           }),
         }),
 
-        //Config mail
         MailerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],

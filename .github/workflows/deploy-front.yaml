@@ -23,15 +23,15 @@ jobs:
       working-directory: front-end
       run: npm install
 
-    - name: List files before build
+    - name: List files before generate
       working-directory: front-end
       run: ls -la
 
-    - name: Build front-end
+    - name: Generate static files
       working-directory: front-end
-      run: npm run build
+      run: npm run generate
 
-    - name: List files after build
+    - name: List files after generate
       working-directory: front-end
       run: ls -la
 

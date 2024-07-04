@@ -42,5 +42,5 @@ jobs:
           rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
           rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
           pm2 delete api-start || true &&
-          pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/main.js --name api-start -f
+          pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/main.js --name api-start -f --watch
         "

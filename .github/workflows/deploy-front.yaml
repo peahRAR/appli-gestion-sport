@@ -33,10 +33,9 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
-        scp -o StrictHostKeyChecking=no -i private_key -r front-end/dist/* $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" front-end/dist/ $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
-          rm -rf /home/$SERVER_USER/appli-gestion-sport/front-end/dist/* && 
-          mv /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/* /home/$SERVER_USER/appli-gestion-sport/front-end/dist/ &&
-          rmdir /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist &&
-          pm2 reload frontend
+          mkdir -p /home/$SERVER_USER/appli-gestion-sport/front-end/dist &&
+          rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/front-end/dist/ &&
+          rm -rf /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist
         "

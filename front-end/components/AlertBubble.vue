@@ -14,7 +14,6 @@ export default {
         }
     },
     computed: {
-        // Gere la couleur de l'alerte
         backgroundColorClass() {
             return {
                 'bg-red-500': this.backgroundColor === 'red',

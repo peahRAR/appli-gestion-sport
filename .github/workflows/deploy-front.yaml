@@ -48,8 +48,9 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
         ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$SERVER_IP "
-          sudo find /home/ubuntu/appli-gestion-sport/front-end -type d -exec chmod 775 {} \; &&
-          sudo find /home/ubuntu/appli-gestion-sport/front-end -type f -exec chmod 664 {} \;
+          sudo usermod -a -G www-data ubuntu &&
+          sudo chown -R ubuntu:www-data /home/ubuntu/appli-gestion-sport/front-end &&
+          sudo chmod -R 775 /home/ubuntu/appli-gestion-sport/front-end
         "
 
     - name: Deploy front-end

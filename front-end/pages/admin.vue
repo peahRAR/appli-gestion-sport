@@ -339,7 +339,7 @@ export default {
 
         // Check the response and showw error message if it's not ok
         this.openErrorModal();
-        (this.errorMessage = "Utilisateur réactivé avec succès"), response;
+        (this.errorMessage = "Utilisateur activé avec succès"), response;
         await this.loadAllUsers();
       } catch (error) {
         this.openErrorModal();

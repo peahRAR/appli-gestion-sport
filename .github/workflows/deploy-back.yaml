@@ -41,5 +41,5 @@ jobs:
           rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/dist/* && 
           mv /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/* /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
           rmdir /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
-          pm2 reload api-start
+          /usr/local/bin/pm2 restart api-start || /usr/local/bin/pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/server.js --name api-start
         "

@@ -1,14 +1,14 @@
-name: Deploy Front-End
+name: Deploy Back-End
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'front-end/**'
+      - 'back-end/**'
 
 jobs:
-  deploy-frontend:
+  deploy-backend:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -19,51 +19,27 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install dependencies
-      working-directory: front-end
-      run: npm install
+    - name: Install dependencies and build back-end
+      working-directory: back-end
+      run: |
+        npm install
+        npm run build
 
-    - name: List files before generate
-      working-directory: front-end
-      run: ls -la
+    - name: List files in dist folder for debugging
+      run: ls -la back-end/dist
 
-    - name: Generate static files
-      working-directory: front-end
-      run: npm run generate
-
-    - name: List files after generate
-      working-directory: front-end
-      run: ls -la
-
-    - name: List dist directory for debugging
-      working-directory: front-end
-      run: ls -la dist
-
-    - name: Adjust permissions on server
+    - name: Deploy back-end
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
-        SERVER_USER: ubuntu
+        SERVER_USER: ${{ secrets.SERVER_USER }}
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$SERVER_IP "
-          sudo usermod -a -G www-data ubuntu &&
-          sudo chown -R ubuntu:www-data /home/ubuntu/appli-gestion-sport/front-end &&
-          sudo chmod -R 775 /home/ubuntu/appli-gestion-sport/front-end
-        "
-
-    - name: Deploy front-end
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SERVER_USER: ubuntu
-      run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
-        chmod 600 private_key
-        rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" front-end/dist/ ubuntu@$SERVER_IP:/home/ubuntu/appli-gestion-sport/front-end/temp-dist/
-        ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$SERVER_IP "
-          mkdir -p /home/ubuntu/appli-gestion-sport/front-end/dist &&
-          rsync -avz --delete /home/ubuntu/appli-gestion-sport/front-end/temp-dist/ /home/ubuntu/appli-gestion-sport/front-end/dist/ &&
-          rm -rf /home/ubuntu/appli-gestion-sport/front-end/temp-dist
+        scp -o StrictHostKeyChecking=no -i private_key -r back-end/dist/* $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/
+        ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
+          rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/dist/* && 
+          mv /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/* /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
+          rmdir /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
+          /usr/local/bin/pm2 restart api-start || /usr/local/bin/pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/server.js --name api-start
         "

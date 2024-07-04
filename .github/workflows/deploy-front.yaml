@@ -19,17 +19,25 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install dependencies and build front-end
+    - name: Install dependencies
       working-directory: front-end
-      run: |
-        npm install
-        npm run build
+      run: npm install
 
-    - name: Verify build output
+    - name: List files before build
       working-directory: front-end
-      run: |
-        echo "Contents of the build directory:"
-        ls -la dist
+      run: ls -la
+
+    - name: Build front-end
+      working-directory: front-end
+      run: npm run build
+
+    - name: List files after build
+      working-directory: front-end
+      run: ls -la
+
+    - name: List dist directory for debugging
+      working-directory: front-end
+      run: ls -la dist
 
     - name: Deploy front-end
       env:

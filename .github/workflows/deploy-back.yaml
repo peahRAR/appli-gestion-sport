@@ -41,5 +41,5 @@ jobs:
           mkdir -p /home/$SERVER_USER/appli-gestion-sport/back-end/dist &&
           rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
           rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
-          pm2 reload api-start
+          pm2 restart api-start || pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/main.js --name api-start
         "

@@ -48,8 +48,8 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
-          mkdir -p /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist &&
-          chmod 777 /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist
+          sudo mkdir -p /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist &&
+          sudo chown $SERVER_USER:$SERVER_USER /home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist
         "
         rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" front-end/dist/ $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/front-end/temp-dist/
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "

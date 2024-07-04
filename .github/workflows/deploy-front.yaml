@@ -25,8 +25,11 @@ jobs:
         npm install
         npm run build
 
-    - name: List files in dist folder for debugging
-      run: ls -la front-end/dist
+    - name: Verify build output
+      working-directory: front-end
+      run: |
+        echo "Contents of the build directory:"
+        ls -la dist
 
     - name: Deploy front-end
       env:

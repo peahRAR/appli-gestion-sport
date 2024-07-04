@@ -37,6 +37,9 @@ jobs:
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
+          mkdir -p /home/$SERVER_USER/appli-gestion-sport/back-end/
+        "
         echo "${{ secrets.GOOGLE_CREDENTIALS }}" > /home/$SERVER_USER/appli-gestion-sport/back-end/credentials.json
         chmod 600 /home/$SERVER_USER/appli-gestion-sport/back-end/credentials.json
         rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" back-end/dist/ $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/

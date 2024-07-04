@@ -14,6 +14,7 @@ import { CronjobsModule } from './cronjobs/cronjobs.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { mailerConfig } from './mailer.config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({})
@@ -64,6 +65,7 @@ export class AppModule implements OnModuleInit {
             return options;
           },
         }),
+        ScheduleModule.forRoot(),
         UsersModule,
         EventsModule,
         ListsMembersModule,

@@ -33,6 +33,7 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER_IP: ${{ secrets.SERVER_IP }}
         SERVER_USER: ${{ secrets.SERVER_USER }}
+        GOOGLE_APPLICATION_CREDENTIALS: "/home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json"
       run: |
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
@@ -41,6 +42,8 @@ jobs:
           mkdir -p /home/$SERVER_USER/appli-gestion-sport/back-end/dist &&
           rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
           rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
+          chmod 644 /home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json &&
+          export GOOGLE_APPLICATION_CREDENTIALS=/home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json &&
           pm2 delete api-start || true &&
           pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/main.js --name api-start -f --watch
         "

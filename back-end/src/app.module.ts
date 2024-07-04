@@ -58,6 +58,7 @@ export class AppModule implements OnModuleInit {
           }),
         }),
         MailerModule.forRootAsync({
+          
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: async (configService: ConfigService) => {

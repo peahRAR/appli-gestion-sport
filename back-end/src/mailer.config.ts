@@ -8,6 +8,8 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
   const smtpUser = configService.get<string>('SMTP_USER');
   const smtpPass = configService.get<string>('SMTP_PASS');
 
+  console.log(process.cwd())
+
   const options = {
     transport: {
       host: smtpHost,
@@ -26,7 +28,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
     },
     template: {
-      dir: process.cwd(),
+      dir: process.cwd() + '/templates/email/',
       adapter: new HandlebarsAdapter(),
       options: {
         strict: false,

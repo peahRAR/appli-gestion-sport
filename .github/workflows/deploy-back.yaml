@@ -39,6 +39,9 @@ jobs:
         chmod 600 private_key
         rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" back-end/dist/ $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/
         ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
+          # Tuer les processus utilisant le port 8080
+          sudo fuser -k 8080/tcp || true
+          
           mkdir -p /home/$SERVER_USER/appli-gestion-sport/back-end/dist &&
           rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
           rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&

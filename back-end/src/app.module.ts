@@ -57,7 +57,6 @@ export class AppModule implements OnModuleInit {
             synchronize: configService.get<boolean>('TYPEORM_SYNC'),
           }),
         }),
-        
         MailerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],

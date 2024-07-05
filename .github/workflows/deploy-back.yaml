@@ -8,46 +8,51 @@ on:
       - 'back-end/**'
 
 jobs:
-  deploy-backend:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '20'
 
-    - name: Install dependencies and build back-end
+    - name: Install Dependencies
       working-directory: back-end
-      run: |
-        npm install
-        npm run build
+      run: npm install
 
-    - name: List files in dist folder for debugging
-      run: ls -la back-end/dist
+    - name: Build
+      working-directory: back-end
+      run: npm run build
 
-    - name: Deploy back-end
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SERVER_IP: ${{ secrets.SERVER_IP }}
-        SERVER_USER: ${{ secrets.SERVER_USER }}
-        GOOGLE_APPLICATION_CREDENTIALS: "/home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json"
-      run: |
-        echo "$SSH_PRIVATE_KEY" > private_key
-        chmod 600 private_key
-        rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" back-end/dist/ $SERVER_USER@$SERVER_IP:/home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/
-        ssh -o StrictHostKeyChecking=no -i private_key $SERVER_USER@$SERVER_IP "
-          # Tuer les processus utilisant le port 8080
-          sudo fuser -k 8080/tcp || true
-          
-          mkdir -p /home/$SERVER_USER/appli-gestion-sport/back-end/dist &&
-          rsync -avz --delete /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist/ /home/$SERVER_USER/appli-gestion-sport/back-end/dist/ &&
-          rm -rf /home/$SERVER_USER/appli-gestion-sport/back-end/temp-dist &&
-          chmod 644 /home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json &&
-          export GOOGLE_APPLICATION_CREDENTIALS=/home/$SERVER_USER/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json &&
-          pm2 delete api-start || true &&
-          pm2 start /home/$SERVER_USER/appli-gestion-sport/back-end/dist/main.js --name api-start -f --watch &&
+    - name: Archive Production Build
+      run: tar -czf production.tar.gz -C back-end/dist .
+
+    - name: Copy Files to the Server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        source: "production.tar.gz"
+        target: "/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/"
+
+    - name: Deploy with PM2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
+          tar -xzf production.tar.gz
+          rm production.tar.gz
+          chmod 644 mma-baisieux-f9fcae8661ce.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
+          pm2 delete api-start || true
+          pm2 start dist/main.js --name api-start -f --watch
           pm2 save
-        "

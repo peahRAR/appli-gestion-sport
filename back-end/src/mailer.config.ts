@@ -29,7 +29,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
     },
     template: {
-      dir: process.cwd() + '/templates/email/',
+      dir: process.cwd() + '/appli-gestion-sport/back-end/templates/email/',
       adapter: new HandlebarsAdapter(),
       options: {
         strict: false,

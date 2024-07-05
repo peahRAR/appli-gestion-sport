@@ -1,7 +1,6 @@
 import { MailerOptions } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ConfigService } from '@nestjs/config';
-import path from 'path';
 
 export const mailerConfig = (configService: ConfigService): MailerOptions => {
   const smtpHost = configService.get<string>('SMTP_HOST');
@@ -27,7 +26,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
     },
     template: {
-      dir: path.join(process.cwd(), 'templates', 'email'),
+      dir: process.cwd(),
       adapter: new HandlebarsAdapter(),
       options: {
         strict: false,

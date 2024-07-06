@@ -8,6 +8,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
   const smtpUser = configService.get<string>('SMTP_USER');
   const smtpPass = configService.get<string>('SMTP_PASS');
 
+
   const options = {
     transport: {
       host: smtpHost,

@@ -53,7 +53,7 @@ jobs:
         script: |
           cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
           rm -rf dist  # Supprimer le contenu existant du répertoire dist
-          tar -xzf production.tar.gz
+          tar -xzf production.tar.gz -C dist
           ls -l dist  # Vérifiez le contenu après extraction
           if [ ! -f dist/main.js ]; then
             echo "Error: dist/main.js not found"

@@ -16,7 +16,6 @@ import { AppService } from './app.service';
 import { mailerConfig } from './mailer.config';
 import { ScheduleModule } from '@nestjs/schedule';
 
-
 @Module({})
 export class AppModule implements OnModuleInit {
   constructor(private configService: ConfigService) { }

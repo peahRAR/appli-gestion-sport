@@ -8,7 +8,6 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
   const smtpUser = configService.get<string>('SMTP_USER');
   const smtpPass = configService.get<string>('SMTP_PASS');
 
-  
   console.log('Current working directory:', process.cwd());
 
   const options = {

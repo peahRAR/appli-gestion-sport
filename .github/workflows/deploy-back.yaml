@@ -54,10 +54,15 @@ jobs:
           cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
           rm -rf dist  # Supprimer le contenu existant du répertoire dist
           tar -xzf production.tar.gz
-          ls -l dist  # Vérifier le contenu après extraction
+          ls -l dist  # Vérifiez le contenu après extraction
+          if [ ! -f dist/main.js ]; then
+            echo "Error: dist/main.js not found"
+            exit 1
+          fi
           rm production.tar.gz
           chmod 644 mma-baisieux-f9fcae8661ce.json
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
           pm2 delete api-start || true
           pm2 start dist/main.js --name api-start -f --watch
           pm2 save
+

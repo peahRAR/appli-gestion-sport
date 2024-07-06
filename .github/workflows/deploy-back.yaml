@@ -52,7 +52,8 @@ jobs:
         port: 22
         script: |
           cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
-          rm -rf dist  # Supprimer le contenu existant du répertoire dist
+          rm -rf dist
+          mkdir dist
           tar -xzf production.tar.gz -C dist
           ls -l dist  # Vérifiez le contenu après extraction
           if [ ! -f dist/main.js ]; then

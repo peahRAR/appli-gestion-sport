@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxt/image": "^1.4.0",
     "@pinia/nuxt": "^0.5.1",
+    "cropperjs": "^1.6.2",
     "dotenv": "^16.4.5",
     "nuxt": "^3.11.1",
     "pinia": "^2.1.7",

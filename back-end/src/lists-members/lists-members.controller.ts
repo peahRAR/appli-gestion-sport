@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ListsMembersService } from './lists-members.service';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
-import { AdminRoleGuard } from 'src/auth/admin.guard';
+import { AdminRoleGuard } from 'src/common/guard/admin.guard';
 
 @Controller('lists-members')
 export class ListsMembersController {
@@ -25,7 +25,7 @@ export class ListsMembersController {
     return this.listsMembersService.findAllByIdEvent(eventId);
   }
 
-  @Get('participants/:eventId') //Retourne uniquement la liste des participants
+  @Get('participants/:eventId') 
   findParticipant(@Param('eventId') eventId: number) {
     return this.listsMembersService.findParticipants(eventId)
   }

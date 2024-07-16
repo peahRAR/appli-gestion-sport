@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { Event } from '../events/events.entity';
-import { User } from '../users/users.entity';
+import { User } from '../users/entities/users.entity';
 
 @Entity()
 export class ListsMember {

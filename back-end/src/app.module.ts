@@ -2,7 +2,7 @@ import { Module, DynamicModule, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { User } from './users/users.entity';
+import { User } from './users/entities/users.entity';
 import { ListsMember } from './lists-members/lists-member.entity';
 import { UsersModule } from './users/users.module';
 import { EventsModule } from './events/events.module';
@@ -55,7 +55,7 @@ export class AppModule implements OnModuleInit {
             },
             synchronize: configService.get<boolean>('TYPEORM_SYNC'),
           }),
-        }), 
+        }),
         MailerModule.forRootAsync({
           imports: [ConfigModule],
           inject: [ConfigService],

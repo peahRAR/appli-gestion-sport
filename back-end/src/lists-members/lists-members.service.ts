@@ -5,7 +5,7 @@ import { ListsMember } from './lists-member.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { EventsService } from 'src/events/events.service';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../users/services/users.service';
 
 @Injectable()
 export class ListsMembersService {
@@ -16,7 +16,7 @@ export class ListsMembersService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
-  ) {}
+  ) { }
 
   async create(
     createListsMemberDto: CreateListsMemberDto,
@@ -39,33 +39,47 @@ export class ListsMembersService {
   }
 
   async findParticipants(eventId: number): Promise<any[]> {
-    // Find all participants for the given event
-    const participants = await this.listsMemberRepository.find({
-      where: { eventId, isParticipant: true },
-      relations: ['user'],
-    });
-
-    // Fetch and map participant details to the required format
-    const participantDetails = await Promise.all(
-      participants.map(async participant => {
-        const user = await this.usersService.findOne(participant.user.id);
-        if (user) {
-          return {
-            id: user.id,
-            license: user.license,
-            date_end_pay: user.date_end_pay,
-            avatar: user.avatar,
-            firstname: user.firstname,
-            name: user.name,
-          };
-        } else {
-          return null;
+    try {
+      const participants = await this.listsMemberRepository.find({
+        where: { eventId, isParticipant: true },
+        relations: ['user'],
+        select: {
+          user: {
+            id: true,
+            license: {
+              identifier: true,
+              data: true
+            },
+            date_end_pay: {
+              identifier: true,
+              data: true
+            },
+            avatar: {
+              identifier: true,
+              data: true
+            },
+            firstname: {
+              identifier: true,
+              data: true
+            },
+            name: {
+              identifier: true,
+              data: true
+            },
+          }
         }
-      })
-    );
+      });
 
-    // Filter out any null values in case some users were not found
-    return participantDetails.filter(participant => participant !== null);
+      const listParticipants = participants.map(participant => participant.user);
+      //TODO externaliser les methode de crypte et decrypte puis les utiliser pour decrypté les champs 
+      console.log(listParticipants)
+
+      return null
+
+    } catch (error) {
+      console.error('Error finding participants:', error);
+      throw new Error('Failed to find participants');
+    }
   }
 
   async findOne(eventId: number, userId: string): Promise<any> {

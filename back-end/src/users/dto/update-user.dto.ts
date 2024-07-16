@@ -1,11 +1,64 @@
-// update-user.dto.ts
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
-import { IsOptional } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, IsDate } from 'class-validator';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
-  @IsOptional() // Indique que le champ est facultatif
-  password?: string; // Définit que le champ password peut être null ou undefined
-  currentPassword: any;
-  user: object;
+export class UpdateUserDto {
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  firstname?: string;
+
+  @IsDate()
+  @IsOptional()
+  birthday?: Date;
+
+  @IsString()
+  @IsOptional()
+  tel_num?: string;
+
+  @IsString()
+  @IsOptional()
+  tel_medic?: string;
+
+  @IsString()
+  @IsOptional()
+  tel_emergency?: string;
+
+  @IsString()
+  @IsOptional()
+  weight?: string;
+
+  @IsString()
+  @IsOptional()
+  license?: string;
+
+  @IsString()
+  @IsOptional()
+  date_subscribe?: string;
+
+  @IsString()
+  @IsOptional()
+  date_payment?: string;
+
+  @IsString()
+  @IsOptional()
+  date_end_pay?: string;
+
+  @IsString()
+  @IsOptional()
+  avatar?: string;
+
+  @IsString()
+  @MinLength(8)
+  @IsOptional()
+  password?: string;
+
+  @IsString()
+  @IsOptional()
+  currentPassword?: string;
 }

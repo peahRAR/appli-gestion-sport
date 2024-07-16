@@ -13,12 +13,12 @@ import {
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from './services/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Storage } from '@google-cloud/storage';
 import { multerOptions } from '../multer/multer.config';
-import { Public } from 'src/decorators/public.decorator';
-import { UserIdOradminRoleGuard } from './users.guard';
+import { Public } from 'src/common/decorators/public.decorator';
+import { UserIdOradminRoleGuard } from '../common/guard/users.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -173,7 +173,7 @@ export class UsersController {
     return this.usersService.update(id, data);
   }
 
-   // Supprimer un User
+  // Supprimer un User
   @UseGuards(UserIdOradminRoleGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {

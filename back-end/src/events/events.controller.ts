@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Logger} f
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { AdminRoleGuard } from 'src/auth/admin.guard';
+import { AdminRoleGuard } from 'src/common/guard/admin.guard';
 
 
 

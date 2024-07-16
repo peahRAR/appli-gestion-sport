@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from './users/users.service';
-import { User } from './users/users.entity';
+import { UsersService } from './users/services/users.service';
+import { User } from './users/entities/users.entity';
 import { ConfigService } from '@nestjs/config';
 
 
@@ -9,8 +9,8 @@ export class AppService {
   constructor(
     private usersService: UsersService,
     private readonly configService: ConfigService,
-    
-  ) {}
+
+  ) { }
 
   async initApp(): Promise<User> {
     const users = await this.usersService.findAll();

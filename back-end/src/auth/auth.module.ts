@@ -8,7 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';  // Assurez-vous q
 import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({
-      imports: [ConfigModule],  
+      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');
         const expiresIn = configService.get<string>('JWT_EXP');
@@ -25,7 +25,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
           signOptions: { expiresIn: expiresIn },
         };
       },
-      inject: [ConfigService],  
+      inject: [ConfigService],
     }),
   ],
   providers: [

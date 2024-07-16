@@ -14,7 +14,7 @@ import { AlertService } from './alert.service';
 import { Alert } from './alert.entity';
 import { CreateAlertDto } from './dto/create-alert.dto';
 import { UpdateAlertDto } from './dto/update-alert.dto';
-import { AdminRoleGuard } from 'src/auth/admin.guard';
+import { AdminRoleGuard } from 'src/common/guard/admin.guard';
 
 @Controller('alerts')
 export class AlertController {

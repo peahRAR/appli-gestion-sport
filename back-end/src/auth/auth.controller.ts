@@ -7,16 +7,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { LocalAuthGuard } from './local-auth.guard';
-import { Public } from 'src/decorators/public.decorator';
+import { UsersService } from '../users/services/users.service';
+import { LocalAuthGuard } from '../common/guard/local-auth.guard';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private usersService: UsersService,
-  ) {}
+  ) { }
 
   @Public()
   @UseGuards(LocalAuthGuard)

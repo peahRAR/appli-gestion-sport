@@ -1,51 +1,79 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsDate } from 'class-validator';
+// create-user.dto.ts
+import {
+  IsString,
+  IsBoolean,
+  IsDate,
+  IsOptional,
+  IsNotEmpty,
+  IsEmail,
+  IsDateString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateUserDto {
-  @IsEmail()
-  email: string;
-
-  @IsString()
   @IsNotEmpty()
-  name: string;
-
   @IsString()
-  @IsNotEmpty()
   firstname: string;
 
-  @IsDate()
+  @IsEmail({}, { message: "L'adresse email doit être un email valide" })
+  email: string;
+
   @IsNotEmpty()
-  birthday: Date;
-
   @IsString()
-  tel_num?: string;
+  name: string;
 
+  @IsNotEmpty()
   @IsString()
-  tel_medic?: string;
-
-  @IsString()
-  tel_emergency?: string;
-
-  @IsString()
-  weight?: string;
-
-  @IsString()
-  license?: string;
-
-  @IsString()
-  date_subscribe?: Date;
-
-  @IsString()
-  date_payment?: string;
-
-  @IsString()
-  date_end_pay?: string;
-
-  @IsString()
-  avatar?: string;
-
-  @IsString()
-  @MinLength(8)
   password: string;
 
+  @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
+  birthday: Date;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  gender: boolean;
+
+  @IsOptional()
+  @IsString()
+  tel_num: string;
+
+  @IsOptional()
+  @IsString()
+  tel_medic: string;
+
+  @IsOptional()
+  @IsString()
+  tel_emergency: string;
+
+  @IsOptional()
+  weight: number;
+
+  @IsOptional()
+  @IsString()
+  license: string;
+
+  @IsOptional()
+  @IsDateString()
+  date_subscribe: Date;
+
+  @IsOptional()
+  @IsDate()
+  date_payment: Date;
+
+  @IsOptional()
+  @IsDate()
+  date_end_pay: Date;
+
+  @IsOptional()
+  @IsString()
+  avatar: string;
+
+  @IsOptional()
   role: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean = false;
 }

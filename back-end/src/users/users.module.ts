@@ -7,6 +7,8 @@ import { ResetPassword } from './entities/reset-password.entity';
 import { ListsMembersModule } from 'src/lists-members/lists-members.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+import { EncryptionService } from './services/encryption.service';
+import { EmailService } from './services/email.service';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, EncryptionService, EmailService],
   exports: [UsersService, TypeOrmModule],
 })
 export class UsersModule { }

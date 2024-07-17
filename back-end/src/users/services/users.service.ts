@@ -19,7 +19,7 @@ import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ResetPassword } from '../entities/reset-password.entity';
 import { EncryptionService } from './encryption.service';
 import { EmailService } from './email.service';
-import { IUserDto } from '../dto/user.dto.interface';
+
 
 @Injectable()
 export class UsersService {
@@ -40,6 +40,24 @@ export class UsersService {
     const regex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
+  }
+
+  private async encryptUserFields(dto: any): Promise<any> {
+    return {
+      email: this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.email, true)),
+      name: this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.name)),
+      firstname: dto.firstname ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.firstname)) : undefined,
+      birthday: dto.birthday ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.birthday)) : undefined,
+      tel_num: dto.tel_num ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_num)) : undefined,
+      tel_medic: dto.tel_medic ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_medic)) : undefined,
+      tel_emergency: dto.tel_emergency ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_emergency)) : undefined,
+      weight: dto.weight ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.weight)) : undefined,
+      license: dto.license ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.license)) : undefined,
+      date_subscribe: dto.date_subscribe ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_subscribe)) : undefined,
+      date_payment: dto.date_payment ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_payment)) : undefined,
+      date_end_pay: dto.date_end_pay ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_end_pay)) : undefined,
+      avatar: dto.avatar ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.avatar)) : undefined,
+    };
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -69,15 +87,23 @@ export class UsersService {
       throw new BadRequestException('Le domaine de l\'email n\'est pas autorisé.');
     }
 
-    // Convert birthday and date_subscribe to string before passing to encryptUserFields
-    const userDto: IUserDto = {
-      ...createUserDto,
-      email: createUserDto.email,
-      birthday: createUserDto.birthday.toISOString(), // Convert Date to string
-      date_subscribe: new Date().toISOString(), // Add date_subscribe as a string
-    };
+    // Convertir la date anniversaire en objet Date
+    const birthdayDate = new Date(createUserDto.birthday);
+    if (isNaN(birthdayDate.getTime())) {
+      throw new BadRequestException('Date de naissance invalide.');
+    }
 
-    const encryptedFields = await this.encryptUserFields(userDto);
+    const birthdayString = birthdayDate.toISOString();
+
+    // Date création de compte
+    const dateSubscribeString = new Date().toISOString();
+
+    // Chiffrement des valeurs
+    const encryptedBirthday = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(birthdayString));
+    const encryptedDateSubscribe = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dateSubscribeString));
+    const encryptedName = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.name));
+    const encryptedFirstName = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.firstname));
+    const encryptedEmail = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.email, true));
 
     if (!this.verifyPasswordRegex(createUserDto.password)) {
       throw new BadRequestException('Le mot de passe ne correspond pas aux critères requis.');
@@ -87,7 +113,7 @@ export class UsersService {
 
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'data' = :data", { data: encryptedFields.email.data })
+      .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
       .getOne();
 
     if (existingUser) {
@@ -95,38 +121,22 @@ export class UsersService {
     }
 
     const newUser = this.userRepository.create({
-      ...encryptedFields,
+      gender: createUserDto.gender,
+      firstname: encryptedFirstName,
+      name: encryptedName,
       password: hashedPassword,
-      role: createUserDto.role,
-      isActive,
+      email: encryptedEmail,
+      birthday: encryptedBirthday,
+      date_subscribe: encryptedDateSubscribe,
+      role: role,
+      isActive: isActive,
     });
 
     await this.emailService.sendConfirmationEmail(createUserDto.email);
 
     const savedUser = await this.userRepository.save(newUser);
-    return savedUser as unknown as User; 
+    return savedUser;
   }
-
-
-
-  private async encryptUserFields(dto: IUserDto): Promise<any> {
-    return {
-      email: dto.email ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.email, true)) : undefined,
-      name: this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.name)),
-      firstname: dto.firstname ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.firstname)) : undefined,
-      birthday: dto.birthday ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.birthday.toString())) : undefined,
-      tel_num: dto.tel_num ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_num)) : undefined,
-      tel_medic: dto.tel_medic ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_medic)) : undefined,
-      tel_emergency: dto.tel_emergency ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_emergency)) : undefined,
-      weight: dto.weight ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.weight.toString())) : undefined,
-      license: dto.license ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.license)) : undefined,
-      date_subscribe: dto.date_subscribe ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_subscribe.toString())) : undefined,
-      date_payment: dto.date_payment ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_payment.toString())) : undefined,
-      date_end_pay: dto.date_end_pay ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_end_pay.toString())) : undefined,
-      avatar: dto.avatar ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.avatar)) : undefined,
-    };
-  }
-
 
 
   async findAll(): Promise<User[]> {
@@ -182,7 +192,8 @@ export class UsersService {
       return undefined;
     }
 
-    return this.decryptUserFields([user])[0];
+    const decryptedUsers = await this.decryptUserFields([user]);
+    return decryptedUsers[0];
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -203,6 +214,8 @@ export class UsersService {
       throw new Error('Aucun utilisateur trouvé.');
     }
 
+    console.log('Found user:', user); // Log après la récupération de l'utilisateur
+
     if (updateUserDto.password) {
       if (!updateUserDto.currentPassword) {
         throw new BadRequestException('Le mot de passe actuel est requis pour changer le mot de passe.');
@@ -218,21 +231,39 @@ export class UsersService {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    // Ensure email is present before passing to encryptUserFields
-    const userDto: IUserDto = {
-      ...updateUserDto,
-      email: updateUserDto.email || user.email, // Ensure email is always present
-      birthday: updateUserDto.birthday ? updateUserDto.birthday.toISOString() : undefined, // Convert Date to string
+    // Ensure all fields are strings before passing to encryptUserFields
+    const userDto = {
+      email: updateUserDto.email || user.email,
+      name: updateUserDto.name || user.name,
+      firstname: updateUserDto.firstname || user.firstname,
+      birthday: updateUserDto.birthday ? updateUserDto.birthday.toISOString() : user.birthday,
+      tel_num: updateUserDto.tel_num || user.tel_num,
+      tel_medic: updateUserDto.tel_medic || user.tel_medic,
+      tel_emergency: updateUserDto.tel_emergency || user.tel_emergency,
+      weight: updateUserDto.weight ? updateUserDto.weight.toString() : user.weight,
+      license: updateUserDto.license || user.license,
+      date_subscribe: user.date_subscribe,
+      date_payment: updateUserDto.date_payment || user.date_payment,
+      date_end_pay: updateUserDto.date_end_pay || user.date_end_pay,
+      avatar: updateUserDto.avatar || user.avatar,
     };
 
+    console.log('User DTO before encryption:', userDto); // Log avant le chiffrement des champs
+
     const encryptedFields = await this.encryptUserFields(userDto);
+
+    console.log('Encrypted fields:', encryptedFields); // Log après le chiffrement des champs
+
     Object.assign(user, encryptedFields);
+
+    console.log('User before save:', user); // Log avant la sauvegarde de l'utilisateur
 
     await this.userRepository.save(user);
 
+    console.log('User saved:', user); // Log après la sauvegarde de l'utilisateur
+
     return user;
   }
-
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);
@@ -314,12 +345,17 @@ export class UsersService {
       for (const field of fieldsToDecrypt) {
         if (user[field] && user[field].data) {
           const isEmail = field === 'email';
-          const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
-          user[field] = decryptedField;
+          try {
+            const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
+            user[field] = decryptedField;
+          } catch (error) {
+            console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
+          }
         }
       }
     }
 
     return users;
   }
+  
 }

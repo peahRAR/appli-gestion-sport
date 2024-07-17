@@ -6,6 +6,7 @@ import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { EventsService } from 'src/events/events.service';
 import { UsersService } from '../users/services/users.service';
+import { EncryptionService } from 'src/users/services/encryption.service';
 
 @Injectable()
 export class ListsMembersService {
@@ -16,6 +17,7 @@ export class ListsMembersService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
+    private readonly encryptionService: EncryptionService, 
   ) { }
 
   async create(
@@ -71,10 +73,28 @@ export class ListsMembersService {
       });
 
       const listParticipants = participants.map(participant => participant.user);
-      //TODO externaliser les methode de crypte et decrypte puis les utiliser pour decrypté les champs 
-      console.log(listParticipants)
 
-      return null
+      const decryptFields = async (user) => {
+        for (const key in user) {
+          if (user[key] && typeof user[key] === 'object' && 'identifier' in user[key] && 'data' in user[key]) {
+            try {
+              user[key] = await this.encryptionService.decryptField(user[key]);
+            } catch (error) {
+              console.error(`Failed to decrypt ${key} for user ${user.id}:`, error);
+            }
+          }
+        }
+      };
+
+      // Décryptage des champs pour chaque utilisateur
+      for (const user of listParticipants) {
+        await decryptFields(user);
+      }
+
+      console.log(listParticipants);
+
+      return listParticipants;
+      
 
     } catch (error) {
       console.error('Error finding participants:', error);

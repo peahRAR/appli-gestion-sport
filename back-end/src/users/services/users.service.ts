@@ -43,21 +43,53 @@ export class UsersService {
   }
 
   private async encryptUserFields(dto: any): Promise<any> {
-    return {
-      email: this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.email, true)),
-      name: this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.name)),
-      firstname: dto.firstname ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.firstname)) : undefined,
-      birthday: dto.birthday ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.birthday)) : undefined,
-      tel_num: dto.tel_num ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_num)) : undefined,
-      tel_medic: dto.tel_medic ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_medic)) : undefined,
-      tel_emergency: dto.tel_emergency ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.tel_emergency)) : undefined,
-      weight: dto.weight ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.weight)) : undefined,
-      license: dto.license ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.license)) : undefined,
-      date_subscribe: dto.date_subscribe ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_subscribe)) : undefined,
-      date_payment: dto.date_payment ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_payment)) : undefined,
-      date_end_pay: dto.date_end_pay ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.date_end_pay)) : undefined,
-      avatar: dto.avatar ? this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dto.avatar)) : undefined,
-    };
+    const encryptedFields = {};
+
+    for (const [key, value] of Object.entries(dto)) {
+      if (value && typeof value === 'string') {
+        encryptedFields[key] = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(value, key === 'email'));
+      } else if (value && typeof value === 'object' && 'identifier' in value && 'data' in value) {
+        encryptedFields[key] = value;
+      } else {
+        encryptedFields[key] = value;
+      }
+    }
+
+    return encryptedFields;
+  }
+
+  private async decryptUserFields(users: User[]): Promise<User[]> {
+    const fieldsToDecrypt = [
+      'email',
+      'name',
+      'firstname',
+      'avatar',
+      'birthday',
+      'date_subscribe',
+      'date_payment',
+      'date_end_pay',
+      'license',
+      'weight',
+      'tel_num',
+      'tel_medic',
+      'tel_emergency',
+    ];
+
+    for (const user of users) {
+      for (const field of fieldsToDecrypt) {
+        if (user[field] && user[field].data) {
+          const isEmail = field === 'email';
+          try {
+            const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
+            user[field] = decryptedField;
+          } catch (error) {
+            console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
+          }
+        }
+      }
+    }
+
+    return users;
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -138,7 +170,6 @@ export class UsersService {
     return savedUser;
   }
 
-
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.find({
       select: [
@@ -214,8 +245,6 @@ export class UsersService {
       throw new Error('Aucun utilisateur trouvé.');
     }
 
-    console.log('Found user:', user); // Log après la récupération de l'utilisateur
-
     if (updateUserDto.password) {
       if (!updateUserDto.currentPassword) {
         throw new BadRequestException('Le mot de passe actuel est requis pour changer le mot de passe.');
@@ -231,7 +260,6 @@ export class UsersService {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    // Ensure all fields are strings before passing to encryptUserFields
     const userDto = {
       email: updateUserDto.email || user.email,
       name: updateUserDto.name || user.name,
@@ -247,21 +275,9 @@ export class UsersService {
       date_end_pay: updateUserDto.date_end_pay || user.date_end_pay,
       avatar: updateUserDto.avatar || user.avatar,
     };
-
-    console.log('User DTO before encryption:', userDto); // Log avant le chiffrement des champs
-
     const encryptedFields = await this.encryptUserFields(userDto);
-
-    console.log('Encrypted fields:', encryptedFields); // Log après le chiffrement des champs
-
     Object.assign(user, encryptedFields);
-
-    console.log('User before save:', user); // Log avant la sauvegarde de l'utilisateur
-
     await this.userRepository.save(user);
-
-    console.log('User saved:', user); // Log après la sauvegarde de l'utilisateur
-
     return user;
   }
 
@@ -323,39 +339,4 @@ export class UsersService {
     await this.userRepository.save(user);
     await this.resetPasswordRepository.delete(resetRecord.id);
   }
-
-  private async decryptUserFields(users: User[]): Promise<User[]> {
-    const fieldsToDecrypt = [
-      'email',
-      'name',
-      'firstname',
-      'avatar',
-      'birthday',
-      'date_subscribe',
-      'date_payment',
-      'date_end_pay',
-      'license',
-      'weight',
-      'tel_num',
-      'tel_medic',
-      'tel_emergency',
-    ];
-
-    for (const user of users) {
-      for (const field of fieldsToDecrypt) {
-        if (user[field] && user[field].data) {
-          const isEmail = field === 'email';
-          try {
-            const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
-            user[field] = decryptedField;
-          } catch (error) {
-            console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
-          }
-        }
-      }
-    }
-
-    return users;
-  }
-  
 }

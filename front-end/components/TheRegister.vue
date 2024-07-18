@@ -4,128 +4,56 @@
       <label class="block text-gray-700 text-sm font-bold mb-2">Genre</label>
       <div class="flex">
         <label class="inline-flex items-center mr-4">
-          <input
-            v-model="user.gender"
-            type="radio"
-            name="gender"
-            value="true"
-            class="form-radio"
-          />
+          <input v-model="user.gender" type="radio" name="gender" value="true" class="form-radio" />
           <span class="ml-2">Homme</span>
         </label>
         <label class="inline-flex items-center">
-          <input
-            v-model="user.gender"
-            type="radio"
-            name="gender"
-            value="false"
-            class="form-radio"
-          />
+          <input v-model="user.gender" type="radio" name="gender" value="false" class="form-radio" />
           <span class="ml-2">Femme</span>
         </label>
       </div>
     </div>
     <div class="mb-4">
-      <label for="name" class="block text-gray-700 text-sm font-bold mb-2"
-        >Nom</label
-      >
-      <input
-        v-model="user.name"
-        type="name"
-        id="name"
-        required
-        name="name"
-        placeholder="Votre Nom"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-      />
+      <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Nom</label>
+      <input v-model="user.name" type="name" id="name" required name="name" placeholder="Votre Nom"
+        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
     </div>
     <div class="mb-4">
-      <label for="firstname" class="block text-gray-700 text-sm font-bold mb-2"
-        >Prénom</label
-      >
-      <input
-        v-model="user.firstname"
-        type="firstname"
-        id="firstname"
-        required
-        name="firstname"
+      <label for="firstname" class="block text-gray-700 text-sm font-bold mb-2">Prénom</label>
+      <input v-model="user.firstname" type="firstname" id="firstname" required name="firstname"
         placeholder="Votre Prénom"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-      />
+        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
     </div>
     <div class="mb-4">
-      <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
-        >Email</label
-      >
-      <input
-        v-model="user.email"
-        type="email"
-        id="email"
-        required
-        name="email"
-        placeholder="Votre email"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-      />
+      <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+      <input v-model="user.email" type="email" id="email" required name="email" placeholder="Votre email"
+        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
     </div>
     <div class="mb-6">
-      <inputPassword
-        v-model="user.password"
-        :regex="regexPassword"
-        label="Nouveau mot de passe : "
-        id="password"
-        :isValid="validerPassword"
-      />
+      <inputPassword v-model="user.password" :regex="regexPassword" label="Nouveau mot de passe : " id="password"
+        :isValid="validerPassword" />
 
       <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
-      <check-password
-        :isLength="isLength"
-        :isSpecial="isSpecial"
-        :isMaj="isMaj"
-        :isMin="isMin"
-        :isNumber="isNumber"
-      />
+      <check-password :isLength="isLength" :isSpecial="isSpecial" :isMaj="isMaj" :isMin="isMin" :isNumber="isNumber" />
     </div>
-    <inputPassword
-      label="Confirmer votre mot de passe : "
-      id="confirmNewPassword"
-      v-model="confirmNewPassword"
-      :isValid="validerConfirmPassword"
-      ref="confirmPassword"
-      class="mb-4"
-    />
+    <inputPassword label="Confirmer votre mot de passe : " id="confirmNewPassword" v-model="confirmNewPassword"
+      :isValid="validerConfirmPassword" ref="confirmPassword" class="mb-4" />
 
     <div class="mb-4">
-      <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2"
-        >Date d'anniversaire</label
-      >
-      <input
-        v-model="user.birthday"
-        type="date"
-        required
-        id="birthdate"
-        name="birthdate"
-        placeholder="Votre date de naissance"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400"
-      />
+      <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2">Date d'anniversaire</label>
+      <DatePicker v-model="user.birthday" required />
     </div>
     <div class="mb-4">
       <label for="acceptConditions">
-        <input
-          type="checkbox"
-          id="acceptConditions"
-          name="acceptConditions"
-          required
-        />
+        <input type="checkbox" id="acceptConditions" name="acceptConditions" required />
         J'accepte les
         <NuxtLink href="/terms" target="_blank" class="underline text-blue">Conditions d'Utilisation</NuxtLink>
       </label>
     </div>
 
     <div class="flex justify-center">
-      <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-      >
+      <button type="submit"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
         S'inscrire
       </button>
     </div>
@@ -139,7 +67,7 @@
   </TheModal>
   <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{
     this.errorMessage
-  }}</TheModal>
+    }}</TheModal>
 </template>
 
 <script>

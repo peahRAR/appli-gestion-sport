@@ -5,8 +5,9 @@
       <!-- Email input -->
       <div class="mb-4">
         <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email :</label>
-        <input v-model="user.email" type="email" id="email" name="email" placeholder="Votre email"
-          class="w-full px-4 py-2 border rounded-lg focus:outline-none" autocomplete="email" />
+        <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
+          name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          autocomplete="email" />
       </div>
       <!-- Password input -->
       <div class="mb-6">

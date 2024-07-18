@@ -26,7 +26,8 @@
     </div>
     <div class="mb-4">
       <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
-      <input v-model="user.email" type="email" id="email" required name="email" placeholder="Votre email"
+      <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
+        required name="email" placeholder="Votre email"
         class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
     </div>
     <div class="mb-6">
@@ -67,7 +68,7 @@
   </TheModal>
   <TheModal :isOpen="showErrorModal" title="Message" @close="closeErrorModal">{{
     this.errorMessage
-    }}</TheModal>
+  }}</TheModal>
 </template>
 
 <script>
@@ -173,7 +174,7 @@ export default {
         this.errorMessage = `Erreur lors de la création du compte : ${error.message}`;
       }
     },
-    
+
     // Close The modal
     closeModal() {
       // Masquer la modal et réinitialiser le formulaire lorsque l'utilisateur ferme la modal

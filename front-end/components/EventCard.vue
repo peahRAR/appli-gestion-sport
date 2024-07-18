@@ -5,9 +5,9 @@
                 <!--TOP CARD -->
                 <h2 class="text-lg font-semibold text-gray-900">{{ event.formattedDate }}</h2>
 
-                <div @click="openModal(event)" class="flex flex-row justify-between items-center rounded px-1 cursor-pointer"
+                <div class="flex flex-row justify-between items-center rounded px-1 cursor-pointer"
                     :class="placesClass">
-                    <Icon name="fa6-solid:people-group" class="mr-1" />
+                    <Icon name="streamline:tickets-solid" class="mr-1" />
                     <p class="text-gray-800 font-semibold text-xs">
                         {{ event.places }}
                     </p>
@@ -53,6 +53,20 @@
                         v-if="event.overview.length > 150 || showOverflow">
                         Afficher {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
                     </button>
+                </div>
+
+                <div class="flex justify-center items-center">
+                    <!--Affichage des participants ici-->
+                    <Icon v-if="participants === 1" name="fa6-solid:user" class="mr-1" />
+                    <Icon v-if="participants > 1" name="fa6-solid:people-group" class="mr-1" />
+                    <div class="partipants font-bold">
+                        <div v-if="participants > 0" @click="openModal(event)" class="clickable inline-block underline cursor-pointer">
+                            <span class="pr-2">{{ participants }} {{ participantWord }}</span>
+                        </div>
+                        <span>
+                            {{ participantMessage }}
+                        </span>
+                    </div>
                 </div>
 
                 <!--Buttons-->
@@ -104,7 +118,7 @@ export default {
     },
     computed: {
         placesClass() {
-            if (this.event.places === 0) return 'bg-transparent';
+            if (this.event.places === 0) return 'bg-red-400';
             if (this.event.places > 0 && this.event.places <= this.event.totalPlaces * 0.2) return 'bg-orange-500';
             return 'bg-green-600';
         },
@@ -114,6 +128,22 @@ export default {
         absentButtonClass() {
             return this.isAbsentButtonActive ? 'bg-red-600' : 'bg-red-500';
         },
+        participants() {
+            return this.event.totalPlaces - this.event.places;
+        },
+        participantMessage() {
+            const participants = this.participants;
+            if (participants === 0) {
+                return "Il n'y a aucun participant pour le moment";
+            } else if (participants === 1) {
+                return "est inscrit à ce cours";
+            } else {
+                return `sont inscrits à ce cours`;
+            }
+        },
+        participantWord() {
+            return this.participants === 1 ? 'participant' : 'participants';
+        }
     },
 };
 </script>

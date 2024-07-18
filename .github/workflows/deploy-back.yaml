@@ -33,7 +33,10 @@ jobs:
     - name: Verify Archive Content
       run: tar -tzf production.tar.gz
 
-    - name: Copy Files to the Server
+    - name: Check ecosystem.config.js existence
+      run: ls -l back-end/ecosystem.config.js
+
+    - name: Copy Production Build to the Server
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.SERVER_IP }}
@@ -50,7 +53,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-        source: "ecosystem.config.js"
+        source: "back-end/ecosystem.config.js"
         target: "/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/"
 
     - name: Deploy with PM2

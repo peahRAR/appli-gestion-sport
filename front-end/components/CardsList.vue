@@ -266,6 +266,10 @@ export default {
         const token = this.getToken();
         const url = this.getUrl();
         const userId = await this.getUserIdFromToken();
+
+        // Vérification de l'état de participation précédent
+        const previousParticipation = await this.checkParticipation(event.id, userId);
+
         const requestBody = {
           eventId: event.id,
           userId: userId,
@@ -282,20 +286,24 @@ export default {
         if (!response.ok) {
           throw new Error("Failed to update participation status");
         }
+
         const index = this.events.findIndex(e => e.id === event.id);
         if (index !== -1) {
           this.events[index].isParticipating = value;
         }
 
-        // Mise à jour de l'état de participation dans l'événement local
+        // Mise à jour de l'état de participation localement
         const eventIndex = this.events.findIndex(e => e.id === event.id);
         if (eventIndex !== -1) {
-          const isParticipating = this.events[eventIndex].isParticipating;
-          // Mettre à jour le nombre de participants
-          if (isParticipating) {
-            this.events[eventIndex].places -= 1;
-          } else {
-            this.events[eventIndex].places += 1;
+          const currentParticipation = this.events[eventIndex].isParticipating;
+
+          // Comparer l'état actuel avec l'état précédent
+          if (previousParticipation !== undefined) {
+            if (currentParticipation) {
+              this.events[eventIndex].places -= 1;
+            } else {
+              this.events[eventIndex].places += 1;
+            }
           }
         }
 

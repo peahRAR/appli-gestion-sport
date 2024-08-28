@@ -9,11 +9,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { EncryptionService } from './services/encryption.service';
 import { EmailService } from './services/email.service';
+import { KeyHolderModule } from '../keyholder/keyholder.module'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, ResetPassword]),
     forwardRef(() => ListsMembersModule),
+    forwardRef(() => KeyHolderModule),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -15,6 +15,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { mailerConfig } from './mailer.config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { KeyHolderModule } from './keyholder/keyholder.module';
 
 @Module({})
 export class AppModule implements OnModuleInit {
@@ -72,6 +73,7 @@ export class AppModule implements OnModuleInit {
         AdminModule,
         AlertModule,
         CronjobsModule,
+        KeyHolderModule, 
       ],
       controllers: [AppController],
       providers: [AppService],

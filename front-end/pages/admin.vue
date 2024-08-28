@@ -33,6 +33,12 @@
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
           <event-list :events="events" @edit-event="editEvent" @delete-event="deleteEvent" />
         </div>
+
+        <!-- Liste des clefs -->
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+          <key-manager :users="users" :baseUrl="getUrl() " />
+        </div>
+
       </div>
 
       <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" @close="closeModalUser"

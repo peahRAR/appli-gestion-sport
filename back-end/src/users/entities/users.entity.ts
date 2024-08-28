@@ -5,6 +5,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { ListsMember } from 'src/lists-members/lists-member.entity';
+import { KeyHolder } from 'src/keyholder/entities/keyholder.entity';
 
 @Entity()
 export class User {
@@ -103,4 +104,7 @@ export class User {
 
   @OneToMany(() => ListsMember, listsMember => listsMember.user, { cascade: ['remove'] })
   listsMembers: ListsMember[];
+
+  @OneToMany(() => KeyHolder, keyHolder => keyHolder.user)
+  keys: KeyHolder[];
 }

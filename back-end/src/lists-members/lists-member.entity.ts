@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, Index } from 'typeorm';
 import { Event } from '../events/events.entity';
 import { User } from '../users/entities/users.entity';
 
 @Entity()
+@Index(['eventId', 'userId'], { unique: true })
 export class ListsMember {
   @PrimaryGeneratedColumn()
   id: number;

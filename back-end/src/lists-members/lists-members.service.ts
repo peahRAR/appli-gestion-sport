@@ -1,6 +1,6 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { ListsMember } from './lists-member.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
@@ -17,14 +17,12 @@ export class ListsMembersService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
-    private readonly encryptionService: EncryptionService, 
+    private readonly encryptionService: EncryptionService,
+    private readonly dataSource: DataSource, // Injection de DataSource
   ) { }
 
-  async create(
-    createListsMemberDto: CreateListsMemberDto,
-  ): Promise<ListsMember> {
-    const newListsMember =
-      this.listsMemberRepository.create(createListsMemberDto);
+  async create(createListsMemberDto: CreateListsMemberDto): Promise<ListsMember> {
+    const newListsMember = this.listsMemberRepository.create(createListsMemberDto);
     return this.listsMemberRepository.save(newListsMember);
   }
 
@@ -94,7 +92,6 @@ export class ListsMembersService {
       console.log(listParticipants);
 
       return listParticipants;
-      
 
     } catch (error) {
       console.error('Error finding participants:', error);
@@ -107,7 +104,6 @@ export class ListsMembersService {
       where: { eventId, userId },
     });
     if (!listsMember) {
-      // Si aucune correspondance n'est trouvée, retourner un objet JSON vide ou un message d'erreur
       return {}; // Ou return { error: 'Aucune correspondance trouvée' };
     }
     return listsMember;
@@ -118,54 +114,82 @@ export class ListsMembersService {
     userId: string,
     updateListsMemberDto: UpdateListsMemberDto,
   ): Promise<ListsMember | undefined> {
-    const response = await this.eventsService.findOne(eventId);
-    let places = response.places;
+    console.log(`Transaction started for eventId: ${eventId}, userId: ${userId}`);
 
-    // Vérifier si l'utilisateur souhaite s'inscrire et s'il reste des places disponibles
-    if (updateListsMemberDto.isParticipant && places <= 0) {
-      throw new Error("Désolé, il n'y a plus de place pour ce cours");
-    }
+    return this.dataSource.transaction(async manager => {
+      console.log(`Transaction in progress for eventId: ${eventId}, userId: ${userId}`);
 
-    // Récupérer l'entrée de la liste des membres correspondant à l'utilisateur et à l'événement
-    const fetchBdd = await this.listsMemberRepository.findOne({
-      where: { eventId, userId },
-    });
+      const response = await this.eventsService.findOne(eventId);
+      let places = response.places;
 
-    // Vérifier si l'utilisateur est déjà inscrit à l'événement
-    const isAlreadyParticipant = fetchBdd && fetchBdd.isParticipant;
-
-    // Mettre à jour la liste des membres et le nombre de places en fonction de l'état de participation
-    if (updateListsMemberDto.isParticipant === isAlreadyParticipant) {
-      return; // Aucune action nécessaire si l'état de participation est le même
-    }
-
-    // Mettre à jour la liste des membres et le nombre de places en fonction de l'état de participation
-    if (updateListsMemberDto.isParticipant === false) {
-      if (!fetchBdd) {
-        this.create({ eventId, userId, isParticipant: false });
-      } else {
-        await this.listsMemberRepository.update(
-          { eventId, userId },
-          updateListsMemberDto,
-        );
-        places++;
+      // Vérifier si l'utilisateur souhaite s'inscrire et s'il reste des places disponibles
+      if (updateListsMemberDto.isParticipant && places <= 0) {
+        console.log(`No more places available for eventId: ${eventId}`);
+        throw new Error("Désolé, il n'y a plus de place pour ce cours");
       }
-    } else {
-      if (!fetchBdd) {
-        this.create({ eventId, userId, isParticipant: true });
-        places--;
-      } else {
-        await this.listsMemberRepository.update(
-          { eventId, userId },
-          updateListsMemberDto,
-        );
-        places--;
+
+      // Récupérer l'entrée de la liste des membres correspondant à l'utilisateur et à l'événement
+      const fetchBdd = await manager.findOne(ListsMember, {
+        where: { eventId, userId },
+        lock: { mode: 'pessimistic_write' }, // Verrouillage pessimiste
+      });
+
+      // Vérifier si l'utilisateur est déjà inscrit à l'événement
+      const isAlreadyParticipant = fetchBdd && fetchBdd.isParticipant;
+
+      if (updateListsMemberDto.isParticipant === isAlreadyParticipant) {
+        console.log(`No change in participation status for userId: ${userId}, eventId: ${eventId}`);
+        return; // Aucune action nécessaire si l'état de participation est le même
       }
-    }
-    // Mettre à jour le nombre de places restantes pour l'événement
-    const placesRest = { places };
-    this.eventsService.update(eventId, placesRest);
-    return this.listsMemberRepository.findOne({ where: { eventId, userId } });
+
+      if (updateListsMemberDto.isParticipant === false) {
+        if (!fetchBdd) {
+          console.log(`Creating non-participant entry for userId: ${userId}, eventId: ${eventId}`);
+          await manager.save(ListsMember, {
+            eventId,
+            userId,
+            isParticipant: false,
+          });
+        } else {
+          console.log(`Updating to non-participant for userId: ${userId}, eventId: ${eventId}`);
+          await manager.update(
+            ListsMember,
+            { eventId, userId },
+            updateListsMemberDto,
+          );
+          places++;
+        }
+      } else {
+        if (!fetchBdd) {
+          console.log(`Creating participant entry for userId: ${userId}, eventId: ${eventId}`);
+          await manager.save(ListsMember, {
+            eventId,
+            userId,
+            isParticipant: true,
+          });
+          places--;
+        } else {
+          console.log(`Updating to participant for userId: ${userId}, eventId: ${eventId}`);
+          await manager.update(
+            ListsMember,
+            { eventId, userId },
+            updateListsMemberDto,
+          );
+          places--;
+        }
+      }
+
+      // Mettre à jour le nombre de places restantes pour l'événement
+      const placesRest = { places };
+      await this.eventsService.update(eventId, placesRest);
+
+      console.log(`Transaction committed for eventId: ${eventId}, userId: ${userId}`);
+      return manager.findOne(ListsMember, { where: { eventId, userId } });
+    })
+      .catch(error => {
+        console.log(`Transaction failed for eventId: ${eventId}, userId: ${userId}`, error);
+        throw error;
+      });
   }
 
   async remove(eventId: number, userId: string): Promise<void> {

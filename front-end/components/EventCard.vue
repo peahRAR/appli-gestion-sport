@@ -60,7 +60,8 @@
                     <Icon v-if="participants === 1" name="fa6-solid:user" class="mr-1" />
                     <Icon v-if="participants > 1" name="fa6-solid:people-group" class="mr-1" />
                     <div class="partipants font-bold">
-                        <div v-if="participants > 0" @click="openModal(event)" class="clickable inline-block underline cursor-pointer">
+                        <div v-if="participants > 0" @click="openModal(event)"
+                            class="clickable inline-block underline cursor-pointer">
                             <span class="pr-2">{{ participants }} {{ participantWord }}</span>
                         </div>
                         <span>
@@ -74,21 +75,24 @@
                     <div class="buttons w-full flex flex-col font-semibold">
                         <button @click.stop="participate(event, true)" @mousedown="isPresentButtonActive = true"
                             @mouseup="isPresentButtonActive = false" @mouseleave="isPresentButtonActive = false"
-                            :class="[presentButtonClass, { 'opacity-50 cursor-not-allowed': event.isParticipating === true }]"
-                            :disabled="event.isParticipating === true" class="text-white py-1 px-3 rounded mb-2">
+                            :class="[presentButtonClass, { 'opacity-50 cursor-not-allowed ': event.isParticipating === true }]"
+                            :disabled="event.isParticipating === true"
+                            class="text-white py-1 px-3 rounded mb-2 flex justify-center items-center">
+                            <Icon name="carbon:choose-item" class="mr-2 text-2xl" v-if="event.isParticipating" />
                             Présent
                         </button>
                         <button @click.stop="participate(event, false)" @mousedown="isAbsentButtonActive = true"
                             @mouseup="isAbsentButtonActive = false" @mouseleave="isAbsentButtonActive = false"
-                            :class="[absentButtonClass, { 'opacity-50 cursor-not-allowed': event.isParticipating === false }]"
-                            :disabled="event.isParticipating === false" class="text-white py-1 px-3 rounded">
+                            :class="[absentButtonClass, { 'opacity-50 cursor-not-allowed ': event.isParticipating === false }]"
+                            :disabled="event.isParticipating === false"
+                            class="text-white py-1 px-3 rounded mb-2 flex justify-center items-center">
+                            <Icon name="carbon:choose-item" class="mr-2 text-2xl"
+                                v-if="event.isParticipating === false" />
                             Absent
                         </button>
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
 </template>

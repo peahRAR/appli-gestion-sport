@@ -18,13 +18,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { KeyHolderModule } from './keyholder/keyholder.module';
 
 @Module({})
-export class AppModule implements OnModuleInit {
+export class AppModule  {
   constructor(private configService: ConfigService) { }
 
-  async onModuleInit() {
-    const databaseHost = this.configService.get<string>('DATABASE_HOST');
-    console.log(`LOG - Database Host: ${databaseHost}`);
-  }
 
   static forRoot(secrets: Record<string, any>): DynamicModule {
     return {

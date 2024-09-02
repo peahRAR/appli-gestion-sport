@@ -28,7 +28,7 @@ jobs:
       run: npm run build
 
     - name: Archive Production Build
-      run: tar -czf production.tar.gz -C back-end/dist .
+      run: tar -czf production.tar.gz -C back-end dist
 
     - name: Verify Archive Content
       run: tar -tzf production.tar.gz
@@ -69,3 +69,4 @@ jobs:
           rm production.tar.gz
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
           pm2 reload /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
+

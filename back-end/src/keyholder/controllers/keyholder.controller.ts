@@ -9,6 +9,10 @@ export class KeyHolderController {
         private readonly userService: UsersService,
     ) { }
 
+    onModuleInit() {
+        console.log('KeyHolderController has been initialized');
+    }
+
     // Méthode pour assigner une clé à un utilisateur
     @Post()
     async createKey(
@@ -22,6 +26,7 @@ export class KeyHolderController {
     // Méthode pour récupérer toutes les clés
     @Get()
     async findAll() {
+        console.log('KeyHolderController: Handling GET /keys request');
         return this.keyHolderService.findAll();
     }
 

@@ -28,7 +28,7 @@
 export default {
   data() {
     return {
-      expanded: false,
+      expanded: true,
     };
   },
   props: {

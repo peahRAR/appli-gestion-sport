@@ -21,7 +21,6 @@ import { KeyHolderModule } from './keyholder/keyholder.module';
 export class AppModule  {
   constructor(private configService: ConfigService) { }
 
-
   static forRoot(secrets: Record<string, any>): DynamicModule {
     return {
       module: AppModule,

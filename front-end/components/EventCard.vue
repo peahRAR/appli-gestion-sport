@@ -75,19 +75,16 @@
                     <div class="buttons w-full flex flex-col font-semibold">
                         <button @click.stop="participate(event, true)" @mousedown="isPresentButtonActive = true"
                             @mouseup="isPresentButtonActive = false" @mouseleave="isPresentButtonActive = false"
-                            :class="[presentButtonClass, { 'opacity-50 cursor-not-allowed ': event.isParticipating === true }]"
+                            :class="[presentButtonClass, { 'cursor-not-allowed ': event.isParticipating === true }]"
                             :disabled="event.isParticipating === true"
-                            class="text-white py-1 px-3 rounded mb-2 flex justify-center items-center">
-                            <Icon name="carbon:choose-item" class="mr-2 text-2xl" v-if="event.isParticipating" />
+                            class=" border border-slate-500 drop-shadow-lg py-1 px-3 rounded mb-2 flex justify-center items-center">
                             Présent
                         </button>
                         <button @click.stop="participate(event, false)" @mousedown="isAbsentButtonActive = true"
                             @mouseup="isAbsentButtonActive = false" @mouseleave="isAbsentButtonActive = false"
-                            :class="[absentButtonClass, { 'opacity-50 cursor-not-allowed ': event.isParticipating === false }]"
+                            :class="[absentButtonClass, { 'cursor-not-allowed ': event.isParticipating === false }]"
                             :disabled="event.isParticipating === false"
-                            class="text-white py-1 px-3 rounded mb-2 flex justify-center items-center">
-                            <Icon name="carbon:choose-item" class="mr-2 text-2xl"
-                                v-if="event.isParticipating === false" />
+                            class=" border border-slate-500 drop-shadow-lg py-1 px-3 rounded mb-2 flex justify-center items-center">
                             Absent
                         </button>
                     </div>
@@ -127,10 +124,20 @@ export default {
             return 'bg-green-600';
         },
         presentButtonClass() {
-            return this.isPresentButtonActive ? 'bg-green-600' : 'bg-green-500';
+            if (this.event.isParticipating === true) {
+                return 'bg-green-600 text-white'; // Non cliquable et vert
+            } else if (this.isPresentButtonActive) {
+                return 'bg-white text-black'; // Cliquable et blanc
+            }
+            return 'bg-white text-black'; // Par défaut blanc quand cliquable
         },
         absentButtonClass() {
-            return this.isAbsentButtonActive ? 'bg-red-600' : 'bg-red-500';
+            if (this.event.isParticipating === false) {
+                return 'bg-red-600 text-white'; // Non cliquable et rouge
+            } else if (this.isAbsentButtonActive) {
+                return 'bg-white text-black'; // Cliquable et blanc
+            }
+            return 'bg-white text-black'; // Par défaut blanc quand cliquable
         },
         participants() {
             return this.event.totalPlaces - this.event.places;

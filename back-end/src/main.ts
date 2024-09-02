@@ -4,7 +4,10 @@ import loadSecrets from './config/configuration';
 
 async function bootstrap() {
   const secrets = await loadSecrets();
-  const app = await NestFactory.create(AppModule.forRoot(secrets));
+  const app = await NestFactory.create(AppModule.forRoot(secrets), {
+    logger: ['log', 'error', 'warn', 'debug'], 
+  });
+
 
   const allowedOrigins = ['http://localhost:3000', 'https://app.mmabaisieux.fr'];
 

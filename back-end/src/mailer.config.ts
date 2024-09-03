@@ -9,6 +9,9 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
   const smtpUser = configService.get<string>('SMTP_USER');
   const smtpPass = configService.get<string>('SMTP_PASS');
 
+  const templateDir = join(__dirname, '..', 'templates', 'email');
+  console.log('Template directory:', templateDir); // Log du chemin du template
+
 
   const options = {
     transport: {

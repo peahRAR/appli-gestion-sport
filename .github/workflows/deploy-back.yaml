@@ -28,7 +28,7 @@ jobs:
       run: npm run build
 
     - name: Archive Production Build
-      run: tar -czf production.tar.gz -C back-end dist
+      run: tar -czf production.tar.gz -C back-end dist templates
 
     - name: Verify Archive Content
       run: tar -tzf production.tar.gz

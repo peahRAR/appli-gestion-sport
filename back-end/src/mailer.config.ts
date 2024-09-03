@@ -31,7 +31,7 @@ export const mailerConfig = (configService: ConfigService): MailerOptions => {
       from: '"MMA-Association" <no-reply@mmabaisieux.fr>',
     },
     template: {
-      dir: join(__dirname, '..', 'templates', 'email'),
+      dir: templateDir,
       adapter: new HandlebarsAdapter(),
       options: {
         strict: false,

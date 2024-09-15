@@ -2,7 +2,10 @@ import { User } from '../../users/entities/users.entity'
 
 export class UpdateEventDto {
   date_event?: Date;
-  duration?: string;
+  duration?: {
+    hours?: number;
+    minutes?: number;
+  };
   places?: number;
   name_event?: string;
   coach?: string;

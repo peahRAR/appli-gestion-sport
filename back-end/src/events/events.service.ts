@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Repository, FindManyOptions } from 'typeorm';
+import { Repository, FindManyOptions, DeepPartial } from 'typeorm';
 import { Event } from './events.entity';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
@@ -53,26 +53,53 @@ export class EventsService {
     id: number,
     updateEventDto: UpdateEventDto,
   ): Promise<Event | undefined> {
-    // Cloner l'objet updateEventDto pour éviter de modifier l'original
-    const updatedEvent: Partial<UpdateEventDto> = { ...updateEventDto };
+    // Créer un objet vide qui sera compatible avec l'entité Event
+    const updatedEvent: DeepPartial<Event> = {};
 
-    // Vérifier si la durée est fournie
-    if (updateEventDto.duration) {
-      // Convertir la durée de chaîne de caractères en entier
-      const durationInMinutes = parseInt(updateEventDto.duration, 10);
+    // Copier manuellement chaque propriété du DTO dans l'objet updatedEvent
+    if (updateEventDto.date_event) {
+      updatedEvent.date_event = updateEventDto.date_event;
+    }
+    if (updateEventDto.places) {
+      updatedEvent.places = updateEventDto.places;
+    }
+    if (updateEventDto.name_event) {
+      updatedEvent.name_event = updateEventDto.name_event;
+    }
+    if (updateEventDto.coach) {
+      updatedEvent.coach = updateEventDto.coach;
+    }
+    if (updateEventDto.overview) {
+      updatedEvent.overview = updateEventDto.overview;
+    }
 
-      if (isNaN(durationInMinutes)) {
+    // Vérifier si la durée est fournie et contient des heures ou des minutes
+    if (updateEventDto.duration && (updateEventDto.duration.hours || updateEventDto.duration.minutes)) {
+      const hours = updateEventDto.duration.hours || 0; // Prendre 0 si non défini
+      const minutes = updateEventDto.duration.minutes || 0; // Prendre 0 si non défini
+
+      // Convertir tout en minutes
+      const totalDurationInMinutes = (hours * 60) + minutes;
+
+      // Vérifier si la durée totale est valide
+      if (isNaN(totalDurationInMinutes) || totalDurationInMinutes <= 0) {
         throw new Error('Invalid duration format');
       }
 
-      // Convertir la durée en intervalle PostgreSQL
-      const durationInterval = `PT${durationInMinutes}M`;
+      // Convertir la durée en intervalle PostgreSQL (ISO 8601 format)
+      const durationInterval = `PT${totalDurationInMinutes}M`;
+
+      // Mettre à jour la durée avec le format string attendu
       updatedEvent.duration = durationInterval;
     }
 
+    // Mettre à jour l'événement dans la base de données
     await this.eventRepository.update(id, updatedEvent);
+
     return this.eventRepository.findOne({ where: { id } });
   }
+
+
 
   async remove(id: number): Promise<void> {
     const event = await this.findOne(id);

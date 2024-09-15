@@ -46,7 +46,7 @@
                 <!--More informations-->
                 <div v-if="event.overview" class="flex flex-col my-4">
                     <p class="text-gray-500 mb-4 p-1 text-left" :class="{ 'line-clamp-3': !event.showOverflow }">
-                        {{ event.formattedOverview }}
+                        {{ event.overview }}
                     </p>
                     <button @click="emitToggleOverflow"
                         class="text-gray-800 font-semibold text-sm focus:outline-none text-center"

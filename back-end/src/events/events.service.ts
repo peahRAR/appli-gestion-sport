@@ -124,9 +124,9 @@ export class EventsService {
     // Supprimer les entrées correspondantes dans la table ListsMembers
     for (const event of expiredEvents) {
       const lists = await this.listsMembersService.findAllByIdEvent(event.id);
-      lists.forEach((element) => {
-        this.listsMembersService.remove(element.eventId, element.userId);
-      });
+      for (const element of lists) {
+        await this.listsMembersService.remove(element.eventId, element.userId);
+      }
     }
 
     // Supprimer les événements expirés de la table Events

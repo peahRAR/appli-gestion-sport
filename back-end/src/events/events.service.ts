@@ -11,7 +11,7 @@ import { ListsMembersService } from 'src/lists-members/lists-members.service';
 export class EventsService {
 
   private readonly logger = new Logger(EventsService.name);
-  
+
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -116,10 +116,10 @@ export class EventsService {
   async deleteExpiredEvents(): Promise<void> {
   this.logger.debug('Début de la suppression des événements expirés');
 
-  // Date d'expiration = aujourd'hui - 1 jour
-  const expirationDate = new Date();
-  expirationDate.setDate(expirationDate.getDate() - 1);
-  this.logger.debug(`Date d'expiration calculée : ${expirationDate}`);
+    // Date d'expiration = aujourd'hui - 4 heures
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() - 4);
+    this.logger.debug(`Date d'expiration calculée : ${expirationDate}`);
 
   // Récupérer les IDs des événements expirés
   const expiredEvents = await this.eventRepository

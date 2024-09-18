@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, forwardRef, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -6,8 +6,12 @@ import { Repository, FindManyOptions, DeepPartial } from 'typeorm';
 import { Event } from './events.entity';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
+
 @Injectable()
 export class EventsService {
+
+  private readonly logger = new Logger(EventsService.name);
+  
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
@@ -110,30 +114,43 @@ export class EventsService {
   }
 
   async deleteExpiredEvents(): Promise<void> {
-    // Date d'expiration = aujourd'hui - 1 jour
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() - 1);
+  this.logger.debug('Début de la suppression des événements expirés');
 
-    // Récupérer les IDs des événements expirés
-    const expiredEvents = await this.eventRepository
-      .createQueryBuilder('event')
-      .select('event.id')
-      .where('event.date_event < :expirationDate', { expirationDate })
-      .getMany();
+  // Date d'expiration = aujourd'hui - 1 jour
+  const expirationDate = new Date();
+  expirationDate.setDate(expirationDate.getDate() - 1);
+  this.logger.debug(`Date d'expiration calculée : ${expirationDate}`);
 
-    // Supprimer les entrées correspondantes dans la table ListsMembers
-    for (const event of expiredEvents) {
-      const lists = await this.listsMembersService.findAllByIdEvent(event.id);
-      for (const element of lists) {
-        await this.listsMembersService.remove(element.eventId, element.userId);
-      }
+  // Récupérer les IDs des événements expirés
+  const expiredEvents = await this.eventRepository
+    .createQueryBuilder('event')
+    .select('event.id')
+    .where('event.date_event < :expirationDate', { expirationDate })
+    .getMany();
+
+  this.logger.debug(`Événements expirés récupérés : ${JSON.stringify(expiredEvents)}`);
+
+  // Supprimer les entrées correspondantes dans la table ListsMembers
+  for (const event of expiredEvents) {
+    this.logger.debug(`Traitement de l'événement : ${event.id}`);
+    const lists = await this.listsMembersService.findAllByIdEvent(event.id);
+    this.logger.debug(`Membres trouvés pour l'événement : ${JSON.stringify(lists)}`);
+
+    for (const element of lists) {
+      this.logger.debug(`Suppression du membre : eventId=${element.eventId}, userId=${element.userId}`);
+      await this.listsMembersService.remove(element.eventId, element.userId);
     }
-
-    // Supprimer les événements expirés de la table Events
-    await this.eventRepository
-      .createQueryBuilder()
-      .delete()
-      .where('date_event < :expirationDate', { expirationDate })
-      .execute();
   }
+
+  // Supprimer les événements expirés de la table Events
+  this.logger.debug('Suppression des événements de la table Events');
+  await this.eventRepository
+    .createQueryBuilder()
+    .delete()
+    .where('date_event < :expirationDate', { expirationDate })
+    .execute();
+
+  this.logger.debug('Fin de la suppression des événements expirés');
+}
+
 }

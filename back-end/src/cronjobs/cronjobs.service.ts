@@ -10,7 +10,7 @@ export class CronjobsService {
     private readonly alertService: AlertService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
     // Supprimer les événements dépassés d'un jour
     await this.eventsService.deleteExpiredEvents();

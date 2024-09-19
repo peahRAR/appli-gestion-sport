@@ -12,7 +12,7 @@
                 <p class="ml-2">Kg</p>
             </div>
             <div class="w-full flex items-baseline">
-                <p>License:</p>
+                <p>Licence:</p>
                 <input type="text" v-model="editedLicense" @input="updateField('editedLicense', $event.target.value)"
                     placeholder="Nouvelle license"
                     class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2" />

@@ -170,8 +170,18 @@ export class ListsMembersService {
           places--; // Décrémenter les places si l'utilisateur devient participant
         }
       } else {
-        // Cas où l'utilisateur se désinscrit ou devient non-participant
-        if (existingMember && existingMember.isParticipant) {
+        // Cas où l'utilisateur choisit de ne pas participer
+        if (!existingMember) {
+          // Si l'utilisateur n'a jamais donné de réponse et choisit de ne pas participer
+          console.log(`Recording non-participation for userId: ${userId}, eventId: ${eventId}`);
+          await transactionalEntityManager.save(ListsMember, {
+            eventId,
+            userId,
+            isParticipant: false,
+          });
+          // Pas de modification des places car l'utilisateur ne participe pas
+        } else if (existingMember.isParticipant) {
+          // Si l'utilisateur se désinscrit d'un cours où il était déjà inscrit
           console.log(`Updating to non-participant for userId: ${userId}, eventId: ${eventId}`);
           existingMember.isParticipant = false;
           await transactionalEntityManager.save(existingMember);
@@ -191,6 +201,7 @@ export class ListsMembersService {
         throw error;
       });
   }
+
 
   async remove(eventId: number, userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ eventId, userId });

@@ -129,7 +129,6 @@ export class ListsMembersService {
         throw new Error(`Event with id ${eventId} not found`);
       }
 
-      let places = event.places;
       const totalPlaces = event.totalPlaces;
 
       // Récupérer l'entrée de la liste des membres correspondant à l'utilisateur et à l'événement
@@ -144,13 +143,13 @@ export class ListsMembersService {
         return existingMember; // Aucune action nécessaire si l'état de participation est le même
       }
 
-      // Récupérer le nombre de participants déjà inscrits
-      const participants = await transactionalEntityManager.count(ListsMember, {
-        where: { eventId, isParticipant: true },
-      });
-
       // Cas où l'utilisateur devient participant
       if (updateListsMemberDto.isParticipant === true) {
+        // Récupérer le nombre de participants déjà inscrits
+        const participants = await transactionalEntityManager.count(ListsMember, {
+          where: { eventId, isParticipant: true },
+        });
+
         if (participants >= totalPlaces) {
           throw new Error("Désolé, il n'y a plus de place pour ce cours");
         }
@@ -162,46 +161,44 @@ export class ListsMembersService {
             userId,
             isParticipant: true,
           });
-          places--; // Décrémenter les places si un nouvel utilisateur devient participant
         } else {
           console.log(`Updating to participant for userId: ${userId}, eventId: ${eventId}`);
           existingMember.isParticipant = true;
           await transactionalEntityManager.save(existingMember);
-          places--; // Décrémenter les places si l'utilisateur devient participant
         }
       } else {
         // Cas où l'utilisateur choisit de ne pas participer
         if (!existingMember) {
-          // Si l'utilisateur n'a jamais donné de réponse et choisit de ne pas participer
           console.log(`Recording non-participation for userId: ${userId}, eventId: ${eventId}`);
           await transactionalEntityManager.save(ListsMember, {
             eventId,
             userId,
             isParticipant: false,
           });
-          // Pas de modification des places car l'utilisateur ne participe pas
         } else if (existingMember.isParticipant) {
-          // Si l'utilisateur se désinscrit d'un cours où il était déjà inscrit
           console.log(`Updating to non-participant for userId: ${userId}, eventId: ${eventId}`);
           existingMember.isParticipant = false;
           await transactionalEntityManager.save(existingMember);
-          places++; // Incrémenter les places uniquement si l'utilisateur était inscrit
         }
       }
 
-      // Mettre à jour le nombre de places restantes pour l'événement
-      event.places = places;
+      // Calculer le nombre de places restantes en fonction du nombre de participants
+      const updatedParticipantsCount = await transactionalEntityManager.count(ListsMember, {
+        where: { eventId, isParticipant: true },
+      });
+
+      event.places = totalPlaces - updatedParticipantsCount;
+
+      // Sauvegarder l'événement mis à jour avec les places restantes recalculées
       await transactionalEntityManager.save(event);
 
       console.log(`Transaction committed for eventId: ${eventId}, userId: ${userId}`);
       return transactionalEntityManager.findOne(ListsMember, { where: { eventId, userId } });
-    })
-      .catch(error => {
-        console.log(`Transaction failed for eventId: ${eventId}, userId: ${userId}`, error);
-        throw error;
-      });
+    }).catch(error => {
+      console.log(`Transaction failed for eventId: ${eventId}, userId: ${userId}`, error);
+      throw error;
+    });
   }
-
 
   async remove(eventId: number, userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ eventId, userId });

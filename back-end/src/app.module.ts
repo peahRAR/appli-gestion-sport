@@ -1,4 +1,4 @@
-import { Module, DynamicModule, OnModuleInit } from '@nestjs/common';
+import { Module, DynamicModule} from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';

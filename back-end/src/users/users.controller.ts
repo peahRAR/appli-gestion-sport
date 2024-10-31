@@ -12,6 +12,7 @@ import {
   UseGuards,
   forwardRef,
   Inject,
+  Logger,
 } from '@nestjs/common';
 import { UsersService } from './services/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -36,7 +37,6 @@ export class UsersController {
     private readonly configService: ConfigService,
   ) { }
 
-
   async onModuleInit() {
     await this.initializeStorage();
   }
@@ -53,7 +53,6 @@ export class UsersController {
 
     this.bucketName = bucketName;
   }
-
 
   private async uploadFileToGCS(file: Express.Multer.File, destination: string): Promise<string> {
 
@@ -91,7 +90,6 @@ export class UsersController {
       }
     });
   }
-
 
   private async emptyGCSFolder(folderPath: string): Promise<void> {
     // Enlever les apostrophes du nom du bucket
@@ -131,6 +129,7 @@ export class UsersController {
   // Liste des Users
   @Get()
   findAll() {
+    Logger.log("route user findAll", "UsersController");
     return this.usersService.findAll();
   }
 

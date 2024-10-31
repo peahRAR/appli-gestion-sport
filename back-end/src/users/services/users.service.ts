@@ -171,6 +171,7 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
+    console.log("METHOD FINDALL")
     const users = await this.userRepository.find({
       select: [
         'id',
@@ -193,7 +194,10 @@ export class UsersService {
       ],
     });
 
-    return this.decryptUserFields(users);
+    console.log("retourne tout les utilisateurs")
+
+    return users
+    //return this.decryptUserFields(users);
   }
 
   async findOne(id: string): Promise<User | undefined> {

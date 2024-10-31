@@ -61,8 +61,8 @@
               <span>
                 <!-- Cash icon if date_end_pay is null or < date of the day -->
                 <Icon v-if="!user.date_end_pay ||
-          new Date(user.date_end_pay) < new Date()
-          " name="tabler:tax-euro" class=" text-black text-3xl" />
+                  new Date(user.date_end_pay) < new Date()
+                " name="tabler:tax-euro" class=" text-black text-3xl" />
                 <!-- Id Card icon if license is null -->
                 <svg v-if="!user.license" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
                   <path fill="text-black"
@@ -92,11 +92,11 @@
     <div class="mt-4 w-full flex items-center">
       <div>
         <select v-model="pageSize">
-          <option value="10" default>10</option>
-          <option value="25">25</option>
-          <option value="35">35</option>
-          <option value="50">50</option>
-          <option value="75">75</option>
+          <option :value="10" default>10</option>
+          <option :value="25">25</option>
+          <option :value="35">35</option>
+          <option :value="50">50</option>
+          <option :value="75">75</option>
         </select>
       </div>
       <div class="flex justify-center w-full items-center">
@@ -155,7 +155,7 @@ export default {
       currentPage: 1,
       filterOption: "all",
       currentColumns: this.activeColumns,
-      pageSize: '10',
+      pageSize: 10,
     };
   },
   methods: {
@@ -230,6 +230,12 @@ export default {
         this.currentColumns = [...this.defaultColumns];
       }
     },
+
+    pageSize(newSize) {
+      this.pageSize = parseInt(newSize); // Assurez-vous que `pageSize` est toujours un entier
+      this.currentPage = 1; // Reset page lors du changement de taille
+    },
+
   },
   computed: {
     capitalize() {
@@ -255,8 +261,8 @@ export default {
       return filteredUsers.slice(startIndex, endIndex);
     },
     totalPages() {
-      const filteredUsers = this.filterUsers(this.sortedUsers); // Appliquer le filtre aux utilisateurs
-      return Math.ceil(filteredUsers.length / this.pageSize); // Calculer le nombre de pages en fonction des utilisateurs filtrés
+      const filteredUsers = this.filterUsers(this.sortedUsers);
+      return Math.ceil(filteredUsers.length / this.pageSize);
     },
     filteredUsers() {
       // Appliquer le filtre aux utilisateurs en fonction des options de filtrage

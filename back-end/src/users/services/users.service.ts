@@ -65,30 +65,24 @@ export class UsersService {
       'tel_medic', 'tel_emergency'
     ];
 
-    const batchSize = 10; // Nombre d’utilisateurs par batch
-    for (let i = 0; i < users.length; i += batchSize) {
-      const batch = users.slice(i, i + batchSize);
-
-      // Déchiffrement des champs pour chaque utilisateur dans le batch
-      await Promise.all(batch.map(async (user) => {
-        const decryptionPromises = fieldsToDecrypt.map(async (field) => {
-          if (user[field] && user[field].data) {
-            const isEmail = field === 'email';
-            try {
-              const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
-              user[field] = decryptedField;
-            } catch (error) {
-              console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
-            }
+    for (const user of users) {
+      const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+        if (user[field] && user[field].data) {
+          const isEmail = field === 'email';
+          try {
+            const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
+            user[field] = decryptedField;
+          } catch (error) {
+            console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
           }
-        });
-        await Promise.all(decryptionPromises); 
-      }));
+        }
+      });
+
+      await Promise.all(decryptionPromises); // Déchiffre tous les champs d'un utilisateur en parallèle
     }
 
     return users;
   }
-
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     let isActive = false;

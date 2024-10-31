@@ -60,23 +60,13 @@ export class UsersService {
 
   private async decryptUserFields(users: User[]): Promise<User[]> {
     const fieldsToDecrypt = [
-      'email',
-      'name',
-      'firstname',
-      'avatar',
-      'birthday',
-      'date_subscribe',
-      'date_payment',
-      'date_end_pay',
-      'license',
-      'weight',
-      'tel_num',
-      'tel_medic',
-      'tel_emergency',
+      'email', 'name', 'firstname', 'avatar', 'birthday', 'date_subscribe',
+      'date_payment', 'date_end_pay', 'license', 'weight', 'tel_num',
+      'tel_medic', 'tel_emergency'
     ];
 
     for (const user of users) {
-      for (const field of fieldsToDecrypt) {
+      const decryptionPromises = fieldsToDecrypt.map(async (field) => {
         if (user[field] && user[field].data) {
           const isEmail = field === 'email';
           try {
@@ -86,7 +76,9 @@ export class UsersService {
             console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
           }
         }
-      }
+      });
+
+      await Promise.all(decryptionPromises); // Déchiffre tous les champs d'un utilisateur en parallèle
     }
 
     return users;
@@ -196,8 +188,8 @@ export class UsersService {
 
     console.log("retourne tout les utilisateurs")
 
-    return users
-    //return this.decryptUserFields(users);
+    //return users
+    return this.decryptUserFields(users);
   }
 
   async findOne(id: string): Promise<User | undefined> {

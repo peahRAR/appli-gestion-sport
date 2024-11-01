@@ -39,7 +39,18 @@ export class EncryptionService {
         return { identifier, data };
     }
 
+    // Dans votre service de chiffrement
+    private decryptionCache = new Map<string, string>();
+
     async decryptField(encryptedObj: { identifier: string, data: string }, isEmail: boolean = false): Promise<string> {
+        // Clé unique basée sur les données chiffrées
+        const cacheKey = `${encryptedObj.identifier}:${encryptedObj.data}`;
+
+        // Vérifier le cache avant de déchiffrer
+        if (this.decryptionCache.has(cacheKey)) {
+            return this.decryptionCache.get(cacheKey);
+        }
+
         const { identifier, data } = encryptedObj;
         const secret = isEmail ? this.emailKey : this.generalKey;
         const key = crypto.scryptSync(secret, this.salt, 32);
@@ -49,9 +60,13 @@ export class EncryptionService {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decrypted = decipher.update(data, 'hex', 'utf-8');
             decrypted += decipher.final('utf-8');
+
+            // Mettre en cache le résultat
+            this.decryptionCache.set(cacheKey, decrypted);
+
             return decrypted;
         } catch (error) {
-            console.error('Decryption error:', error); // Log en cas d'erreur
+            console.error('Decryption error:', error);
             throw error;
         }
     }

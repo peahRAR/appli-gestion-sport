@@ -65,23 +65,23 @@ export class UsersService {
       'tel_medic', 'tel_emergency'
     ];
 
-    for (const user of users) {
-      const decryptionPromises = fieldsToDecrypt.map(async (field) => {
+    // Déchiffrer tous les utilisateurs en parallèle
+    return Promise.all(users.map(async (user) => {
+      for (const field of fieldsToDecrypt) {
         if (user[field] && user[field].data) {
           const isEmail = field === 'email';
           try {
-            const decryptedField = await this.encryptionService.decryptField({ identifier: user[field].identifier, data: user[field].data }, isEmail);
-            user[field] = decryptedField;
+            user[field] = await this.encryptionService.decryptField({
+              identifier: user[field].identifier,
+              data: user[field].data
+            }, isEmail);
           } catch (error) {
             console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
           }
         }
-      });
-
-      await Promise.all(decryptionPromises); // Déchiffre tous les champs d'un utilisateur en parallèle
-    }
-
-    return users;
+      }
+      return user;
+    }));
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -163,7 +163,6 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    console.log("METHOD FINDALL")
     const users = await this.userRepository.find({
       select: [
         'id',
@@ -185,10 +184,6 @@ export class UsersService {
         'role',
       ],
     });
-
-    console.log("retourne tout les utilisateurs")
-
-    //return users
     return this.decryptUserFields(users);
   }
 

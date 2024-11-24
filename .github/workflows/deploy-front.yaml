@@ -62,6 +62,7 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > private_key
         chmod 600 private_key
         rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" front-end/dist/ ubuntu@$SERVER_IP:/home/ubuntu/appli-gestion-sport/front-end/temp-dist/
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no -i private_key" front-end/public/ ubuntu@$SERVER_IP:/home/ubuntu/appli-gestion-sport/front-end/public/
         ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$SERVER_IP "
           mkdir -p /home/ubuntu/appli-gestion-sport/front-end/dist &&
           rsync -avz --delete /home/ubuntu/appli-gestion-sport/front-end/temp-dist/ /home/ubuntu/appli-gestion-sport/front-end/dist/ &&

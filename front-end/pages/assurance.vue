@@ -51,7 +51,7 @@
                     adressée à l'attention du médecin conseil de l'assureur :
                 </p>
                 <p class="mt-6 text-center text-gray-700 px-4 md:px-16">
-                    <strong>Médecin Conseil</strong><br />
+                    <strong>Médecin Conseil </strong><br />
                     WTW DGPL Dommages<br />
                     2 Rue de Gourville - 45911 Orléans Cedex 9 – France<br />
                     <a href="mailto:fr.fsgt@wtwco.com" class="text-blue-500 underline">fr.fsgt@wtwco.com</a>

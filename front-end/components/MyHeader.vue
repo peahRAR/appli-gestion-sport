@@ -1,5 +1,6 @@
 <template>
-  <div class="flex justify-between relative top-0 left-0  z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400">
+  <div
+    class="flex justify-between relative top-0 left-0  z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400">
     <nuxt-picture src="MMABsxLogo.png" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16" />
 
     <div v-if="isAuthenticated">
@@ -20,6 +21,10 @@
           </NuxtLink>
           <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/" @click="toggleMenu">
             Cours
+          </NuxtLink>
+          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/assurance"
+            @click="toggleMenu">
+            Déclarations d'assurance
           </NuxtLink>
           <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
           <div v-if="userRole === 1 || userRole === 2">

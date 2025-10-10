@@ -359,13 +359,32 @@ export default {
         this.userRole = parsedPayload.role;
       }
     },
+
+    async fetchUserLicenses(userId) {
+      const token = this.getToken();
+      const url = this.getUrl();
+      const res = await fetch(`${url}/users/${userId}/licenses`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to fetch user licenses');
+      return res.json();
+    },
+
     async checkUserAlert() {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = await this.getUserIdFromToken();
         const url = this.getUrl();
 
-        // Faire une requête pour récupérer les informations de l'utilisateur
+        // reset du message à chaque appel
+        this.alertMessage = "";
+        this.paramAlertColor1 = true;
+        this.paramAlertColor2 = true;
+
+        // 1) Récup user (pour la date de paiement)
         const response = await fetch(`${url}/users/${userId}`, {
           method: "GET",
           headers: {
@@ -373,33 +392,47 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch user data");
         const userData = await response.json();
 
-        // Vérifier les conditions nécessaires pour afficher l'alerte
-        this.noLicense = !userData.license;
-        this.paymentExpired = new Date(userData.date_end_pay) < new Date();
+        // 2) Récup licences (nouveau système)
+        const licenses = await this.fetchUserLicenses(userId);
 
-        // Définir le message d'alerte en fonction des conditions
+        // On considère “licence présente” si au moins UNE licence non-LEGACY existe
+        // et qu’on a un numéro (number_plain si dispo, sinon fallback sur number_encrypted.data)
+        const hasModernLicense = Array.isArray(licenses) && licenses.some(l =>
+          l?.federation?.code !== 'LEGACY' && (!!l?.number_plain || !!l?.number_encrypted?.data)
+        );
+
+        this.noLicense = !hasModernLicense;
+
+        // Payment expiré (on ne force pas si la date est absente/invalid)
+        let paymentExpired = false;
+        if (userData?.date_end_pay) {
+          const end = new Date(userData.date_end_pay);
+          if (!isNaN(end)) paymentExpired = end < new Date();
+        }
+        this.paymentExpired = paymentExpired;
+
+        // Messages + couleurs
         if (this.noLicense) {
           this.alertMessage += "• Aucun numéro de licence renseigné. <br>";
-          this.paramAlertColor1 = false
+          this.paramAlertColor1 = false;
         }
         if (this.paymentExpired) {
           this.alertMessage += "• Votre paiement a expiré, merci de prendre contact avec la trésorerie. <br>";
-          this.paramAlertColor2 = false
+          this.paramAlertColor2 = false;
         }
 
-        // Afficher la bulle d'alerte si nécessaire
+        // Affichage bulle si au moins une alerte
         this.showAlertBubble = this.noLicense || this.paymentExpired;
       } catch (error) {
         console.error("Error checking user alert:", error);
+        // En cas d'erreur, on n’affiche pas d’alerte “fausse”
+        this.showAlertBubble = false;
       }
     },
+
     async fetchUserDetails(userId) {
       const token = this.getToken();
       const url = this.getUrl();

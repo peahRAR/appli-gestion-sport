@@ -3,16 +3,20 @@
     <TheSkeleton v-if="loading" />
     <div v-else class="container mx-auto px-4 py-8 min-h-screen">
       <h1 class="text-3xl font-bold mb-8">Profil Utilisateur</h1>
-      <UserInfo :user="user" />
+      <UserInfo :user="user" :baseUrl="getUrl()" />
       <UserActions :isEditing="isEditing" @editProfile="editProfile" @confirmDelete="confirmDelete"
         @openModal="openModal" />
-      <EditProfileModal :isOpen="isEditing" :user="user" @cancelEdit="cancelEdit" @saveChanges="saveChanges" />
+      <EditProfileModal :isOpen="isEditing" :user="user" :baseUrl="getUrl()" @cancelEdit="cancelEdit"
+        @saveChanges="saveChanges" />
       <ChangePasswordModal :isOpen="showChangePasswordModal" @close="closeModal" @changePassword="changePassword"
         v-model:currentPassword="currentPassword" v-model:newPassword="newPassword"
         v-model:confirmNewPassword="confirmNewPassword" :regexPassword="regexPassword" />
       <ErrorModal :isOpen="showErrorModal" :message="errorMessage" @close="closeErrorModal" />
-      <ConfirmationModal :isOpen="showConfirmationModal" :message="confirmationMessage" @confirm="deleteUser"
-        @cancel="() => { showConfirmationModal = false; }" />
+      <ConfirmationModal :isOpen="showConfirmationModal" :message="confirmationMessage" @confirm="deleteUser" @cancel="
+        () => {
+          showConfirmationModal = false;
+        }
+      " />
     </div>
   </div>
 </template>
@@ -134,13 +138,19 @@ export default {
         this.user = data;
         this.loading = false;
       } catch (error) {
-        console.error("Erreur lors de la récupération des informations utilisateur", error);
+        console.error(
+          "Erreur lors de la récupération des informations utilisateur",
+          error
+        );
       }
     },
     editProfile() {
       this.isEditing = true;
     },
-    async saveChanges(updatedProfile) {
+    async saveChanges(payload) {
+      const { profile, licenses } = payload;
+
+      // 1) PATCH user (sans le champ license)
       const formData = new FormData();
       formData.append("user", JSON.stringify({
         password: null,
@@ -148,36 +158,38 @@ export default {
         firstname: null,
         date_end_pay: null,
         date_payment: null,
-        weight: updatedProfile.weight,
-        license: updatedProfile.license,
-        tel_num: updatedProfile.tel_num,
-        tel_medic: updatedProfile.tel_medic,
-        tel_emergency: updatedProfile.tel_emergency,
+        weight: profile.weight,
+        tel_num: profile.tel_num,
+        tel_medic: profile.tel_medic,
+        tel_emergency: profile.tel_emergency,
       }));
+      if (profile.avatar) formData.append("file", profile.avatar);
 
-      formData.append("file", updatedProfile.avatar); // Utiliser le blob de l'avatar
-      try {
-        const token = localStorage.getItem("accessToken");
-        const userId = this.getUserIdFromToken();
-        const url = this.getUrl();
-        if (!userId) {
-          console.error("Impossible de récupérer l'ID de l'utilisateur.");
-          return;
-        }
-        await fetch(`${url}/users/${userId}`, {
-          method: "PATCH",
-          mode: "cors",
-          body: formData,
+      const token = localStorage.getItem("accessToken");
+      const userId = this.getUserIdFromToken();
+      const url = this.getUrl();
+
+      await fetch(`${url}/users/${userId}`, {
+        method: "PATCH",
+        mode: "cors",
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // 2) Upsert licences
+      for (const lic of (licenses || [])) {
+        await fetch(`${url}/users/${userId}/licenses`, {
+          method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
           },
+          body: JSON.stringify(lic), // { federationCode, number }
         });
-        this.avatar = null;
-        document.location.href = "/profil";
-      } catch (error) {
-        this.openErrorModal();
-        this.errorMessage = "Erreur lors de la sauvegarde des modifications";
       }
+
+      // refresh simple
+      document.location.href = "/profil";
     },
 
     cancelEdit() {

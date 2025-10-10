@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 import { ListsMember } from 'src/lists-members/lists-member.entity';
 import { KeyHolder } from 'src/keyholder/entities/keyholder.entity';
+import { UserLicense } from './user-license.entity';
 
 @Entity()
 export class User {
@@ -102,8 +103,14 @@ export class User {
   @Column({ type: 'int', default: 0 })
   role: number;
 
+  @Column({ type: 'boolean', default: false })
+  approove_rules: boolean;
+
   @OneToMany(() => ListsMember, listsMember => listsMember.user, { cascade: ['remove'] })
   listsMembers: ListsMember[];
+
+  @OneToMany(() => UserLicense, lic => lic.user, { cascade: ['remove'] })
+  licenses: UserLicense[];
 
   @OneToMany(() => KeyHolder, keyHolder => keyHolder.user)
   keys: KeyHolder[];

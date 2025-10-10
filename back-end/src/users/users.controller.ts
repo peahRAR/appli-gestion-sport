@@ -118,6 +118,13 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  // Lister les fédérations
+  @Public()
+  @Get('federations')
+  listFeds() {
+    return this.usersService.listFederations();
+  }
+
   // Réinitialiser le mot de passe
   @Patch('reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
@@ -155,6 +162,11 @@ export class UsersController {
     } else {
       data = body;
     }
+
+    if (data && typeof data === 'object' && 'license' in data) {
+      delete data.license;
+    }
+
 
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
@@ -211,5 +223,20 @@ export class UsersController {
     await bucket.deleteFiles({
       prefix: folderPath,
     });
+  }
+
+  @UseGuards(UserIdOradminRoleGuard)
+  @Get(':id/licenses')
+  getLicenses(@Param('id') id: string) {
+    return this.usersService.getUserLicenses(id);
+  }
+
+  @UseGuards(UserIdOradminRoleGuard)
+  @Post(':id/licenses')
+  addOrUpdateLicense(
+    @Param('id') id: string,
+    @Body() dto: { federationCode: string; number: string },
+  ) {
+    return this.usersService.upsertUserLicense(id, dto.federationCode, dto.number);
   }
 }

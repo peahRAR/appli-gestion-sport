@@ -19,6 +19,8 @@ import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ResetPassword } from '../entities/reset-password.entity';
 import { EncryptionService } from './encryption.service';
 import { EmailService } from './email.service';
+import { UserLicense } from '../entities/user-license.entity';
+import { Federation } from '../../federations/federations.entity';
 
 
 @Injectable()
@@ -26,8 +28,16 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
     @InjectRepository(ResetPassword)
     private readonly resetPasswordRepository: Repository<ResetPassword>,
+
+    @InjectRepository(UserLicense)
+    private readonly userLicenseRepo: Repository<UserLicense>,
+
+    @InjectRepository(Federation)
+    private readonly fedRepo: Repository<Federation>,
+
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @Inject(forwardRef(() => ListsMembersService))
@@ -41,6 +51,107 @@ export class UsersService {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   }
+
+  async listFederations() {
+    return this.fedRepo.find({ order: { code: 'ASC' } });
+  }
+
+
+  async getUserLicenses(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['licenses', 'licenses.federation'],
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    // Licences modernes -> ajoute number_plain (avec try/catch)
+    const modern = await Promise.all(
+      (user.licenses ?? []).map(async (lic) => {
+        let number_plain = '';
+        try {
+          if (lic?.number_encrypted?.identifier && lic?.number_encrypted?.data) {
+            number_plain = await this.encryptionService.decryptField(lic.number_encrypted, false);
+          }
+        } catch (e) {
+          // on laisse number_plain vide si le déchiffrement échoue
+        }
+        return {
+          id: lic.id,
+          federation: {
+            id: lic.federation.id,
+            code: lic.federation.code,
+            name: lic.federation.name,
+          },
+          number_encrypted: lic.number_encrypted,
+          number_plain,                 // ← important pour le front
+          createdAt: lic.createdAt,
+          valid_from: lic.valid_from ?? null,
+          valid_to: lic.valid_to ?? null,
+          isLegacy: false,
+        };
+      })
+    );
+
+    // Fallback LEGACY (on le renvoie aussi)
+    const legacy: any[] = [];
+    if (user.license) {
+      let legacyPlain = '';
+      try {
+        legacyPlain = typeof user.license === 'string'
+          ? user.license
+          : await this.encryptionService.decryptField(user.license as any, false);
+      } catch (_) {
+        legacyPlain = '';
+      }
+      legacy.push({
+        id: 'legacy',
+        federation: { code: 'LEGACY', name: 'Licence importée (ancien champ)' },
+        number_encrypted: user.license,
+        number_plain: legacyPlain,      // ← dispo si le déchiffrement passe
+        createdAt: new Date(),
+        isLegacy: true,
+      });
+    }
+
+    return [...modern, ...legacy];
+  }
+
+
+  async upsertUserLicense(
+    userId: string,
+    federationCode: string,
+    licensePlainNumber: string,
+  ) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const federation = await this.fedRepo.findOne({ where: { code: federationCode } });
+    if (!federation) throw new BadRequestException('Fédération inconnue');
+
+    // 1) chiffrer le numéro → { identifier, data }
+    const encrypted = this.encryptionService.splitEncryptedField(
+      await this.encryptionService.createEncryptedField(licensePlainNumber) // pas d’email ici
+    );
+
+    // 2) upsert
+    let lic = await this.userLicenseRepo.findOne({
+      where: { user: { id: userId }, federation: { id: federation.id } },
+      relations: ['user', 'federation'],
+    });
+
+    if (!lic) {
+      lic = this.userLicenseRepo.create({
+        user,
+        federation,
+        number_encrypted: encrypted,
+      });
+    } else {
+      lic.number_encrypted = encrypted;
+    }
+
+    return this.userLicenseRepo.save(lic);
+  }
+
 
   private async encryptUserFields(dto: any): Promise<any> {
     const encryptedFields = {};
@@ -207,6 +318,7 @@ export class UsersService {
         'date_payment',
         'date_subscribe',
         'role',
+        'approove_rules'
       ],
     });
 
@@ -260,12 +372,16 @@ export class UsersService {
       tel_medic: updateUserDto.tel_medic || user.tel_medic,
       tel_emergency: updateUserDto.tel_emergency || user.tel_emergency,
       weight: updateUserDto.weight ? updateUserDto.weight.toString() : user.weight,
-      license: updateUserDto.license || user.license,
       date_subscribe: user.date_subscribe,
       date_payment: updateUserDto.date_payment || user.date_payment,
       date_end_pay: updateUserDto.date_end_pay || user.date_end_pay,
       avatar: updateUserDto.avatar || user.avatar,
+      approove_rules:
+        typeof updateUserDto.approove_rules === 'boolean'
+          ? updateUserDto.approove_rules
+          : user.approove_rules,
     };
+
     const encryptedFields = await this.encryptUserFields(userDto);
     Object.assign(user, encryptedFields);
     await this.userRepository.save(user);

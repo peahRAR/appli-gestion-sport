@@ -36,7 +36,12 @@
 
         <!-- Liste des clefs -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-          <key-manager :users="users" :baseUrl="getUrl() " />
+          <key-manager :users="users" :baseUrl="getUrl()" />
+        </div>
+
+        <!-- Gestion des fédérations -->
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <federation-manager :baseUrl="getUrl()" />
         </div>
 
       </div>
@@ -73,13 +78,13 @@ export default {
         { cat: "Prénom", value: "firstname" },
         { cat: "Age", value: "birthday" },
         { cat: "Poids", value: "weight" },
-        
+
       ],
       filterList: [
         { filter: "Filtrer par ...", value: "all" },
         { filter: "Hommes", value: "homme" },
         { filter: "Femmes", value: "femme" },
-        {filter: "Date de fin de paiement", value:"dateEndPay"},
+        { filter: "Date de fin de paiement", value: "dateEndPay" },
       ],
       activeColumns: ["name", "firstname"],
       defaultColumns: ["name", "firstname"],
@@ -107,7 +112,7 @@ export default {
     },
   },
   methods: {
-     preprocessUsers(users) {
+    preprocessUsers(users) {
       return users.map((user) => ({
         ...user,
         weight: user.weight ? `${user.weight} Kg` : "-",
@@ -242,15 +247,15 @@ export default {
     },
     filterUsers(isActive) {
       // Covert the respons in JSON
-          const allUsers = this.users;
-          // Filter Users
-          const users = allUsers.filter(
-            (user) => user.isActive === isActive
+      const allUsers = this.users;
+      // Filter Users
+      const users = allUsers.filter(
+        (user) => user.isActive === isActive
       );
 
       return users
     },
-    
+
     // Open Selected User Modal to show user details
     openModal(user) {
       this.selectedUser = user;

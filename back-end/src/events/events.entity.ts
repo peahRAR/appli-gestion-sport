@@ -27,6 +27,9 @@ export class Event {
   @Column({ nullable: true })
   overview: string;
 
+  @Column({ name: 'is_visible', default: true })
+  isVisible: boolean;
+
   @OneToMany(() => ListsMember, listsMember => listsMember.event, { cascade: ['remove'] })
   listsMembers: ListsMember[];
 }

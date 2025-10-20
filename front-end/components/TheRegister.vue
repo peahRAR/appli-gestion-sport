@@ -41,8 +41,29 @@
       :isValid="validerConfirmPassword" ref="confirmPassword" class="mb-4" />
 
     <div class="mb-4">
-      <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2">Date d'anniversaire</label>
+      <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2">Date de naissance</label>
       <DatePicker v-model="user.birthday" required />
+    </div>
+
+    <!-- Bloc Règlement intérieur -->
+    <div class="mb-2">
+      <h3 class="font-semibold text-gray-800 mb-2">
+        {{ rules.title }}
+      </h3>
+
+      <div class="border rounded-lg p-3 bg-gray-50 text-sm text-gray-700 max-h-64 overflow-y-auto leading-relaxed">
+        <template v-for="(section, i) in rules.sections" :key="i">
+          <div class="font-medium mb-1">{{ section.title }}</div>
+          <p class="whitespace-pre-line mb-3">
+            {{ section.content }}
+          </p>
+        </template>
+      </div>
+
+      <label for="approveRules" class="inline-flex items-center gap-2 mt-3">
+        <input id="approveRules" v-model="user.approve_rules" type="checkbox" required class="accent-blue-600" />
+        <span>J’ai lu et j’approuve le règlement intérieur</span>
+      </label>
     </div>
     <div class="mb-4">
       <label for="acceptConditions">
@@ -72,6 +93,8 @@
 </template>
 
 <script>
+import rules from '~/public/json/rules.json';
+
 export default {
   name: "TheRegister",
   data() {
@@ -83,7 +106,9 @@ export default {
         firstname: null,
         birthday: null,
         gender: null,
+        approve_rules: false,
       },
+      rules,
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
       showModal: false, // Ajouter une propriété pour contrôler l'affichage de la modal
@@ -142,20 +167,31 @@ export default {
     // SignUp method
     async signUp() {
       const url = this.getUrl();
+
       if (!this.validerConfirmPassword) {
-        this.showErrorModal();
+        this.openErrorModal();
         this.errorMessage = "Les mots de passes ne correspondent pas !";
         return;
       }
 
       try {
+        // 🟢 map front -> back
+        const payload = {
+          ...this.user,
+          approove_rules: !!this.user.approve_rules, 
+        };
+        delete payload.approve_rules; // on évite d'envoyer le doublon
+
+        // (bonus) assure un booléen pour gender si besoin
+        if (typeof payload.gender === 'string') {
+          payload.gender = payload.gender === 'true';
+        }
+
         const response = await fetch(`${url}/users`, {
           method: "POST",
           mode: "cors",
-          body: JSON.stringify(this.user),
-          headers: {
-            "Content-Type": "application/json",
-          },
+          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
         });
 
         if (!response.ok) {
@@ -163,9 +199,7 @@ export default {
           throw new Error(errorData.message || "Erreur lors de la création du compte");
         }
 
-        const data = await response.json();
-
-        // Si l'inscription réussit, vider les champs du formulaire et afficher la modal
+        await response.json();
         this.clearForm();
         this.openErrorModal();
         this.errorMessage = "Vérifiez vos emails afin de vous tenir informer de la suite";
@@ -191,6 +225,7 @@ export default {
       this.user.birthday = null;
       this.user.gender = null;
       this.confirmNewPassword = "";
+      this.user.approve_rules = false;
     },
     // Regex
     validatePassword(password) {

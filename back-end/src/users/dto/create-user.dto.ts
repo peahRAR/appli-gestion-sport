@@ -76,4 +76,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean = false;
+
+  @IsBoolean()
+  @IsOptional()
+  approove_rules?: boolean;
 }

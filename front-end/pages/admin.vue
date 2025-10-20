@@ -13,8 +13,8 @@
         </div>
         <!-- USERS List -->
         <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
-          <UserList :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns :defaultColumns
-            :columnsNames @update:users="updateUsers" @open-modal="openModal" />
+          <UserList :key="usersKey" :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns
+            :defaultColumns :columnsNames @update:users="updateUsers" @open-modal="openModal" />
         </div>
         <!-- Ajouté une alerte -->
         <div class="bg-white mx-2 rounded p-2 mb-10">
@@ -31,7 +31,7 @@
 
         <!-- Liste des cours -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-          <event-list :events="events" @edit-event="editEvent" @delete-event="deleteEvent" />
+          <event-list :events="events" @edit-event="editEvent" :base-url="getUrl()" @delete-event="deleteEvent" />
         </div>
 
         <!-- Liste des clefs -->
@@ -41,12 +41,13 @@
 
         <!-- Gestion des fédérations -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-        <federation-manager :baseUrl="getUrl()" />
+          <federation-manager :baseUrl="getUrl()" />
         </div>
 
       </div>
 
-      <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" @close="closeModalUser"
+      <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" :licenses="selectedUserLicenses"
+        :licensesLoading="licensesLoading" :licensesError="licensesError" @close="closeModalUser"
         @update-user="updateUser" @delete-user="deleteUser" @change-role="changeUserRole" />
 
       <!-- Modal For Editing Event -->
@@ -61,6 +62,7 @@ export default {
   data() {
     return {
       users: [], // User List
+      usersKey: 0, // Force re-render UserList
       selectedUser: null, // user selected
       inactiveUsers: [], // Unactivate User
       events: [], // Events List
@@ -72,11 +74,15 @@ export default {
       loading: true,
       showErrorModal: false,
       errorMessage: null,
+      selectedUserLicenses: [],
+      licensesLoading: false,
+      licensesError: '',
+      licensesCache: new Map(),
       alerts: [],
       sortByList: [
         { cat: "Nom", value: "name" },
         { cat: "Prénom", value: "firstname" },
-        { cat: "Age", value: "birthday" },
+        { cat: "Age", value: "age" },
         { cat: "Poids", value: "weight" },
 
       ],
@@ -88,7 +94,7 @@ export default {
       ],
       activeColumns: ["name", "firstname"],
       defaultColumns: ["name", "firstname"],
-      columnsNames: { name: "Nom", firstname: "Prénom", birthday: "Age", weight: "Poids" },
+      columnsNames: { name: "Nom", firstname: "Prénom", age: "Âge", weight: "Poids" },
     };
   },
   async mounted() {
@@ -112,11 +118,15 @@ export default {
     },
   },
   methods: {
+
     preprocessUsers(users) {
       return users.map((user) => ({
         ...user,
-        weight: user.weight ? `${user.weight} Kg` : "-",
-        birthday: this.calculateAge(user.birthday),
+        age: typeof user.birthday === 'number'
+          ? user.birthday
+          : this.calculateAge(user.birthday),
+        // si tu veux afficher "Kg" dans le tableau sans casser le tri, ajoute un label séparé
+        weightLabel: user.weight ? `${user.weight} Kg` : "—",
       }));
     },
     calculateAge(birthday) {
@@ -175,8 +185,7 @@ export default {
       const url = this.getUrl();
       try {
         const token = localStorage.getItem("accessToken");
-        // Make a get request at the api for events
-        const response = await useFetch(`${url}/events`, {
+        const response = await useFetch(`${url}/events/all`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -185,12 +194,19 @@ export default {
           },
         });
 
-        // Keep the elements in Events
-        this.events = response.data;
+        const arr = Array.isArray(response.data.value) ? response.data.value : [];
+        // normalise camelCase / snake_case
+        this.events = arr.map(ev => ({
+          ...ev,
+          isVisible: typeof ev.isVisible === 'boolean'
+            ? ev.isVisible
+            : (typeof ev.is_visible === 'boolean' ? ev.is_visible : true),
+        }));
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }
-    },
+    }
+    ,
     async createCourse(newCourseData) {
       try {
         newCourseData.places = newCourseData.totalPlaces;
@@ -255,11 +271,53 @@ export default {
 
       return users
     },
+    async loadLicensesFor(userId) {
+      this.licensesError = '';
+      this.licensesLoading = true;
+      try {
+        // cache
+        if (this.licensesCache.has(userId)) {
+          this.selectedUserLicenses = this.licensesCache.get(userId);
+          this.licensesLoading = false; // ✅ éviter de rester bloqué en "loading"
+          return;
+        }
+
+        const token = localStorage.getItem('accessToken');
+        const url = this.getUrl();
+        const res = await fetch(`${url}/users/${userId}/licenses`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const raw = await res.json();
+
+        // ✅ filtre legacy + numéros vides, puis tri (par code fédé ici)
+        const processed = (Array.isArray(raw) ? raw : [])
+          .filter(l => !l?.isLegacy && !!l?.number_plain)
+          .sort((a, b) => (a?.federation?.code || '').localeCompare(b?.federation?.code || ''));
+
+        this.selectedUserLicenses = processed;
+
+        // ✅ stocke une copie pour éviter les effets de bord si tu muteras selectedUserLicenses ailleurs
+        this.licensesCache.set(userId, JSON.parse(JSON.stringify(processed)));
+      } catch (e) {
+        console.error(e);
+        this.selectedUserLicenses = [];
+        this.licensesError = "Impossible de charger les licences.";
+      } finally {
+        this.licensesLoading = false;
+      }
+    },
 
     // Open Selected User Modal to show user details
     openModal(user) {
       this.selectedUser = user;
+      this.selectedUserLicenses = [];
       this.showModalSelectedUser = true;
+      if (user?.id) this.loadLicensesFor(user.id);
     },
     // Close User modal
     closeModalUser() {
@@ -294,43 +352,48 @@ export default {
       return formattedDate;
     },
     // Update user method
-    async updateUser() {
+    async updateUser(patch) {
       try {
         if (!this.selectedUser) {
           console.error("Aucun utilisateur sélectionné.");
           return;
         }
 
+        // (debug) vérifie ce que la modale envoie
+        console.log("PATCH envoyé =>", patch);
+
         const token = localStorage.getItem("accessToken");
-        const userId = this.selectedUser.id; // Keep the Selected user Id
-        this.selectedUser.password = null;
+        const userId = this.selectedUser.id;
         const url = this.getUrl();
-        // Request patch to update the user
+
         const response = await fetch(`${url}/users/${userId}`, {
           method: "PATCH",
           mode: "cors",
-          body: JSON.stringify({
-            name: this.selectedUser.name,
-            firstname: this.selectedUser.firstname,
-            date_end_pay: this.selectedUser.date_end_pay,
-            date_payment: this.selectedUser.date_payment,
-          }),
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
+          body: JSON.stringify(patch), // ✅ on envoie ce que la modale a émis
         });
 
-        // Check if the request throw a 200 status
+        if (!response.ok) {
+          const txt = await response.text();
+          throw new Error(`HTTP ${response.status} - ${txt}`);
+        }
+
+        const updated = await response.json();
+
+        // ✅ réinjecte la réponse côté UI
+        this.selectedUser = { ...this.selectedUser, ...updated };
+        this.users = this.users.map(u => (u.id === this.selectedUser.id ? { ...u, ...updated } : u));
+
         this.openErrorModal();
-        (this.errorMessage = "Mise à jour réussie :"), response;
-        this.loadAllUsers();
-        this.closeModal();
+        this.errorMessage = "Mise à jour réussie";
+        this.closeModalUser(); // ✅ c'était closeModal() (la modale d'event)
       } catch (error) {
+        console.error(error);
         this.openErrorModal();
-        (this.errorMessage = "Erreur lors de la mise à jour de l'utilisateur"),
-          error;
-        // Show error message if it not in status 200
+        this.errorMessage = "Erreur lors de la mise à jour de l'utilisateur";
       }
     },
     // Method for activate user is not yet

@@ -23,6 +23,13 @@ to-indigo-500 shadow-sm ring-1 ring-slate-200">
                 <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
 
                     <div>
+                        <dt class="text-xs font-semibold tracking-wide text-white">Date de naissance</dt>
+                        <dd class="mt-1 text-sm text-white">
+                            {{ formatBirthday(user.birthday) }}
+                        </dd>
+                    </div>
+
+                    <div>
                         <dt class="text-xs font-semibold tracking-wide text-white">Poids</dt>
                         <dd class="mt-1 text-sm text-white">
                             {{ user.weight ? (user.weight + ' Kg') : 'Non Renseigné' }}
@@ -142,6 +149,31 @@ export default {
                 this.licensesLoading = false
             }
         },
+        formatBirthday(dateStr) {
+            if (!dateStr) return 'Non renseigné';
+            const date = new Date(dateStr);
+
+            // Format JJ/MM/AAAA
+            const formatted = date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            // Calcul de l'âge
+            const age = this.calculateAge(date);
+
+            return `${formatted} (${age} ans)`;
+        },
+        calculateAge(birthDate) {
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
     },
     watch: {
         'user.id': { immediate: true, handler() { this.loadLicenses() } }

@@ -265,6 +265,7 @@ export class UsersService {
       date_subscribe: encryptedDateSubscribe,
       role: role,
       isActive: isActive,
+      approove_rules: createUserDto.approove_rules,
     });
 
     await this.emailService.sendConfirmationEmail(createUserDto.email);
@@ -343,11 +344,11 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined> {
     const user = await this.userRepository.findOne({ where: { id } });
-
     if (!user) {
       throw new Error('Aucun utilisateur trouvé.');
     }
 
+    // ————— Password flow (inchangé) —————
     if (updateUserDto.password) {
       if (!updateUserDto.currentPassword) {
         throw new BadRequestException('Le mot de passe actuel est requis pour changer le mot de passe.');
@@ -363,30 +364,50 @@ export class UsersService {
       user.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    const userDto = {
-      email: updateUserDto.email || user.email,
-      name: updateUserDto.name || user.name,
-      firstname: updateUserDto.firstname || user.firstname,
-      birthday: updateUserDto.birthday ? updateUserDto.birthday.toISOString() : user.birthday,
-      tel_num: updateUserDto.tel_num || user.tel_num,
-      tel_medic: updateUserDto.tel_medic || user.tel_medic,
-      tel_emergency: updateUserDto.tel_emergency || user.tel_emergency,
-      weight: updateUserDto.weight ? updateUserDto.weight.toString() : user.weight,
-      date_subscribe: user.date_subscribe,
-      date_payment: updateUserDto.date_payment || user.date_payment,
-      date_end_pay: updateUserDto.date_end_pay || user.date_end_pay,
-      avatar: updateUserDto.avatar || user.avatar,
-      approove_rules:
-        typeof updateUserDto.approove_rules === 'boolean'
-          ? updateUserDto.approove_rules
-          : user.approove_rules,
+    // ————— Helpers —————
+    const has = (k: keyof UpdateUserDto) =>
+      Object.prototype.hasOwnProperty.call(updateUserDto, k);
+
+    // Accepte string/Date/null/undefined → normalise en ISO, ou laisse tel quel
+    const toIso = (v: string | Date | null | undefined) => {
+      if (v === undefined) return undefined; // clé non envoyée → ne pas toucher
+      if (v === null) return null;           // explicitement null → effacer
+      const d = new Date(v as any);
+      if (isNaN(+d)) throw new BadRequestException('Date invalide');
+      return d.toISOString();
     };
 
+    // ————— Build des champs à mettre à jour —————
+    const userDto = {
+      // Texte (présence de clé plutôt que ||)
+      email: has('email') ? updateUserDto.email : user.email,
+      name: has('name') ? updateUserDto.name : user.name,
+      firstname: has('firstname') ? updateUserDto.firstname : user.firstname,
+
+      // Dates normalisées
+      birthday: has('birthday') ? toIso(updateUserDto.birthday as any) : user.birthday,
+      date_payment: has('date_payment') ? toIso(updateUserDto.date_payment as any) : user.date_payment,
+      date_end_pay: has('date_end_pay') ? toIso(updateUserDto.date_end_pay as any) : user.date_end_pay,
+
+      // Autres
+      tel_num: has('tel_num') ? updateUserDto.tel_num : user.tel_num,
+      tel_medic: has('tel_medic') ? updateUserDto.tel_medic : user.tel_medic,
+      tel_emergency: has('tel_emergency') ? updateUserDto.tel_emergency : user.tel_emergency,
+      weight: has('weight') ? (updateUserDto.weight as any) : user.weight,
+      avatar: has('avatar') ? updateUserDto.avatar : user.avatar,
+      approove_rules: has('approove_rules') ? updateUserDto.approove_rules : user.approove_rules,
+
+      // Non modifié par ce endpoint
+      date_subscribe: user.date_subscribe,
+    };
+
+    // Chiffrement + sauvegarde
     const encryptedFields = await this.encryptUserFields(userDto);
     Object.assign(user, encryptedFields);
     await this.userRepository.save(user);
     return user;
   }
+
 
   async remove(id: string): Promise<void> {
     const user = await this.findOne(id);

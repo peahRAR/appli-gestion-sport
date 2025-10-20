@@ -67,14 +67,16 @@ export default {
   },
   computed: {
     formattedEvents() {
-      return this.events.map(event => ({
-        ...event,
-        formattedDate: this.formatDate(event.date_event),
-        formattedTime: this.formatTime(event.date_event),
-        formattedEndTime: this.calculateEndTime(event.date_event, event.duration),
-        formattedOverview: this.formatOverview(event.overview),
-        formattedDuration: this.formatDuration(event.duration)
-      }));
+      return this.events
+        .filter((ev) => (typeof ev?.is_visible === 'boolean' ? ev.is_visible : (ev?.isVisible ?? true)) === true)
+        .map(event => ({
+          ...event,
+          formattedDate: this.formatDate(event.date_event),
+          formattedTime: this.formatTime(event.date_event),
+          formattedEndTime: this.calculateEndTime(event.date_event, event.duration),
+          formattedOverview: this.formatOverview(event.overview),
+          formattedDuration: this.formatDuration(event.duration),
+        }));
     },
     alertColor() {
       const incorrectParams = [this.paramAlertColor1, this.paramAlertColor2].filter(param => !param).length;
@@ -121,10 +123,13 @@ export default {
     async initialization() {
       const userId = await this.getUserIdFromToken();
       const eventsData = await this.loadEvents();
+
       if (eventsData && Array.isArray(eventsData._rawValue)) {
-        const eventsArray = eventsData._rawValue;
+        // ✅ Ceinture et bretelles : on garde uniquement les visibles
+        const visibleOnly = eventsData._rawValue.filter(ev => (ev?.is_visible ?? true) === true);
+
         const eventsWithParticipation = await Promise.all(
-          eventsArray.map(async (event) => {
+          visibleOnly.map(async (event) => {
             if (event && event.id) {
               const isParticipating = await this.checkParticipation(event.id, userId);
               return { ...event, isParticipating };
@@ -134,12 +139,14 @@ export default {
             }
           })
         );
+
         this.events = eventsWithParticipation.filter(event => event !== null);
         this.loading = false;
       } else {
         console.error("eventsData n'est pas un objet avec la propriété _rawValue qui est un tableau :", eventsData);
       }
     },
+
     async loadEvents() {
       try {
         const token = this.getToken();

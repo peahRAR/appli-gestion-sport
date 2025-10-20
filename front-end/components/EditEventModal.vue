@@ -39,6 +39,24 @@
                     class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
             </div>
 
+            <!-- Visibilité  -->
+            <div class="flex items-center gap-3 mb-2">
+                <span class="font-semibold">Visibilité :</span>
+                <label class="relative inline-flex items-center cursor-pointer select-none">
+                    <input type="checkbox" v-model="event.isVisible" class="sr-only peer"
+                        aria-label="Basculer la visibilité du cours" />
+                    <div
+                        class="w-12 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-green-500">
+                    </div>
+                    <div
+                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-6">
+                    </div>
+                </label>
+                <span :class="event.isVisible ? 'text-green-600' : 'text-gray-500'" class="text-sm font-medium">
+                    {{ event.isVisible ? 'Visible' : 'Masqué' }}
+                </span>
+            </div>
+
             <!-- Save -->
             <button type="submit"
                 class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">

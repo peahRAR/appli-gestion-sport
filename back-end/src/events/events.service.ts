@@ -32,78 +32,86 @@ export class EventsService {
 
     const newEvent = this.eventRepository.create({
       ...createEventDto,
-      duration: durationInterval, // Enregistrer la durée en tant qu'intervalle
+      duration: durationInterval,
+      isVisible: createEventDto.isVisible ?? true
     });
 
     await this.eventRepository.save(newEvent);
     return newEvent;
   }
 
-  async findAll(): Promise<Event[]> {
-    const options: FindManyOptions<Event> = {
-      order: {
-        date_event: 'ASC',
-      },
-    };
+  async findAll(options?: { visible?: boolean }): Promise<Event[]> {
+    const where: any = {};
+    if (options?.visible === true || options?.visible === false) {
+      where.isVisible = options.visible;
+    }
 
-    return this.eventRepository.find(options);
+    return this.eventRepository.find({
+      where,
+      order: { date_event: 'ASC' },
+    });
+  }
+
+  async findAllVisible(): Promise<Event[]> {
+    return this.eventRepository.find({ where: { isVisible: true }, order: { date_event: 'ASC' } });
   }
 
   async findOne(id: number): Promise<Event | undefined> {
     return this.eventRepository.findOne({ where: { id } });
   }
 
-  async update(
-    id: number,
-    updateEventDto: UpdateEventDto,
-  ): Promise<Event | undefined> {
-    // Créer un objet vide qui sera compatible avec l'entité Event
+  // events.service.ts (extrait)
+  async update(id: number, updateEventDto: UpdateEventDto): Promise<Event | undefined> {
     const updatedEvent: DeepPartial<Event> = {};
 
-    // Copier manuellement chaque propriété du DTO dans l'objet updatedEvent
-    if (updateEventDto.date_event) {
-      updatedEvent.date_event = updateEventDto.date_event;
-    }
-    if (updateEventDto.places) {
-      updatedEvent.places = updateEventDto.places;
-    }
-    if (updateEventDto.name_event) {
-      updatedEvent.name_event = updateEventDto.name_event;
-    }
-    if (updateEventDto.coach) {
-      updatedEvent.coach = updateEventDto.coach;
-    }
-    if (updateEventDto.overview) {
-      updatedEvent.overview = updateEventDto.overview;
-    }
+    if (updateEventDto.date_event) updatedEvent.date_event = updateEventDto.date_event;
+    if (updateEventDto.places) updatedEvent.places = updateEventDto.places;
+    if (updateEventDto.name_event) updatedEvent.name_event = updateEventDto.name_event;
+    if (updateEventDto.coach) updatedEvent.coach = updateEventDto.coach;
+    if (updateEventDto.overview) updatedEvent.overview = updateEventDto.overview;
 
-    // Vérifier si la durée est fournie et contient des heures ou des minutes
-    if (updateEventDto.duration && (updateEventDto.duration.hours || updateEventDto.duration.minutes)) {
-      const hours = updateEventDto.duration.hours || 0; // Prendre 0 si non défini
-      const minutes = updateEventDto.duration.minutes || 0; // Prendre 0 si non défini
+    // --- visibilité: accepte camelCase et snake_case
+    const anyDto = updateEventDto as any;
+    if (typeof anyDto.isVisible === 'boolean') updatedEvent.isVisible = anyDto.isVisible;
+    else if (typeof anyDto.is_visible === 'boolean') updatedEvent.isVisible = anyDto.is_visible;
 
-      // Convertir tout en minutes
-      const totalDurationInMinutes = (hours * 60) + minutes;
-
-      // Vérifier si la durée totale est valide
-      if (isNaN(totalDurationInMinutes) || totalDurationInMinutes <= 0) {
-        throw new Error('Invalid duration format');
+    // --- durée: rendre le parsing tolérant
+    if (anyDto.duration !== undefined) {
+      if (typeof anyDto.duration === 'string') {
+        const s = anyDto.duration.trim();
+        if (s === '') {
+          // ignore
+        } else if (/^PT(\d+H(\d+M)?)|^PT(\d+M)$/i.test(s)) {
+          updatedEvent.duration = s.toUpperCase();
+        } else {
+          const minutes = Number(s);
+          if (Number.isFinite(minutes) && minutes > 0) {
+            updatedEvent.duration = `PT${minutes}M`;
+          } else {
+            this.logger.warn(`Duration ignorée (format invalide): "${s}" pour event #${id}`);
+          }
+        }
+      } else if (typeof anyDto.duration === 'object' && anyDto.duration !== null) {
+        const hours = Number(anyDto.duration.hours || 0);
+        const minutes = Number(anyDto.duration.minutes || 0);
+        const total = hours * 60 + minutes;
+        if (Number.isFinite(total) && total > 0) {
+          updatedEvent.duration = `PT${total}M`;
+        } else {
+          this.logger.warn(`Duration ignorée (objet invalide) pour event #${id}`);
+        }
       }
-
-      // Convertir la durée en intervalle PostgreSQL (ISO 8601 format)
-      const durationInterval = `PT${totalDurationInMinutes}M`;
-
-      // Mettre à jour la durée avec le format string attendu
-      updatedEvent.duration = durationInterval;
     }
 
-    // Mettre à jour l'événement dans la base de données
     await this.eventRepository.update(id, updatedEvent);
-
     return this.eventRepository.findOne({ where: { id } });
   }
 
 
+  async updateVisibility(id: number, visible: boolean): Promise<Event | undefined> {
+    await this.eventRepository.update(id, { isVisible: visible });
+    return this.findOne(id);
+  }
 
   async remove(id: number): Promise<void> {
     const event = await this.findOne(id);
@@ -114,43 +122,43 @@ export class EventsService {
   }
 
   async deleteExpiredEvents(): Promise<void> {
-  this.logger.debug('Début de la suppression des événements expirés');
+    this.logger.debug('Début de la suppression des événements expirés');
 
     // Date d'expiration = aujourd'hui - 4 heures
     const expirationDate = new Date();
     expirationDate.setHours(expirationDate.getHours() - 4);
     this.logger.debug(`Date d'expiration calculée : ${expirationDate}`);
 
-  // Récupérer les IDs des événements expirés
-  const expiredEvents = await this.eventRepository
-    .createQueryBuilder('event')
-    .select('event.id')
-    .where('event.date_event < :expirationDate', { expirationDate })
-    .getMany();
+    // Récupérer les IDs des événements expirés
+    const expiredEvents = await this.eventRepository
+      .createQueryBuilder('event')
+      .select('event.id')
+      .where('event.date_event < :expirationDate', { expirationDate })
+      .getMany();
 
-  this.logger.debug(`Événements expirés récupérés : ${JSON.stringify(expiredEvents)}`);
+    this.logger.debug(`Événements expirés récupérés : ${JSON.stringify(expiredEvents)}`);
 
-  // Supprimer les entrées correspondantes dans la table ListsMembers
-  for (const event of expiredEvents) {
-    this.logger.debug(`Traitement de l'événement : ${event.id}`);
-    const lists = await this.listsMembersService.findAllByIdEvent(event.id);
-    this.logger.debug(`Membres trouvés pour l'événement : ${JSON.stringify(lists)}`);
+    // Supprimer les entrées correspondantes dans la table ListsMembers
+    for (const event of expiredEvents) {
+      this.logger.debug(`Traitement de l'événement : ${event.id}`);
+      const lists = await this.listsMembersService.findAllByIdEvent(event.id);
+      this.logger.debug(`Membres trouvés pour l'événement : ${JSON.stringify(lists)}`);
 
-    for (const element of lists) {
-      this.logger.debug(`Suppression du membre : eventId=${element.eventId}, userId=${element.userId}`);
-      await this.listsMembersService.remove(element.eventId, element.userId);
+      for (const element of lists) {
+        this.logger.debug(`Suppression du membre : eventId=${element.eventId}, userId=${element.userId}`);
+        await this.listsMembersService.remove(element.eventId, element.userId);
+      }
     }
+
+    // Supprimer les événements expirés de la table Events
+    this.logger.debug('Suppression des événements de la table Events');
+    await this.eventRepository
+      .createQueryBuilder()
+      .delete()
+      .where('date_event < :expirationDate', { expirationDate })
+      .execute();
+
+    this.logger.debug('Fin de la suppression des événements expirés');
   }
-
-  // Supprimer les événements expirés de la table Events
-  this.logger.debug('Suppression des événements de la table Events');
-  await this.eventRepository
-    .createQueryBuilder()
-    .delete()
-    .where('date_event < :expirationDate', { expirationDate })
-    .execute();
-
-  this.logger.debug('Fin de la suppression des événements expirés');
-}
 
 }

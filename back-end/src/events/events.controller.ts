@@ -17,7 +17,7 @@ export class EventsController {
     return this.eventsService.create(createEventDto);
   }
 
-  // Public — ne renvoie que les visibles par défaut
+  // Public, ne renvoie que les visibles par défaut
   @Get()
   findAllPublic() {
     return this.eventsService.findAllVisible();

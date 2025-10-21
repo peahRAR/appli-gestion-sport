@@ -29,7 +29,6 @@ export class EventsController {
   findAllAdmin(
     @Query('visible', new ParseBoolPipe({ optional: true })) visible?: boolean,
   ) {
-    // visible === undefined -> tout, true -> visibles, false -> non visibles
     return this.eventsService.findAll({ visible });
   }
 

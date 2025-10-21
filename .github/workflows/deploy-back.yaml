@@ -78,14 +78,24 @@ jobs:
           rm production.tar.gz
           
           # Vérification que main.js existe
-          if [ ! -f "dist/main.js" ]; then
-            echo "❌ ERREUR: dist/main.js n'existe pas!"
+          if [ -f "dist/src/main.js" ]; then
+            echo "✅ dist/src/main.js trouvé"
+          elif [ -f "dist/main.js" ]; then
+            echo "✅ dist/main.js trouvé"
+          else
+            echo "❌ ERREUR: main.js n'existe ni dans dist/ ni dans dist/src/!"
+            echo "Contenu de dist/:"
             ls -la dist/
+            echo "Contenu de dist/src/:"
+            ls -la dist/src/ 2>/dev/null || echo "dist/src/ n'existe pas"
             exit 1
           fi
           
           echo "✅ Fichiers déployés correctement"
+          echo "Contenu de dist/:"
           ls -la dist/ | head -10
+          echo "Contenu de dist/src/:"
+          ls -la dist/src/ | head -10 2>/dev/null || echo "Pas de dossier src"
           
           # Configuration et reload PM2
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json

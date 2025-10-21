@@ -2,8 +2,7 @@ name: Deploy Back-End
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - 'back-end/**'
 
@@ -12,20 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
         node-version: '20'
 
     - name: Install Dependencies
       working-directory: back-end
-      run: npm install
+      run: npm ci
 
     - name: Build
       working-directory: back-end
-      run: npm run build
+      env:
+        GIT_COMMIT: ${{ github.sha }}
+        BUILT_AT: ${{ github.run_id }}
+      run: |
+        npm run build
+        # (facultatif) écrire un petit fichier de version dans le build
+        echo "{\"commit\":\"${GIT_COMMIT}\",\"builtAt\":\"$(date -Is)\"}" > dist/version.json
 
     - name: Archive Production Build
       run: tar -czf production.tar.gz -C back-end dist templates
@@ -37,7 +42,7 @@ jobs:
       run: ls -l back-end/ecosystem.config.js
 
     - name: Copy Production Build to the Server
-      uses: appleboy/scp-action@master
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
@@ -47,7 +52,7 @@ jobs:
         target: "/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/"
 
     - name: Copy Ecosystem Config to the Server
-      uses: appleboy/scp-action@master
+      uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
@@ -57,16 +62,24 @@ jobs:
         target: "/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/"
 
     - name: Deploy with PM2
-      uses: appleboy/ssh-action@master
+      uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.SERVER_IP }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
+          set -euo pipefail
           cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
+          # 🔥 supprime l’ancien build pour éviter les résidus
+          rm -rf dist
           tar -xzf production.tar.gz
           rm production.tar.gz
+          # (optionnel) migrations auto si tu veux
+          # export NODE_ENV=production
+          # npx typeorm-ts-node-commonjs migration:run -d dist/data-source.js || true
+          # ou si tu as un script npm:
+          # npm run migration:run
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
           pm2 reload /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
-
+          pm2 describe all

@@ -30,17 +30,14 @@ jobs:
         BUILT_AT: ${{ github.run_id }}
       run: |
         npm run build
-        # (facultatif) écrire un petit fichier de version dans le build
         echo "{\"commit\":\"${GIT_COMMIT}\",\"builtAt\":\"$(date -Is)\"}" > dist/version.json
 
     - name: Archive Production Build
-      run: tar -czf production.tar.gz -C back-end dist templates
+      working-directory: back-end
+      run: tar -czf ../production.tar.gz dist templates
 
     - name: Verify Archive Content
-      run: tar -tzf production.tar.gz
-
-    - name: Check ecosystem.config.js existence
-      run: ls -l back-end/ecosystem.config.js
+      run: tar -tzf production.tar.gz | head -20
 
     - name: Copy Production Build to the Server
       uses: appleboy/scp-action@v0.1.7
@@ -72,10 +69,25 @@ jobs:
         script: |
           set -euo pipefail
           cd /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end
-          # 🔥 supprime l’ancien build pour éviter les résidus
-          rm -rf dist
+          
+          # Supprime l'ancien build
+          rm -rf dist templates
+          
+          # Extrait la nouvelle version
           tar -xzf production.tar.gz
           rm production.tar.gz
+          
+          # Vérification que main.js existe
+          if [ ! -f "dist/main.js" ]; then
+            echo "❌ ERREUR: dist/main.js n'existe pas!"
+            ls -la dist/
+            exit 1
+          fi
+          
+          echo "✅ Fichiers déployés correctement"
+          ls -la dist/ | head -10
+          
+          # Configuration et reload PM2
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
           pm2 reload /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
           pm2 ls

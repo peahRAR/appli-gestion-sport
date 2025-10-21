@@ -128,12 +128,12 @@ export class UsersService {
     const federation = await this.fedRepo.findOne({ where: { code: federationCode } });
     if (!federation) throw new BadRequestException('Fédération inconnue');
 
-    // 1) chiffrer le numéro → { identifier, data }
+    // Chiffrer le numéro → { identifier, data }
     const encrypted = this.encryptionService.splitEncryptedField(
       await this.encryptionService.createEncryptedField(licensePlainNumber) // pas d’email ici
     );
 
-    // 2) upsert
+
     let lic = await this.userLicenseRepo.findOne({
       where: { user: { id: userId }, federation: { id: federation.id } },
       relations: ['user', 'federation'],

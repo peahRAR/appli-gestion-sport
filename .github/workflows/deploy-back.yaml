@@ -76,11 +76,6 @@ jobs:
           rm -rf dist
           tar -xzf production.tar.gz
           rm production.tar.gz
-          # (optionnel) migrations auto si tu veux
-          # export NODE_ENV=production
-          # npx typeorm-ts-node-commonjs migration:run -d dist/data-source.js || true
-          # ou si tu as un script npm:
-          # npm run migration:run
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
           pm2 reload /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
-          pm2 describe all
+          pm2 ls

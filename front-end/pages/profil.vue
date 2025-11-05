@@ -150,35 +150,62 @@ export default {
     async saveChanges(payload) {
       const { profile, licenses } = payload;
 
-      // 1) PATCH user (sans le champ license)
-      const formData = new FormData();
-      formData.append("user", JSON.stringify({
-        password: null,
-        name: null,
-        firstname: null,
-        date_end_pay: null,
-        date_payment: null,
+      // helpers locaux
+      const isBlank = v => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
+      const clean = obj => Object.fromEntries(Object.entries(obj).filter(([_, v]) => !isBlank(v)));
+      const norm = x => (typeof x === 'string' ? x.trim() : x);
+      const buildPatch = (original, updates) => {
+        const c = clean(updates);
+        return Object.fromEntries(Object.entries(c).filter(([k, v]) => norm(v) !== norm(original?.[k])));
+      };
+
+      // 1) Construire un PATCH minimal depuis le profil (ne JAMAIS hériter de this.user tel quel)
+      const patch = buildPatch(this.user, {
         weight: profile.weight,
         tel_num: profile.tel_num,
         tel_medic: profile.tel_medic,
         tel_emergency: profile.tel_emergency,
-      }));
-      if (profile.avatar) formData.append("file", profile.avatar);
+      });
 
       const token = localStorage.getItem("accessToken");
       const userId = this.getUserIdFromToken();
       const url = this.getUrl();
 
-      await fetch(`${url}/users/${userId}`, {
-        method: "PATCH",
-        mode: "cors",
-        body: formData,
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // 2) PATCH user
+      // - Si avatar présent → multipart avec { user: JSON(patch), file: avatar }
+      // - Sinon → JSON simple (patch)
+      if ((patch && Object.keys(patch).length) || profile.avatar instanceof Blob) {
+        let res;
+        if (profile.avatar instanceof Blob) {
+          const fd = new FormData();
+          fd.append("user", JSON.stringify(patch)); // ⚠️ uniquement les clés du patch
+          fd.append("file", profile.avatar);
+          res = await fetch(`${url}/users/${userId}`, {
+            method: "PATCH",
+            mode: "cors",
+            headers: { Authorization: `Bearer ${token}` }, // pas de Content-Type ici
+            body: fd,
+          });
+        } else {
+          res = await fetch(`${url}/users/${userId}`, {
+            method: "PATCH",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(patch),
+          });
+        }
+        if (!res.ok) {
+          const txt = await res.text().catch(() => '');
+          throw new Error(`Échec update profil: ${res.status} ${txt}`);
+        }
+      }
 
-      // 2) Upsert licences
+      // 3) Upsert licences (seulement celles modifiées et non vides — déjà filtrées côté enfant)
       for (const lic of (licenses || [])) {
-        await fetch(`${url}/users/${userId}/licenses`, {
+        const r = await fetch(`${url}/users/${userId}/licenses`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -186,11 +213,16 @@ export default {
           },
           body: JSON.stringify(lic), // { federationCode, number }
         });
+        if (!r.ok) {
+          const txt = await r.text().catch(() => '');
+          throw new Error(`Échec licences: ${r.status} ${txt}`);
+        }
       }
 
-      // refresh simple
+      // 4) refresh
       document.location.href = "/profil";
     },
+
 
     cancelEdit() {
       this.isEditing = false;

@@ -119,17 +119,17 @@
 export default {
   name: 'EditProfileModal',
   props: {
-    isOpen: { type: Boolean, default: false },
-    user: { type: Object, required: true },
-    baseUrl: { type: String, required: true },
+    isOpen: Boolean,
+    user: Object,
+    baseUrl: { type: String, required: true }, // <- ajoute ça depuis le parent
   },
   data() {
     return {
       // Profil
-      editedWeight: this.user.weight ?? '',
-      editedTelNum: this.user.tel_num ?? '',
-      editedTelMedic: this.user.tel_medic ?? '',
-      editedTelEmergency: this.user.tel_emergency ?? '',
+      editedWeight: this.user.weight,
+      editedTelNum: this.user.tel_num,
+      editedTelMedic: this.user.tel_medic,
+      editedTelEmergency: this.user.tel_emergency,
       avatarBlob: null,
 
       // Licences
@@ -152,11 +152,11 @@ export default {
       immediate: true,
       async handler(v) {
         if (v) {
-          // réhydrate les champs depuis l'utilisateur courant
-          this.editedWeight = this.user?.weight ?? '';
-          this.editedTelNum = this.user?.tel_num ?? '';
-          this.editedTelMedic = this.user?.tel_medic ?? '';
-          this.editedTelEmergency = this.user?.tel_emergency ?? '';
+          // re-hydrate champs profil
+          this.editedWeight = this.user.weight;
+          this.editedTelNum = this.user.tel_num;
+          this.editedTelMedic = this.user.tel_medic;
+          this.editedTelEmergency = this.user.tel_emergency;
           this.avatarBlob = null;
 
           await this.loadLicensesData();
@@ -165,47 +165,16 @@ export default {
     }
   },
   methods: {
-    // -------------- Utils payload --------------
-    isBlank(v) {
-      return v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
-    },
-    cleanObject(obj) {
-      return Object.fromEntries(
-        Object.entries(obj).filter(([_, v]) => !this.isBlank(v))
-      );
-    },
-    buildPatch(original, updates) {
-      // Construit un PATCH minimal : pas de champs vides, pas de champs identiques
-      const cleaned = this.cleanObject(updates);
-      return Object.fromEntries(
-        Object.entries(cleaned).filter(([k, v]) => {
-          const orig = original?.[k];
-          // Comparaison tolérante : on trim les strings
-          const norm = x => (typeof x === 'string' ? x.trim() : x);
-          return norm(v) !== norm(orig);
-        })
-      );
-    },
-
-    // -------------- Form helpers --------------
     updateField(field, value) {
-      // normalisation rapide : trim sur string, conversion number si besoin
-      let val = value;
-      if (typeof val === 'string') val = val.replace(/\s+/g, ' ').trim();
-      if (field === 'editedWeight' && val !== '' && !Number.isNaN(Number(val))) {
-        val = Number(val);
-      }
-      this[field] = val;
-      this.$emit(`update:${field}`, val);
+      this[field] = value;
+      this.$emit(`update:${field}`, value);
     },
     updateAvatar(blob) {
-      this.avatarBlob = blob instanceof Blob ? blob : null;
+      this.avatarBlob = blob;
     },
     token() {
       return localStorage.getItem('accessToken');
     },
-
-    // -------------- Licences --------------
     async loadLicensesData() {
       this.licensesLoading = true;
       this.licensesError = null;
@@ -229,14 +198,14 @@ export default {
         this.federations = await fedsRes.json();
         this.licenses = await licRes.json();
 
-        // Build map code -> { number, original, touched }
+        // Build map code -> {number, original, touched}
         const map = {};
         for (const f of this.federations) {
           if (f.code === 'LEGACY') continue;
           const found = this.licenses.find(l => l?.federation?.code === f.code);
           map[f.code] = {
-            number: (found?.number_plain ?? '').toString(),
-            original: (found?.number_plain ?? '').toString(),
+            number: found?.number_plain || '',
+            original: found?.number_plain || '',
             touched: false,
           };
         }
@@ -250,47 +219,26 @@ export default {
     markTouched(code) {
       if (this.licenseMap[code]) this.licenseMap[code].touched = true;
     },
-
-    // -------------- Submit --------------
     saveChanges() {
-      // 1) Prépare les updates profil depuis les champs édités (SANS héritage de this.user)
-      const profileRaw = {
-        weight: this.editedWeight,         // number | ''
-        tel_num: this.editedTelNum,        // string | ''
-        tel_medic: this.editedTelMedic,    // string | ''
-        tel_emergency: this.editedTelEmergency, // string | ''
+      // payload profil (ancien PATCH user)
+      const profile = {
+        avatar: this.avatarBlob, // blob
+        weight: this.editedWeight,
+        tel_num: this.editedTelNum,
+        tel_medic: this.editedTelMedic,
+        tel_emergency: this.editedTelEmergency,
       };
 
-      // 2) Construit le PATCH minimal (ne contient QUE les champs modifiés et non vides)
-      const userPatch = this.buildPatch(this.user, profileRaw);
-
-      // 3) Avatar : on ne l’ajoute QUE s’il est présent (sinon on ne met rien)
-      // On ne met PAS avatar=null pour éviter tout écrasement côté back.
-      if (this.avatarBlob instanceof Blob) {
-        // On passe l’avatar à part pour que le parent puisse faire un FormData
-        userPatch.__hasAvatar = true; // flag simple pour aider le parent
-      }
-
-      // 4) Licences : uniquement les modifiées ET non vides
+      // payload licences (seulement les modifiées ET non vides)
       const licenses = Object.entries(this.licenseMap)
-        .filter(([, v]) => v.touched && v.number && v.number.trim() !== '')
+        .filter(([, v]) => v.touched && v.number.trim() !== '')
         .map(([federationCode, v]) => ({ federationCode, number: v.number.trim() }));
 
-      // 5) Émission vers le parent
-      // - profile => patch minimal prêt pour un PATCH JSON
-      // - avatar  => blob optionnel, parent décidera d’utiliser FormData si présent
-      // - licenses => tableau épuré
-      this.$emit('saveChanges', {
-        profile: userPatch,
-        avatar: this.avatarBlob ?? null,
-        licenses
-      });
+      this.$emit('saveChanges', { profile, licenses });
     },
-
     cancelEdit() {
       this.$emit('cancelEdit');
     }
   }
 };
 </script>
-

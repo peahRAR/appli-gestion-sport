@@ -220,7 +220,8 @@ export default {
       }
 
       // 4) refresh
-      document.location.href = "/profil";
+      await this.fetchUserData();
+      this.isEditing = false;
     },
 
 

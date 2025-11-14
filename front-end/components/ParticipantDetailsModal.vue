@@ -33,7 +33,7 @@
                         {{ userDetails.weight || "--" }} Kg
                     </strong>
                 </li>
-                <li>License : <strong>
+                <li>Licence : <strong>
                         {{ userDetails.license || "Non Renseigné" }}
                     </strong>
                 </li>

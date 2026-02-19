@@ -438,7 +438,7 @@ onMounted(async () => {
 
                     <!-- ⚠️ md seulement, pas sm -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div class="space-y-1 min-w-0 overflow-hidden">
+                        <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Date</label>
                             <input v-model="form.startDate" type="date"
                                 class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
@@ -554,5 +554,7 @@ input[type="time"] {
     -webkit-appearance: none;
     appearance: none;
     display: block;
+    height: 42px;
+    line-height: normal;
 }
 </style>

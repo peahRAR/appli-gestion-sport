@@ -342,8 +342,18 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
-input[type="date"]::-webkit-calendar-picker-indicator {
+<style scoped>
+input[type="date"],
+input[type="time"] {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    height: 42px;
+    line-height: normal;
     filter: brightness(0) invert(1);
 }
 </style>

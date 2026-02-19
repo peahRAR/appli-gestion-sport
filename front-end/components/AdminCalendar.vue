@@ -368,7 +368,7 @@ onMounted(async () => {
         </div>
 
         <!-- CREATE (admin only) -->
-        <section v-if="canManage" class="border rounded-xl p-4 md:p-6 space-y-4">
+        <section v-if="canManage" class="border rounded-xl p-4 md:p-6 space-y-4 overflow-x-hidden">
             <h3 class="text-lg font-bold">Créer un événement</h3>
 
             <div class="grid gap-4 md:grid-cols-2">

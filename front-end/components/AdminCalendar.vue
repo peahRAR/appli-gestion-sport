@@ -438,7 +438,7 @@ onMounted(async () => {
 
                     <!-- ⚠️ md seulement, pas sm -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div class="space-y-1 min-w-0">
+                        <div class="space-y-1 min-w-0 overflow-hidden">
                             <label class="text-xs opacity-60">Date</label>
                             <input v-model="form.startDate" type="date"
                                 class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
@@ -460,12 +460,14 @@ onMounted(async () => {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Date (optionnel)</label>
-                            <input v-model="form.endDate" type="date" class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                            <input v-model="form.endDate" type="date"
+                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
 
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Heure (optionnel)</label>
-                            <input v-model="form.endTime" type="time" class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                            <input v-model="form.endTime" type="time"
+                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
                     </div>
                 </div>
@@ -546,6 +548,11 @@ onMounted(async () => {
 input[type="date"],
 input[type="time"] {
     max-width: 100%;
+    min-width: 0;
+    width: 100%;
     box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
 }
 </style>

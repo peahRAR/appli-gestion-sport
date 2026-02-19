@@ -19,6 +19,9 @@
             @click="toggleMenu">
             Profil
           </NuxtLink>
+          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/calendar" @click="toggleMenu">
+            Calendrier
+          </NuxtLink>
           <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/" @click="toggleMenu">
             Cours
           </NuxtLink>

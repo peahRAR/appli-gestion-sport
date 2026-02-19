@@ -1,12 +1,14 @@
 import * as crypto from 'crypto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class EncryptionService {
     private salt: string;
     private generalKey: string;
     private emailKey: string;
+    private readonly logger = new Logger(UsersService.name);
 
     constructor(private readonly configService: ConfigService) {
         this.initialize();
@@ -20,19 +22,22 @@ export class EncryptionService {
 
     async createEncryptedField(data: string, isEmail: boolean = false): Promise<string> {
         const secret = isEmail ? this.emailKey : this.generalKey;
-        const key = crypto.scryptSync(secret, this.salt, 32);
-        const iv = isEmail ? Buffer.from('unIVfixe16octets') : crypto.randomBytes(16);
 
-        try {
-            const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-            let encrypted = cipher.update(data, 'utf-8', 'hex');
-            encrypted += cipher.final('hex');
-            const result = iv.toString('hex') + ':' + encrypted;
-            return result;
-        } catch (error) {
-            throw error;
-        }
+        // crypto.scryptSync peut renvoyer un Buffer, on force en Uint8Array pour TS
+        const key = new Uint8Array(crypto.scryptSync(secret, this.salt, 32));
+
+        // IV 16 bytes
+        const ivBuf = isEmail ? Buffer.from('unIVfixe16octets') : crypto.randomBytes(16);
+        const iv = new Uint8Array(ivBuf);
+
+        const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+
+        let encrypted = cipher.update(data, 'utf8', 'hex');
+        encrypted += cipher.final('hex');
+
+        return Buffer.from(iv).toString('hex') + ':' + encrypted;
     }
+
 
     splitEncryptedField(encryptedData: string): { identifier: string, data: string } {
         const [identifier, data] = encryptedData.split(':');
@@ -42,32 +47,29 @@ export class EncryptionService {
     // Dans votre service de chiffrement
     private decryptionCache = new Map<string, string>();
 
-    async decryptField(encryptedObj: { identifier: string, data: string }, isEmail: boolean = false): Promise<string> {
-        // Clé unique basée sur les données chiffrées
+    async decryptField(
+        encryptedObj: { identifier: string; data: string },
+        isEmail: boolean = false,
+    ): Promise<string> {
         const cacheKey = `${encryptedObj.identifier}:${encryptedObj.data}`;
-
-        // Vérifier le cache avant de déchiffrer
         if (this.decryptionCache.has(cacheKey)) {
-            return this.decryptionCache.get(cacheKey);
+            return this.decryptionCache.get(cacheKey)!;
         }
 
-        const { identifier, data } = encryptedObj;
         const secret = isEmail ? this.emailKey : this.generalKey;
-        const key = crypto.scryptSync(secret, this.salt, 32);
-        const iv = Buffer.from(identifier, 'hex');
+        const key = new Uint8Array(crypto.scryptSync(secret, this.salt, 32));
 
-        try {
-            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decrypted = decipher.update(data, 'hex', 'utf-8');
-            decrypted += decipher.final('utf-8');
+        const ivBuf = Buffer.from(encryptedObj.identifier, 'hex');
+        const iv = new Uint8Array(ivBuf);
 
-            // Mettre en cache le résultat
-            this.decryptionCache.set(cacheKey, decrypted);
+        const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
 
-            return decrypted;
-        } catch (error) {
-            console.error('Decryption error:', error);
-            throw error;
-        }
+        let decrypted = decipher.update(encryptedObj.data, 'hex', 'utf8');
+        decrypted += decipher.final('utf8');
+
+        this.decryptionCache.set(cacheKey, decrypted);
+        return decrypted;
     }
+
+
 }

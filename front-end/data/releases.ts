@@ -8,6 +8,17 @@ export type Release = {
 
 export const releases: Release[] = [
   {
+    version: "1.6",
+    date: "2026-02-19",
+    title: "Améliorations administration et calendrier",
+    changes: [
+      "Ajout du calendrier (Beta)",
+      "Informations : liens désormais cliquables",
+      "Admin : ajout d’un système de recherche des utilisateurs (nom / prénom)",
+      "Admin : correction du bug d’affichage après modification d’un utilisateur",
+    ],
+  },
+  {
     version: "1.5",
     date: "2025-10-21",
     title: "Ajout de features",

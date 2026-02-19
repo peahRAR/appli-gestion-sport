@@ -1,60 +1,79 @@
 <template>
   <div>
     <h2 class="text-xl font-semibold mb-2">Liste des utilisateurs</h2>
-    <!-- Filter and sort section -->
-    <div class="flex justify-between">
+
+    <!-- Filter / Sort / Search -->
+    <div class="flex justify-between gap-4 flex-wrap">
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="currentSortBy"
           class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
         >
           <option value="null">Trier par ...</option>
-          <option v-for="cat in sortByList" :value="cat.value">
+          <option v-for="cat in sortByList" :key="cat.value" :value="cat.value">
             {{ cat.cat }}
           </option>
         </select>
-        <div class="flex">
-          <button
-            @click="updateSortOrder()"
-            class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+
+        <button
+          @click="updateSortOrder()"
+          class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          type="button"
+        >
+          <svg
+            v-if="asc"
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 256 256"
           >
-            <svg
-              v-if="asc"
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 256 256"
-            >
-              <path
-                fill="currentColor"
-                d="M128 128a12 12 0 0 1-12 12H48a12 12 0 0 1 0-24h68a12 12 0 0 1 12 12M48 76h132a12 12 0 0 0 0-24H48a12 12 0 0 0 0 24m52 104H48a12 12 0 0 0 0 24h52a12 12 0 0 0 0-24m132.49-20.49a12 12 0 0 0-17 0L196 179v-67a12 12 0 0 0-24 0v67l-19.51-19.52a12 12 0 0 0-17 17l40 40a12 12 0 0 0 17 0l40-40a12 12 0 0 0 0-16.97"
-              />
-            </svg>
-            <svg
-              v-else
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 256 256"
-            >
-              <path
-                fill="currentColor"
-                d="M36 128a12 12 0 0 1 12-12h68a12 12 0 0 1 0 24H48a12 12 0 0 1-12-12m12-52h52a12 12 0 0 0 0-24H48a12 12 0 0 0 0 24m132 104H48a12 12 0 0 0 0 24h132a12 12 0 0 0 0-24m52.49-100.49l-40-40a12 12 0 0 0-17 0l-40 40a12 12 0 0 0 17 17L172 77v67a12 12 0 0 0 24 0V77l19.51 19.52a12 12 0 0 0 17-17Z"
-              />
-            </svg>
-          </button>
-        </div>
+            <path
+              fill="currentColor"
+              d="M128 128a12 12 0 0 1-12 12H48a12 12 0 0 1 0-24h68a12 12 0 0 1 12 12M48 76h132a12 12 0 0 0 0-24H48a12 12 0 0 0 0 24m52 104H48a12 12 0 0 0 0 24h52a12 12 0 0 0 0-24m132.49-20.49a12 12 0 0 0-17 0L196 179v-67a12 12 0 0 0-24 0v67l-19.51-19.52a12 12 0 0 0-17 17l40 40a12 12 0 0 0 17 0l40-40a12 12 0 0 0 0-16.97"
+            />
+          </svg>
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 256 256"
+          >
+            <path
+              fill="currentColor"
+              d="M36 128a12 12 0 0 1 12-12h68a12 12 0 0 1 0 24H48a12 12 0 0 1-12-12m12-52h52a12 12 0 0 0 0-24H48a12 12 0 0 0 0 24m132 104H48a12 12 0 0 0 0 24h132a12 12 0 0 0 0-24m52.49-100.49l-40-40a12 12 0 0 0-17 0l-40 40a12 12 0 0 0 17 17L172 77v67a12 12 0 0 0 24 0V77l19.51 19.52a12 12 0 0 0 17-17Z"
+            />
+          </svg>
+        </button>
       </div>
-      <!-- Filter section -->
+
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="filterOption"
           class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
         >
-          <option v-for="cat in filterList" :value="cat.value">
+          <option v-for="cat in filterList" :key="cat.value" :value="cat.value">
             {{ cat.filter }}
           </option>
         </select>
+
+        <!-- Search -->
+        <div class="flex items-center space-x-2">
+          <input
+            v-model.trim="searchQuery"
+            type="text"
+            placeholder="Rechercher prénom ou nom…"
+            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
+          />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+            type="button"
+          >
+            Effacer
+          </button>
+        </div>
       </div>
     </div>
 
@@ -67,8 +86,8 @@
               class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Statut
-              <!-- Ajoutez l'icône pour le statut ici -->
             </th>
+
             <th
               v-for="col in currentColumns"
               :key="col"
@@ -86,22 +105,20 @@
             </th>
           </tr>
         </thead>
+
         <tbody class="bg-white divide-y divide-gray-200">
           <tr
-            v-for="(user, index) in paginatedSortedUsers"
+            v-for="user in paginatedUsers"
             :key="user.id"
             :class="userBgColor(user)"
           >
             <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-              <!-- Icon Status -->
-              <span>
-                <!-- Cash icon if date_end_pay is null or < date of the day -->
+              <span class="inline-flex items-center gap-2">
                 <Icon
                   v-if="!user.date_end_pay || new Date(user.date_end_pay) < new Date()"
                   name="tabler:tax-euro"
                   class="text-black text-3xl"
                 />
-                <!-- Id Card icon if license is null -->
                 <svg
                   v-if="!user.license"
                   xmlns="http://www.w3.org/2000/svg"
@@ -116,6 +133,7 @@
                 </svg>
               </span>
             </td>
+
             <td
               v-for="col in currentColumns"
               :key="col"
@@ -123,11 +141,11 @@
             >
               {{ user[col] }}
             </td>
+
             <td
               class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
             >
-              <button @click="openModal(user)" class="focus:outline-none text-black">
-                <!-- Arrow bottom -->
+              <button @click="openModal(user)" class="focus:outline-none text-black" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 text-black hover:text-gray-600 transition duration-300"
@@ -143,52 +161,54 @@
               </button>
             </td>
           </tr>
+
+          <tr v-if="paginatedUsers.length === 0">
+            <td :colspan="currentColumns.length + 2" class="px-3 py-6 text-center text-sm text-gray-500">
+              Aucun utilisateur trouvé
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
+
     <!-- Pagination -->
     <div class="mt-4 w-full flex items-center">
       <div>
-        <select v-model="pageSize">
-          <option :value="10" default>10</option>
+        <select v-model.number="pageSize">
+          <option :value="10">10</option>
           <option :value="25">25</option>
           <option :value="35">35</option>
           <option :value="50">50</option>
           <option :value="75">75</option>
         </select>
       </div>
+
       <div class="flex justify-center w-full items-center">
         <button
           class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="prevPage"
           :class="{ hidden: currentPage === 1 }"
           :disabled="currentPage === 1"
+          type="button"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z"
             />
           </svg>
         </button>
+
         <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
+
         <button
           class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="nextPage"
           :class="{ hidden: currentPage === totalPages }"
           :disabled="currentPage === totalPages"
+          type="button"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="m12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
@@ -203,30 +223,12 @@
 <script>
 export default {
   props: {
-    users: {
-      type: Array,
-      required: true,
-    },
-    sortByList: {
-      type: Array,
-      required: true,
-    },
-    filterList: {
-      type: Array,
-      required: true,
-    },
-    activeColumns: {
-      type: Array,
-      required: true,
-    },
-    defaultColumns: {
-      type: Array,
-      required: true,
-    },
-    columnsNames: {
-      type: Object,
-      required: true,
-    },
+    users: { type: Array, required: true },
+    sortByList: { type: Array, required: true },
+    filterList: { type: Array, required: true },
+    activeColumns: { type: Array, required: true },
+    defaultColumns: { type: Array, required: true },
+    columnsNames: { type: Object, required: true },
   },
   data() {
     return {
@@ -236,52 +238,24 @@ export default {
       filterOption: "all",
       currentColumns: this.activeColumns,
       pageSize: 10,
+      searchQuery: "",
     };
   },
   methods: {
     openModal(user) {
       this.$emit("open-modal", user);
     },
-    // Update Sort Order
     updateSortOrder() {
       this.asc = !this.asc;
     },
-    userBgColor(user) {
-      if (user) {
-        if (
-          !user.license &&
-          (!user.date_end_pay || new Date(user.date_end_pay) < new Date())
-        ) {
-          return "bg-red-500 bg-opacity-75";
-        }
-        if (
-          !user.license ||
-          !user.date_end_pay ||
-          new Date(user.date_end_pay) < new Date()
-        ) {
-          return "bg-orange-500 bg-opacity-75";
-        }
-        if (
-          user.license &&
-          user.date_end_pay &&
-          new Date(user.date_end_pay) >= new Date()
-        ) {
-          return "bg-white";
-        }
-      }
-      // Si user n'est pas défini, retournez une classe par défaut
-      return "bg-gray-300"; // Ou toute autre classe par défaut que vous souhaitez utiliser
-    },
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
+      if (this.currentPage < this.totalPages) this.currentPage++;
     },
     prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+      if (this.currentPage > 1) this.currentPage--;
     },
+
+    // Filtre "homme/femme/dateEndPay/all"
     filterUsers(users) {
       switch (this.filterOption) {
         case "homme":
@@ -296,6 +270,35 @@ export default {
           return users;
       }
     },
+
+    // Recherche sur prénom/nom (robuste: firstname/firstName + lastname/lastName)
+    searchUsers(users) {
+      const q = (this.searchQuery || "").toString().trim().toLowerCase();
+      if (!q) return users;
+
+      return users.filter((u) => {
+        const first = (u.firstname ?? u.firstName ?? "").toString().toLowerCase();
+        const last = (u.name ?? u.Name ?? "").toString().toLowerCase();
+        const full = `${first} ${last}`.trim();
+        return first.includes(q) || last.includes(q) || full.includes(q);
+      });
+    },
+
+    // Couleur de ligne selon licence / paiement
+    userBgColor(user) {
+      if (user) {
+        if (!user.license && (!user.date_end_pay || new Date(user.date_end_pay) < new Date())) {
+          return "bg-red-500 bg-opacity-75";
+        }
+        if (!user.license || !user.date_end_pay || new Date(user.date_end_pay) < new Date()) {
+          return "bg-orange-500 bg-opacity-75";
+        }
+        if (user.license && user.date_end_pay && new Date(user.date_end_pay) >= new Date()) {
+          return "bg-white";
+        }
+      }
+      return "bg-gray-300";
+    },
   },
   watch: {
     currentSortBy(newVal) {
@@ -304,32 +307,38 @@ export default {
       } else {
         this.currentColumns = [...this.defaultColumns];
       }
+      this.currentPage = 1;
     },
-
-    pageSize(newSize) {
-      this.pageSize = parseInt(newSize); // Assurez-vous que `pageSize` est toujours un entier
-      this.currentPage = 1; // Reset page lors du changement de taille
+    pageSize() {
+      this.currentPage = 1;
+    },
+    filterOption() {
+      this.currentPage = 1;
+    },
+    searchQuery() {
+      this.currentPage = 1;
     },
   },
   computed: {
-    capitalize() {
-      return this.activeColumns.map((col) => {
-        return col.charAt(0).toUpperCase() + col.slice(1);
-      });
-    },
+    // Liste finale = filtre + recherche + tri
     sortedUsers() {
-      if (!this.currentSortBy) {
-        return this.users;
-      }
+      let base = this.filterUsers(this.users);
+      base = this.searchUsers(base);
+
+      if (!this.currentSortBy) return base;
+
       const key = this.currentSortBy;
       const asc = this.asc ? 1 : -1;
-      return [...this.users].sort((a, b) => {
+
+      return [...base].sort((a, b) => {
         const va = a[key];
         const vb = b[key];
+
         const na = Number(va);
         const nb = Number(vb);
         const bothNumeric = Number.isFinite(na) && Number.isFinite(nb);
         if (bothNumeric) return (na - nb) * asc;
+
         const sa = (va ?? "").toString().toLowerCase();
         const sb = (vb ?? "").toString().toLowerCase();
         if (sa < sb) return -1 * asc;
@@ -337,21 +346,15 @@ export default {
         return 0;
       });
     },
-    paginatedSortedUsers() {
-      const filteredUsers = this.filterUsers(this.sortedUsers);
+
+    paginatedUsers() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
-      return filteredUsers.slice(startIndex, endIndex);
+      return this.sortedUsers.slice(startIndex, endIndex);
     },
+
     totalPages() {
-      const filteredUsers = this.filterUsers(this.sortedUsers);
-      return Math.ceil(filteredUsers.length / this.pageSize);
-    },
-    filteredUsers() {
-      // Appliquer le filtre aux utilisateurs en fonction des options de filtrage
-      let filteredUsers = this.users;
-      // Ajoutez le code pour filtrer les utilisateurs en fonction des options de filtrage
-      return filteredUsers;
+      return Math.ceil(this.sortedUsers.length / this.pageSize) || 1;
     },
   },
 };

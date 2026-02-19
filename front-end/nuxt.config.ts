@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl: process.env.API_URL || "https://mma-app-api.mmabaisieux.fr",
-      frontVersion: "1.5",
+      frontVersion: "1.6",
     },
   },
 

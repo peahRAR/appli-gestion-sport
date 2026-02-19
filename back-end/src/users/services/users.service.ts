@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
   Inject,
   forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,6 +26,7 @@ import { Federation } from '../../federations/federations.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -342,71 +344,106 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new Error('Aucun utilisateur trouvé.');
-    }
+async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined> {
+  this.logger.log(`update() called for id=${id}`);
 
-    // ————— Password flow (inchangé) —————
-    if (updateUserDto.password) {
-      if (!updateUserDto.currentPassword) {
-        throw new BadRequestException('Le mot de passe actuel est requis pour changer le mot de passe.');
-      }
-
-      const isPasswordValid =
-        (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
-        updateUserDto.currentPassword === this.configService.get<string>('REINITIALIZATIONKEY');
-      if (!isPasswordValid) {
-        throw new UnauthorizedException('Mot de passe actuel incorrect.');
-      }
-
-      user.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
-
-    // ————— Helpers —————
-    const has = (k: keyof UpdateUserDto) =>
-      Object.prototype.hasOwnProperty.call(updateUserDto, k);
-
-    // Accepte string/Date/null/undefined → normalise en ISO, ou laisse tel quel
-    const toIso = (v: string | Date | null | undefined) => {
-      if (v === undefined) return undefined; // clé non envoyée → ne pas toucher
-      if (v === null) return null;           // explicitement null → effacer
-      const d = new Date(v as any);
-      if (isNaN(+d)) throw new BadRequestException('Date invalide');
-      return d.toISOString();
-    };
-
-    // ————— Build des champs à mettre à jour —————
-    const userDto = {
-      // Texte (présence de clé plutôt que ||)
-      email: has('email') ? updateUserDto.email : user.email,
-      name: has('name') ? updateUserDto.name : user.name,
-      firstname: has('firstname') ? updateUserDto.firstname : user.firstname,
-
-      // Dates normalisées
-      birthday: has('birthday') ? toIso(updateUserDto.birthday as any) : user.birthday,
-      date_payment: has('date_payment') ? toIso(updateUserDto.date_payment as any) : user.date_payment,
-      date_end_pay: has('date_end_pay') ? toIso(updateUserDto.date_end_pay as any) : user.date_end_pay,
-
-      // Autres
-      tel_num: has('tel_num') ? updateUserDto.tel_num : user.tel_num,
-      tel_medic: has('tel_medic') ? updateUserDto.tel_medic : user.tel_medic,
-      tel_emergency: has('tel_emergency') ? updateUserDto.tel_emergency : user.tel_emergency,
-      weight: has('weight') ? (updateUserDto.weight as any) : user.weight,
-      avatar: has('avatar') ? updateUserDto.avatar : user.avatar,
-      approove_rules: has('approove_rules') ? updateUserDto.approove_rules : user.approove_rules,
-
-      // Non modifié par ce endpoint
-      date_subscribe: user.date_subscribe,
-    };
-
-    // Chiffrement + sauvegarde
-    const encryptedFields = await this.encryptUserFields(userDto);
-    Object.assign(user, encryptedFields);
-    await this.userRepository.save(user);
-    return user;
+  const user = await this.userRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new Error('Aucun utilisateur trouvé.');
   }
+
+  // ————— Password flow (inchangé) —————
+  if (updateUserDto.password) {
+    if (!updateUserDto.currentPassword) {
+      throw new BadRequestException(
+        'Le mot de passe actuel est requis pour changer le mot de passe.',
+      );
+    }
+
+    const isPasswordValid =
+      (await bcrypt.compare(updateUserDto.currentPassword, user.password)) ||
+      updateUserDto.currentPassword === this.configService.get<string>('REINITIALIZATIONKEY');
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Mot de passe actuel incorrect.');
+    }
+
+    user.password = await bcrypt.hash(updateUserDto.password, 10);
+  }
+
+  // ————— Helpers —————
+  const has = (k: keyof UpdateUserDto) =>
+    Object.prototype.hasOwnProperty.call(updateUserDto, k);
+
+  const toIso = (v: string | Date | null | undefined) => {
+    if (v === undefined) return undefined;
+    if (v === null) return null;
+    const d = new Date(v as any);
+    if (isNaN(+d)) throw new BadRequestException('Date invalide');
+    return d.toISOString();
+  };
+
+  // ————— Build dto à chiffrer —————
+  const userDto = {
+    email: has('email') ? updateUserDto.email : user.email,
+    name: has('name') ? updateUserDto.name : user.name,
+    firstname: has('firstname') ? updateUserDto.firstname : user.firstname,
+
+    birthday: has('birthday') ? toIso(updateUserDto.birthday as any) : user.birthday,
+    date_payment: has('date_payment') ? toIso(updateUserDto.date_payment as any) : user.date_payment,
+    date_end_pay: has('date_end_pay') ? toIso(updateUserDto.date_end_pay as any) : user.date_end_pay,
+
+    tel_num: has('tel_num') ? updateUserDto.tel_num : user.tel_num,
+    tel_medic: has('tel_medic') ? updateUserDto.tel_medic : user.tel_medic,
+    tel_emergency: has('tel_emergency') ? updateUserDto.tel_emergency : user.tel_emergency,
+    weight: has('weight') ? (updateUserDto.weight as any) : user.weight,
+    avatar: has('avatar') ? updateUserDto.avatar : user.avatar,
+    approove_rules: has('approove_rules') ? updateUserDto.approove_rules : user.approove_rules,
+
+    date_subscribe: user.date_subscribe,
+  };
+
+  const encryptedFields = await this.encryptUserFields(userDto);
+  Object.assign(user, encryptedFields);
+
+  await this.userRepository.save(user);
+
+  // ✅ IMPORTANT : refetch + decrypt (retour cohérent avec findOne)
+  const fresh = await this.userRepository.findOne({
+    where: { id },
+    select: [
+      'id',
+      'email',
+      'birthday',
+      'gender',
+      'weight',
+      'license',
+      'name',
+      'firstname',
+      'tel_num',
+      'tel_medic',
+      'tel_emergency',
+      'avatar',
+      'date_end_pay',
+      'date_payment',
+      'date_subscribe',
+      'role',
+      'approove_rules',
+      'isActive',
+    ],
+  });
+
+  if (!fresh) return undefined;
+
+  const [decrypted] = await this.decryptUserFields([fresh]);
+
+  this.logger.log(
+    `returning decrypted firstname/name types: ${typeof (decrypted as any).firstname}/${typeof (decrypted as any).name}`,
+  );
+
+  return decrypted;
+}
+
 
 
   async remove(id: string): Promise<void> {

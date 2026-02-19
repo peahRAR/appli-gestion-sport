@@ -29,6 +29,7 @@ export class UsersController {
   // Créez une instance de Storage avec vos informations d'authentification
   private storage: Storage;
   private bucketName: string;
+  private readonly logger = new Logger(UsersController.name);
 
   constructor(
     private readonly usersService: UsersService,

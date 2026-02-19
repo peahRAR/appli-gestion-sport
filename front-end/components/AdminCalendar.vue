@@ -356,163 +356,217 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="min-h-screen p-4 md:p-6 space-y-6">
-        <div class="flex items-end justify-between gap-4">
-            <div>
-                <h2 class="text-2xl font-bold">Calendrier</h2>
-            </div>
-        </div>
-
-        <div v-if="errorMsg" class="border rounded p-3">
-            {{ errorMsg }}
-        </div>
-
-        <!-- CREATE (admin only) -->
-        <section v-if="canManage" class="border rounded-xl p-4 md:p-6 space-y-4">
-            <h3 class="text-lg font-bold">Créer un événement</h3>
-
-            <div class="grid gap-4 md:grid-cols-2">
-                <div class="space-y-1">
-                    <label class="text-sm opacity-70">Titre <span class="text-red-500">*</span></label>
-                    <input v-model="form.title" class="border rounded px-3 py-2 w-full" />
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-sm opacity-70">Type <span class="text-red-500">*</span></label>
-                    <select v-model="form.type" class="border rounded px-3 py-2 w-full">
-                        <option v-for="opt in TYPE_OPTIONS" :key="opt" :value="opt">{{ opt }}</option>
-                    </select>
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-sm opacity-70">Pour qui <span class="text-red-500">*</span></label>
-                    <select v-model="form.forWho" class="border rounded px-3 py-2 w-full">
-                        <option v-for="opt in FOR_WHO_OPTIONS" :key="opt" :value="opt">{{ opt }}</option>
-                    </select>
-                </div>
-
-                <div class="space-y-1 relative">
-                    <label class="text-sm opacity-70">Lieu <span class="text-red-500">*</span></label>
-                    <input v-model="locationQuery" class="border rounded px-3 py-2 w-full" autocomplete="off"
-                        @focus="onLocationFocus" @blur="onLocationBlur" @keydown="onLocationKeydown" />
-
-                    <div class="absolute right-3 top-[38px] text-xs opacity-60">
-                        <span v-if="locationLoading">…</span>
-                    </div>
-
-                    <div v-if="locationError" class="text-xs opacity-70 mt-1">{{ locationError }}</div>
-
-                    <div v-if="locationOpen && locationSuggestions.length"
-                        class="absolute z-50 mt-2 w-full border rounded-lg bg-white overflow-hidden">
-                        <button v-for="(s, i) in locationSuggestions" :key="s.label + i" type="button"
-                            class="w-full text-left px-3 py-2 text-sm hover:bg-black/5"
-                            :class="i === activeIndex ? 'bg-black/5' : ''" @mousedown.prevent="selectLocation(s)">
-                            <div class="truncate">{{ s.label }}</div>
-                            <div class="text-xs opacity-60" v-if="s.lat && s.lon">{{ s.lat }}, {{ s.lon }}</div>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Début (date required, heure optionnelle) -->
-                <div class="space-y-1">
-                    <label class="text-sm opacity-70">
-                        Début <span class="text-red-500">*</span>
-                    </label>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-60">Date</label>
-                            <input v-model="form.startDate" type="date" class="border rounded px-3 py-2 w-full" />
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-60">Heure (optionnel)</label>
-                            <input v-model="form.startTime" type="time" class="border rounded px-3 py-2 w-full" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fin (optionnelle) -->
-                <div class="space-y-1">
-                    <label class="text-sm opacity-70">Fin</label>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-60">Date (optionnel)</label>
-                            <input v-model="form.endDate" type="date" class="border rounded px-3 py-2 w-full" />
-                        </div>
-
-                        <div class="space-y-1">
-                            <label class="text-xs opacity-60">Heure (optionnel)</label>
-                            <input v-model="form.endTime" type="time" class="border rounded px-3 py-2 w-full" />
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="space-y-1 md:col-span-2">
-                    <div class="flex items-end justify-between gap-3">
-                        <label class="text-sm opacity-70">Description</label>
-                        <div class="text-xs opacity-60">{{ descriptionCount }}/{{ DESCRIPTION_MAX }}</div>
-                    </div>
-
-                    <textarea v-model="form.description"
-                        class="border rounded px-3 py-2 w-full min-h-[90px] resize-none" :maxlength="DESCRIPTION_MAX" />
-                </div>
-            </div>
-
-            <button @click="createEvent" class="bg-red-600 text-white px-4 py-2 rounded">Créer</button>
-        </section>
-
-        <!-- FILTERS -->
-        <section class="border rounded-xl p-4 md:p-6 space-y-4">
-            <div class="flex items-center justify-between gap-4">
-                <h3 class="text-lg font-bold">Filtres</h3>
-                <button class="border px-3 py-2 rounded" type="button" @click="resetFilters">
-                    Réinitialiser
-                </button>
-            </div>
-
-            <div class="grid gap-4 md:grid-cols-2">
-                <div class="space-y-2">
-                    <div class="text-sm font-semibold">Type</div>
-                    <div class="flex flex-wrap gap-2">
-                        <button v-for="t in TYPE_OPTIONS" :key="t" type="button" @click="toggleFilter('types', t)"
-                            class="border rounded-full px-3 py-2 text-sm"
-                            :class="filters.types.includes(t) ? 'bg-gray-700 text-white' : 'bg-white'">
-                            {{ t }}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="space-y-2">
-                    <div class="text-sm font-semibold">Pour qui</div>
-                    <div class="flex flex-wrap gap-2">
-                        <button v-for="w in FOR_WHO_OPTIONS" :key="w" type="button" @click="toggleFilter('forWho', w)"
-                            class="border rounded-full px-3 py-2 text-sm"
-                            :class="filters.forWho.includes(w) ? 'bg-gray-700 text-white' : 'bg-white'">
-                            {{ w }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- LIST -->
-        <section class="space-y-3">
-            <div class="flex items-center justify-between gap-4">
-                <h3 class="text-lg font-bold">Événements</h3>
-                <div class="text-sm opacity-70">
-                    {{ filteredEvents.length }} / {{ safeEvents.length }}
-                </div>
-            </div>
-
-            <div v-if="loading" class="opacity-70">Chargement…</div>
-
-            <div v-else class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                <CardCalendar v-for="event in filteredEvents" :key="event.id" :event="event" :can-manage="canManage"
-                    @delete="deleteEvent" />
-            </div>
-        </section>
+  <div class="min-h-screen p-4 md:p-6 space-y-6 overflow-x-hidden">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <h2 class="text-2xl font-bold">Calendrier</h2>
+      </div>
     </div>
+
+    <div v-if="errorMsg" class="border rounded p-3">
+      {{ errorMsg }}
+    </div>
+
+    <!-- CREATE (admin only) -->
+    <section v-if="canManage" class="border rounded-xl p-4 md:p-6 space-y-4">
+      <h3 class="text-lg font-bold">Créer un événement</h3>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-1 min-w-0">
+          <label class="text-sm opacity-70">
+            Titre <span class="text-red-500">*</span>
+          </label>
+          <input v-model="form.title" class="border rounded px-3 py-2 w-full min-w-0" />
+        </div>
+
+        <div class="space-y-1 min-w-0">
+          <label class="text-sm opacity-70">
+            Type <span class="text-red-500">*</span>
+          </label>
+          <select v-model="form.type" class="border rounded px-3 py-2 w-full min-w-0">
+            <option v-for="opt in TYPE_OPTIONS" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </div>
+
+        <div class="space-y-1 min-w-0">
+          <label class="text-sm opacity-70">
+            Pour qui <span class="text-red-500">*</span>
+          </label>
+          <select v-model="form.forWho" class="border rounded px-3 py-2 w-full min-w-0">
+            <option v-for="opt in FOR_WHO_OPTIONS" :key="opt" :value="opt">
+              {{ opt }}
+            </option>
+          </select>
+        </div>
+
+        <div class="space-y-1 relative min-w-0">
+          <label class="text-sm opacity-70">
+            Lieu <span class="text-red-500">*</span>
+          </label>
+
+          <input
+            v-model="locationQuery"
+            class="border rounded px-3 py-2 w-full min-w-0"
+            autocomplete="off"
+            @focus="onLocationFocus"
+            @blur="onLocationBlur"
+            @keydown="onLocationKeydown"
+          />
+
+          <div class="absolute right-3 top-[38px] text-xs opacity-60">
+            <span v-if="locationLoading">…</span>
+          </div>
+
+          <div v-if="locationError" class="text-xs opacity-70 mt-1">
+            {{ locationError }}
+          </div>
+
+          <div
+            v-if="locationOpen && locationSuggestions.length"
+            class="absolute z-50 mt-2 w-full border rounded-lg bg-white overflow-hidden"
+          >
+            <button
+              v-for="(s, i) in locationSuggestions"
+              :key="s.label + i"
+              type="button"
+              class="w-full text-left px-3 py-2 text-sm hover:bg-black/5"
+              :class="i === activeIndex ? 'bg-black/5' : ''"
+              @mousedown.prevent="selectLocation(s)"
+            >
+              <div class="truncate">{{ s.label }}</div>
+              <div class="text-xs opacity-60" v-if="s.lat && s.lon">
+                {{ s.lat }}, {{ s.lon }}
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Début (date required, heure optionnelle) -->
+        <div class="space-y-1 min-w-0">
+          <label class="text-sm opacity-70">
+            Début <span class="text-red-500">*</span>
+          </label>
+
+          <!-- ⚠️ md seulement, pas sm -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div class="space-y-1 min-w-0">
+              <label class="text-xs opacity-60">Date</label>
+              <input v-model="form.startDate" type="date" class="border rounded px-3 py-2 w-full min-w-0" />
+            </div>
+
+            <div class="space-y-1 min-w-0">
+              <label class="text-xs opacity-60">Heure (optionnel)</label>
+              <input v-model="form.startTime" type="time" class="border rounded px-3 py-2 w-full min-w-0" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Fin (optionnelle) -->
+        <div class="space-y-1 min-w-0">
+          <label class="text-sm opacity-70">Fin</label>
+
+          <!-- ⚠️ md seulement, pas sm -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div class="space-y-1 min-w-0">
+              <label class="text-xs opacity-60">Date (optionnel)</label>
+              <input v-model="form.endDate" type="date" class="border rounded px-3 py-2 w-full min-w-0" />
+            </div>
+
+            <div class="space-y-1 min-w-0">
+              <label class="text-xs opacity-60">Heure (optionnel)</label>
+              <input v-model="form.endTime" type="time" class="border rounded px-3 py-2 w-full min-w-0" />
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-1 md:col-span-2 min-w-0">
+          <div class="flex items-end justify-between gap-3">
+            <label class="text-sm opacity-70">Description</label>
+            <div class="text-xs opacity-60">
+              {{ descriptionCount }}/{{ DESCRIPTION_MAX }}
+            </div>
+          </div>
+
+          <textarea
+            v-model="form.description"
+            class="border rounded px-3 py-2 w-full min-h-[90px] resize-none min-w-0"
+            :maxlength="DESCRIPTION_MAX"
+          />
+        </div>
+      </div>
+
+      <button @click="createEvent" class="bg-red-600 text-white px-4 py-2 rounded">
+        Créer
+      </button>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="border rounded-xl p-4 md:p-6 space-y-4">
+      <div class="flex items-center justify-between gap-4">
+        <h3 class="text-lg font-bold">Filtres</h3>
+        <button class="border px-3 py-2 rounded" type="button" @click="resetFilters">
+          Réinitialiser
+        </button>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="space-y-2 min-w-0">
+          <div class="text-sm font-semibold">Type</div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="t in TYPE_OPTIONS"
+              :key="t"
+              type="button"
+              @click="toggleFilter('types', t)"
+              class="border rounded-full px-3 py-2 text-sm"
+              :class="filters.types.includes(t) ? 'bg-gray-700 text-white' : 'bg-white'"
+            >
+              {{ t }}
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-2 min-w-0">
+          <div class="text-sm font-semibold">Pour qui</div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="w in FOR_WHO_OPTIONS"
+              :key="w"
+              type="button"
+              @click="toggleFilter('forWho', w)"
+              class="border rounded-full px-3 py-2 text-sm"
+              :class="filters.forWho.includes(w) ? 'bg-gray-700 text-white' : 'bg-white'"
+            >
+              {{ w }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIST -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between gap-4">
+        <h3 class="text-lg font-bold">Événements</h3>
+        <div class="text-sm opacity-70">
+          {{ filteredEvents.length }} / {{ safeEvents.length }}
+        </div>
+      </div>
+
+      <div v-if="loading" class="opacity-70">Chargement…</div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+        <CardCalendar
+          v-for="event in filteredEvents"
+          :key="event.id"
+          :event="event"
+          :can-manage="canManage"
+          @delete="deleteEvent"
+        />
+      </div>
+    </section>
+  </div>
 </template>
+

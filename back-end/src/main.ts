@@ -12,9 +12,8 @@ async function bootstrap() {
   // ✅ Active la validation des DTO partout (Create/Update)
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,        // supprime les champs inconnus
-      transform: true,        // convertit les types si besoin
-      forbidNonWhitelisted: false,
+      whitelist: false,
+      transform: true,
     }),
   );
 

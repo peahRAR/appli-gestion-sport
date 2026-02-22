@@ -93,19 +93,21 @@ export class ClubCalendarService {
         )
 
         const result = await this.repo
-            .createQueryBuilder("e")
+            .createQueryBuilder()
             .delete()
+            // important: FROM explicite (évite les surprises)
+            .from(ClubCalendarEvent)
             .where(
                 `
-        (
-          CASE
-            WHEN e."endDate" IS NOT NULL THEN
-              (e."endDate" + COALESCE(e."endTime", '23:59:59'::time))
-            ELSE
-              (e."startDate" + COALESCE(e."startTime", '23:59:59'::time))
-          END
-        ) < :expirationDate
-        `,
+      (
+        CASE
+          WHEN "endDate" IS NOT NULL THEN
+            ("endDate" + COALESCE("endTime", '23:59:59'::time))
+          ELSE
+            ("startDate" + COALESCE("startTime", '23:59:59'::time))
+        END
+      ) < :expirationDate
+      `,
                 { expirationDate },
             )
             .execute()

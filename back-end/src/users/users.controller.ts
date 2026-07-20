@@ -20,6 +20,7 @@ import { Storage } from '@google-cloud/storage';
 import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from '../common/guard/users.guard';
+import { SelfOrSuperAdminGuard } from '../common/guard/self-or-superadmin.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -185,8 +186,8 @@ export class UsersController {
     return this.usersService.update(id, data);
   }
 
-  // Supprimer un User
-  @UseGuards(UserIdOradminRoleGuard)
+  // Supprimer un User — seul le titulaire du compte ou le Super Admin peuvent supprimer
+  @UseGuards(SelfOrSuperAdminGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const user = await this.usersService.findOne(id);

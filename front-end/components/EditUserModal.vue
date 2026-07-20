@@ -187,7 +187,7 @@
                 Enregistrer
             </button>
 
-            <button v-if="user?.role != 2" @click="$emit('delete-user', user)"
+            <button v-if="getUserRole() === 2" @click="$emit('delete-user', user)"
                 class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white">
                 Supprimer Utilisateur
             </button>

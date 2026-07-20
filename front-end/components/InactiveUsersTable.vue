@@ -68,6 +68,7 @@
                 </svg>
               </button>
               <button
+                v-if="getUserRole() === 2"
                 @click="remove(user)"
                 class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600 ml-2"
               >
@@ -163,6 +164,17 @@ export default {
     },
   },
   methods: {
+    getUserRole() {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return null;
+      const parts = token.split(".");
+      if (parts.length !== 3) return null;
+      try {
+        return JSON.parse(atob(parts[1])).role;
+      } catch {
+        return null;
+      }
+    },
     reactivate(user) {
       this.$emit("reactivate", user);
     },

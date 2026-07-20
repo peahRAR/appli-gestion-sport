@@ -18,6 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { KeyHolderModule } from './keyholder/keyholder.module';
 import { BadgesModule } from './badges/badges.module';
 import { ClubCalendarModule } from './club-calendar/club-calendar.module';
+import { EmbedModule } from './embed/embed.module';
 
 @Module({})
 export class AppModule  {
@@ -73,6 +74,7 @@ export class AppModule  {
         KeyHolderModule,
         BadgesModule,
         ClubCalendarModule,
+        EmbedModule,
       ],
       controllers: [AppController],
       providers: [AppService],

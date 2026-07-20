@@ -11,6 +11,10 @@ const logoPrerenderRoutes = logoFiles.flatMap((file) =>
 );
 
 export default defineNuxtConfig({
+  // Keep the Nuxt 3 file layout (no app/ directory) — see the migration plan
+  // for why: pure risk with no functional benefit given the size of this repo
+  // and the amount of other work landing in the same branch.
+  srcDir: '.',
   devtools: { enabled: false },
   components: [
     {

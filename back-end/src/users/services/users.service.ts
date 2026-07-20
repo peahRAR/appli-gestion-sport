@@ -67,44 +67,28 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     // Licences modernes -> ajoute number_plain (avec try/catch)
-    const modern = await Promise.all(
-      (user.licenses ?? []).map(async (lic) => {
-        let number_plain = '';
-        try {
-          if (lic?.number_encrypted?.identifier && lic?.number_encrypted?.data) {
-            number_plain = await this.encryptionService.decryptField(lic.number_encrypted, false);
-          }
-        } catch (e) {
-          // on laisse number_plain vide si le déchiffrement échoue
-        }
-        return {
-          id: lic.id,
-          federation: {
-            id: lic.federation.id,
-            code: lic.federation.code,
-            name: lic.federation.name,
-          },
-          number_encrypted: lic.number_encrypted,
-          number_plain,                 // ← important pour le front
-          createdAt: lic.createdAt,
-          valid_from: lic.valid_from ?? null,
-          valid_to: lic.valid_to ?? null,
-          isLegacy: false,
-        };
-      })
-    );
+    // number_encrypted is already decrypted by the @EncryptedColumn transformer.
+    const modern = (user.licenses ?? []).map((lic) => {
+      return {
+        id: lic.id,
+        federation: {
+          id: lic.federation.id,
+          code: lic.federation.code,
+          name: lic.federation.name,
+        },
+        number_encrypted: lic.number_encrypted,
+        number_plain: lic.number_encrypted ?? '', // ← important pour le front
+        createdAt: lic.createdAt,
+        valid_from: lic.valid_from ?? null,
+        valid_to: lic.valid_to ?? null,
+        isLegacy: false,
+      };
+    });
 
-    // Fallback LEGACY (on le renvoie aussi)
+    // Fallback LEGACY (on le renvoie aussi) — user.license is already decrypted.
     const legacy: any[] = [];
     if (user.license) {
-      let legacyPlain = '';
-      try {
-        legacyPlain = typeof user.license === 'string'
-          ? user.license
-          : await this.encryptionService.decryptField(user.license as any, false);
-      } catch (_) {
-        legacyPlain = '';
-      }
+      const legacyPlain = user.license;
       legacy.push({
         id: 'legacy',
         federation: { code: 'LEGACY', name: 'Licence importée (ancien champ)' },
@@ -130,12 +114,7 @@ export class UsersService {
     const federation = await this.fedRepo.findOne({ where: { code: federationCode } });
     if (!federation) throw new BadRequestException('Fédération inconnue');
 
-    // Chiffrer le numéro → { identifier, data }
-    const encrypted = this.encryptionService.splitEncryptedField(
-      await this.encryptionService.createEncryptedField(licensePlainNumber) // pas d’email ici
-    );
-
-
+    // number_encrypted is encrypted automatically on save by the @EncryptedColumn transformer.
     let lic = await this.userLicenseRepo.findOne({
       where: { user: { id: userId }, federation: { id: federation.id } },
       relations: ['user', 'federation'],
@@ -145,56 +124,13 @@ export class UsersService {
       lic = this.userLicenseRepo.create({
         user,
         federation,
-        number_encrypted: encrypted,
+        number_encrypted: licensePlainNumber,
       });
     } else {
-      lic.number_encrypted = encrypted;
+      lic.number_encrypted = licensePlainNumber;
     }
 
     return this.userLicenseRepo.save(lic);
-  }
-
-
-  private async encryptUserFields(dto: any): Promise<any> {
-    const encryptedFields = {};
-
-    for (const [key, value] of Object.entries(dto)) {
-      if (value && typeof value === 'string') {
-        encryptedFields[key] = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(value, key === 'email'));
-      } else if (value && typeof value === 'object' && 'identifier' in value && 'data' in value) {
-        encryptedFields[key] = value;
-      } else {
-        encryptedFields[key] = value;
-      }
-    }
-
-    return encryptedFields;
-  }
-
-  private async decryptUserFields(users: User[]): Promise<User[]> {
-    const fieldsToDecrypt = [
-      'email', 'name', 'firstname', 'avatar', 'birthday', 'date_subscribe',
-      'date_payment', 'date_end_pay', 'license', 'weight', 'tel_num',
-      'tel_medic', 'tel_emergency'
-    ];
-
-    // Déchiffrer tous les utilisateurs en parallèle
-    return Promise.all(users.map(async (user) => {
-      for (const field of fieldsToDecrypt) {
-        if (user[field] && user[field].data) {
-          const isEmail = field === 'email';
-          try {
-            user[field] = await this.encryptionService.decryptField({
-              identifier: user[field].identifier,
-              data: user[field].data
-            }, isEmail);
-          } catch (error) {
-            console.error(`Failed to decrypt ${field} for user ${user.id}:`, error);
-          }
-        }
-      }
-      return user;
-    }));
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -235,22 +171,19 @@ export class UsersService {
     // Date création de compte
     const dateSubscribeString = new Date().toISOString();
 
-    // Chiffrement des valeurs
-    const encryptedBirthday = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(birthdayString));
-    const encryptedDateSubscribe = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(dateSubscribeString));
-    const encryptedName = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.name));
-    const encryptedFirstName = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.firstname));
-    const encryptedEmail = this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(createUserDto.email, true));
-
     if (!this.verifyPasswordRegex(createUserDto.password)) {
       throw new BadRequestException('Le mot de passe ne correspond pas aux critères requis.');
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    // Duplicate-email check compares raw ciphertext via a query builder predicate,
+    // so it needs the email encrypted manually (bypasses entity persistence, where
+    // @EncryptedColumn would normally handle it automatically).
+    const encryptedEmailForLookup = this.encryptionService.encryptField(createUserDto.email, true);
     const existingUser = await this.userRepository
       .createQueryBuilder('users')
-      .where("users.email->>'data' = :data", { data: (encryptedEmail as { data: string }).data })
+      .where("users.email->>'data' = :data", { data: encryptedEmailForLookup.data })
       .getOne();
 
     if (existingUser) {
@@ -259,12 +192,12 @@ export class UsersService {
 
     const newUser = this.userRepository.create({
       gender: createUserDto.gender,
-      firstname: encryptedFirstName,
-      name: encryptedName,
+      firstname: createUserDto.firstname,
+      name: createUserDto.name,
       password: hashedPassword,
-      email: encryptedEmail,
-      birthday: encryptedBirthday,
-      date_subscribe: encryptedDateSubscribe,
+      email: createUserDto.email,
+      birthday: birthdayString,
+      date_subscribe: dateSubscribeString,
       role: role,
       isActive: isActive,
       approove_rules: createUserDto.approove_rules,
@@ -298,7 +231,7 @@ export class UsersService {
         'role',
       ],
     });
-    return this.decryptUserFields(users);
+    return users;
   }
 
   async findOne(id: string): Promise<User | undefined> {
@@ -329,12 +262,13 @@ export class UsersService {
       return undefined;
     }
 
-    const decryptedUsers = await this.decryptUserFields([user]);
-    return decryptedUsers[0];
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    const encryptedEmail = await this.encryptionService.splitEncryptedField(await this.encryptionService.createEncryptedField(email, true));
+    // Raw predicate against the ciphertext, so the search value needs to be
+    // encrypted manually the same way @EncryptedColumn would for a save.
+    const encryptedEmail = this.encryptionService.encryptField(email, true);
 
     const user = await this.userRepository
       .createQueryBuilder('users')
@@ -403,12 +337,14 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
     date_subscribe: user.date_subscribe,
   };
 
-  const encryptedFields = await this.encryptUserFields(userDto);
-  Object.assign(user, encryptedFields);
+  // userDto only holds plain strings (either from the DTO, or from `user`, which
+  // was already decrypted by the @EncryptedColumn transformer above) — saving
+  // re-encrypts automatically, no manual encryption needed.
+  Object.assign(user, userDto);
 
   await this.userRepository.save(user);
 
-  // ✅ IMPORTANT : refetch + decrypt (retour cohérent avec findOne)
+  // ✅ IMPORTANT : refetch (retour cohérent avec findOne, already decrypted)
   const fresh = await this.userRepository.findOne({
     where: { id },
     select: [
@@ -435,13 +371,11 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
 
   if (!fresh) return undefined;
 
-  const [decrypted] = await this.decryptUserFields([fresh]);
-
   this.logger.log(
-    `returning decrypted firstname/name types: ${typeof (decrypted as any).firstname}/${typeof (decrypted as any).name}`,
+    `returning decrypted firstname/name types: ${typeof fresh.firstname}/${typeof fresh.name}`,
   );
 
-  return decrypted;
+  return fresh;
 }
 
 
@@ -473,10 +407,10 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
 
     await this.resetPasswordRepository.save(resetRecord);
 
-    const decryptedEmail = await this.encryptionService.decryptField(user.email, true);
+    // user.email is already decrypted by the @EncryptedColumn transformer.
     const resetUrl = `https://app.mmabaisieux.fr/reset-password/?token=${resetToken}`;
 
-    await this.emailService.sendResetPasswordEmail(decryptedEmail, resetUrl);
+    await this.emailService.sendResetPasswordEmail(user.email, resetUrl);
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {

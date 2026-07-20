@@ -8,9 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { User } from '../users/entities/users.entity';
 import { Federation } from '../federations/federations.entity';
 
-import { EncryptionService } from 'src/users/services/encryption.service';
-
-import { AdminFederationsController } from '../federations/federations.controller'; 
+import { AdminFederationsController } from '../federations/federations.controller';
 import { AdminFederationsService } from '../federations/federations.service';     
 
 @Module({
@@ -24,7 +22,6 @@ import { AdminFederationsService } from '../federations/federations.service';
   ],
   providers: [
     AdminService,
-    EncryptionService,
     AdminFederationsService,
   ],
 })

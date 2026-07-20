@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/users.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UsersService } from '../users/services/users.service';
-import { EncryptionService } from '../users/services/encryption.service';
 
 @Injectable()
 export class AdminService {
@@ -14,7 +13,6 @@ export class AdminService {
     private usersService: UsersService,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
-    private readonly encryptionService: EncryptionService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) { }
@@ -37,17 +35,13 @@ export class AdminService {
     // Enregistrer les modifications dans la base de données
     await this.userRepository.save(user);
 
-    // Décrypter l'adresse email
-    const decryptedEmail = await this.encryptionService.decryptField(user.email, true);
-
-
+    // user.email is already decrypted by the @EncryptedColumn transformer.
     await this.mailerService.sendMail({
-      to: decryptedEmail,
+      to: user.email,
       subject: 'Confirmation de compte',
       template: 'activation',
       context: {
-        email: decryptedEmail,
-
+        email: user.email,
       },
     });
   }

@@ -115,6 +115,8 @@
 </template>
 
 <script>
+import { formatDate, formatBirthday } from "~/composables/useDateFormat";
+
 export default {
   name: "UserInfo",
   props: {
@@ -164,62 +166,10 @@ export default {
       }
     },
     formatBirthday(dateStr) {
-      if (!dateStr) return "Non renseigné";
-      const date = new Date(dateStr);
-
-      // Format JJ/MM/AAAA
-      const formatted = date.toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-
-      // Calcul de l'âge
-      const age = this.calculateAge(date);
-
-      return `${formatted} (${age} ans)`;
+      return formatBirthday(dateStr);
     },
     formatDateSimple(value) {
-      if (!value) return "Non Renseigné";
-
-      // Si c'est déjà un objet Date
-      if (value instanceof Date && !isNaN(value)) {
-        const y = value.getFullYear();
-        const m = String(value.getMonth() + 1).padStart(2, "0");
-        const d = String(value.getDate()).padStart(2, "0");
-        return `${d}/${m}/${y}`;
-      }
-
-      // Si c'est une chaîne ISO (évite les surprises de timezone)
-      if (typeof value === "string") {
-        const isoPart = value.split("T")[0]; // "2026-07-13"
-        const parts = isoPart.split("-"); // ["2026","07","13"]
-        if (parts.length === 3) {
-          const [y, m, d] = parts;
-          return `${d}/${m}/${y}`;
-        }
-      }
-
-      // Fallback: on tente un new Date() puis toLocaleDateString fr-FR
-      const date = new Date(value);
-      if (!isNaN(date)) {
-        return date.toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      }
-
-      return "Non Renseigné";
-    },
-    calculateAge(birthDate) {
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
+      return formatDate(value, "Non Renseigné");
     },
   },
   watch: {

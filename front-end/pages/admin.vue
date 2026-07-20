@@ -58,6 +58,8 @@
   </div>
 </template>
 <script>
+import { formatDate, calculateAge } from "~/composables/useDateFormat";
+
 export default {
   data() {
     return {
@@ -130,14 +132,7 @@ export default {
       }));
     },
     calculateAge(birthday) {
-      const birthdate = new Date(birthday);
-      const today = new Date();
-      let age = today.getFullYear() - birthdate.getFullYear();
-      const m = today.getMonth() - birthdate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-        age--;
-      }
-      return age;
+      return calculateAge(birthday);
     },
     getUrl() {
       const config = useRuntimeConfig();
@@ -324,32 +319,9 @@ export default {
       this.selectedUser = null;
       this.showModalSelectedUser = false;
     },
-    // Format date
+    // Format date (JJ/MM/AAAA)
     formatDate(dateString) {
-      // Convertir la chaîne en objet Date
-      const date = new Date(dateString);
-
-      // Options de formatage
-      const options = {
-        weekday: "short", // Utiliser les trois premières lettres du jour
-        year: "numeric",
-        month: "short", // Utiliser les trois premières lettres du mois
-        day: "numeric",
-      };
-
-      // Formater la date en utilisant les options
-      let formattedDate = date.toLocaleDateString("fr-FR", options);
-
-      // Extraire les deux derniers chiffres de l'année
-      const lastTwoDigitsOfYear = formattedDate.slice(-2);
-
-      // Remplacer l'année par les deux derniers chiffres de l'année
-      formattedDate = formattedDate.replace(
-        date.getFullYear(),
-        lastTwoDigitsOfYear
-      );
-
-      return formattedDate;
+      return formatDate(dateString);
     },
     // Update user method
     async updateUser(patch) {

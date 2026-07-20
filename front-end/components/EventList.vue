@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import { formatDate } from "~/composables/useDateFormat";
+
 export default {
   props: {
     events: { type: Array, required: true },
@@ -152,7 +154,7 @@ export default {
 
     emitEditEvent(event) { this.$emit("edit-event", event); },
     emitDeleteEvent(eventId) { this.$emit("delete-event", eventId); },
-    formatDate(date) { return this.$parent.formatDate(date); },
+    formatDate(date) { return formatDate(date); },
     nextPage() { if (this.currentPage < this.totalPages) this.currentPage++; },
     prevPage() { if (this.currentPage > 1) this.currentPage--; },
   },

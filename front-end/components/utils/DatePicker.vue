@@ -16,6 +16,7 @@ import { DatePicker as VCalendarDatePicker } from 'v-calendar'
 import type { PropType } from 'vue'
 import 'v-calendar/dist/style.css'
 import { defineProps, defineEmits } from 'vue'
+import { formatDate } from '~/composables/useDateFormat'
 
 const props = defineProps({
     modelValue: {
@@ -44,12 +45,7 @@ const date = computed({
 const isOpen = ref(false)
 const datepickerWrapper = ref<HTMLElement | null>(null)
 
-const formattedDate = (dateObj: Date) => {
-    const day = String(dateObj.getDate()).padStart(2, '0')
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-    const year = dateObj.getFullYear()
-    return `${day}/${month}/${year}`
-}
+const formattedDate = (dateObj: Date) => formatDate(dateObj)
 
 const displayDate = ref('')
 

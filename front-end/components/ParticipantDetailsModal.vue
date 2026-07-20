@@ -50,7 +50,7 @@
                     </strong>
                 </li>
                 <li>Date de fin de paiment : <strong>
-                        {{ userDetails.date_end_pay || "Non Renseigné" }}
+                        {{ formatDate(userDetails.date_end_pay) || "Non Renseigné" }}
                     </strong>
                 </li>
             </ul>
@@ -60,6 +60,8 @@
 
 
 <script>
+import { formatDate, formatBirthday } from "~/composables/useDateFormat";
+
 export default {
     props: {
         isOpen: Boolean,
@@ -69,17 +71,11 @@ export default {
         close() {
             this.$emit('close');
         },
+        formatDate(dateString) {
+            return formatDate(dateString);
+        },
         formatBirthday(dateString) {
-            if (!dateString) return null;
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-
-            const now = new Date();
-            const age = now.getFullYear() - year - (now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate()) ? 1 : 0);
-
-            return `${day}/${month}/${year} (${age} ans)`;
+            return formatBirthday(dateString, null);
         }
     }
 }

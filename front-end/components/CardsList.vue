@@ -36,6 +36,7 @@ import EventCard from './EventCard.vue';
 import ParticipantsListModal from './ParticipantsListModal.vue';
 import ParticipantDetailsModal from './ParticipantDetailsModal.vue';
 import AlertBubble from './AlertBubble.vue';
+import { formatDate } from '~/composables/useDateFormat';
 
 export default {
   data() {
@@ -176,17 +177,7 @@ export default {
       }
     },
     formatDate(dateString) {
-      const date = new Date(dateString);
-      const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      let formattedDate = date.toLocaleDateString("fr-FR", options);
-      const lastTwoDigitsOfYear = formattedDate.slice(-2);
-      formattedDate = formattedDate.replace(date.getFullYear(), lastTwoDigitsOfYear);
-      return formattedDate;
+      return formatDate(dateString);
     },
     formatTime(timeString) {
       const startTime = new Date(timeString);

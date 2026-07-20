@@ -205,6 +205,7 @@
 
 <script>
 import TheModal from "@/components/TheModal.vue";
+import { formatDate, formatBirthday } from "~/composables/useDateFormat";
 
 export default {
     name: "EditUserModal",
@@ -315,28 +316,10 @@ export default {
         },
         // JJ/MM/AAAA (N ans)
         formatBirthday(birthday) {
-            if (!birthday) return "Non Renseigné";
-            const d = new Date(birthday);
-            if (isNaN(d)) return "Non Renseigné";
-            const dd = String(d.getDate()).padStart(2, "0");
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const yyyy = d.getFullYear();
-            return `${dd}/${mm}/${yyyy} (${this.age(d)} ans)`;
+            return formatBirthday(birthday, "Non Renseigné");
         },
         formatDate(dateStr) {
-            const d = new Date(dateStr);
-            if (isNaN(d)) return "—";
-            const dd = String(d.getDate()).padStart(2, "0");
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const yyyy = d.getFullYear();
-            return `${dd}/${mm}/${yyyy}`;
-        },
-        age(birthDate) {
-            const today = new Date();
-            let a = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) a--;
-            return a;
+            return formatDate(dateStr, "—");
         },
     },
 };

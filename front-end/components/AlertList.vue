@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import { formatDate } from "~/composables/useDateFormat";
+
 export default {
   props: {
     alerts: {
@@ -53,7 +55,7 @@ export default {
       this.$emit('delete-alert', alertId);
     },
     formatAlertDate(date) {
-      return this.$parent.formatDate(date);
+      return formatDate(date);
     }
     // Autres méthodes...
   }

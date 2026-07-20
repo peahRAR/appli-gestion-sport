@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex justify-between relative top-0 left-0 z-50 items-center p-2 bg-surface text-text border-b-2 border-border-strong">
-    <nuxt-picture :src="logoSrc" alt="MMA Baisieux" class="text-2xl text-text font-bold h-16 w-16" />
+    <img :src="logoSrc" alt="MMA Baisieux" class="h-14 md:h-20 w-auto object-contain" />
 
     <div v-if="isAuthenticated">
       <!-- Menu déroulant -->
@@ -63,7 +63,10 @@ export default {
   },
   computed: {
     logoSrc() {
-      return this.isDark ? "newLogo/logoBlackTheme.png" : "newLogo/logo2026_whiteTheme.png";
+      // Served directly as a static PNG (bypassing @nuxt/image/IPX): the logo
+      // is small and this guarantees the transparent background is never
+      // lost or altered by a lossy webp re-encode.
+      return this.isDark ? "/newLogo/logoBlackTheme.png" : "/newLogo/logo2026_whiteTheme.png";
     },
   },
   created() {

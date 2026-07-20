@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex justify-between relative top-0 left-0 z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400 dark:bg-gray-800 dark:border-gray-600">
-    <nuxt-picture src="MMABsxLogo.png" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16 dark:text-gray-100" />
+    <nuxt-picture :src="logoSrc" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16 dark:text-gray-100" />
 
     <div v-if="isAuthenticated">
       <!-- Menu déroulant -->
@@ -46,14 +46,25 @@
 </template>
 
 <script>
+import { useTheme } from "~/composables/useTheme";
+
 export default {
   name: "Header",
+  setup() {
+    const { isDark } = useTheme();
+    return { isDark };
+  },
   data() {
     return {
       isAuthenticated: false,
       userRole: 0,
       isMenuOpen: false,
     };
+  },
+  computed: {
+    logoSrc() {
+      return this.isDark ? "newLogo/logoBlackTheme.png" : "newLogo/logo2026_whiteTheme.png";
+    },
   },
   created() {
     this.checkAuthentication();

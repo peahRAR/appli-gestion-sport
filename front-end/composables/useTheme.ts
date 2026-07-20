@@ -3,6 +3,7 @@ export type ThemeMode = "light" | "dark" | "system";
 const STORAGE_KEY = "theme-preference";
 
 const mode = ref<ThemeMode>("system");
+const isDark = ref(false);
 let mediaQuery: MediaQueryList | null = null;
 let initialized = false;
 
@@ -13,8 +14,9 @@ function resolveIsDark(currentMode: ThemeMode): boolean {
 }
 
 function applyTheme(currentMode: ThemeMode) {
+  isDark.value = resolveIsDark(currentMode);
   if (typeof document === "undefined") return;
-  document.documentElement.classList.toggle("dark", resolveIsDark(currentMode));
+  document.documentElement.classList.toggle("dark", isDark.value);
 }
 
 function initTheme() {
@@ -42,5 +44,5 @@ export function useTheme() {
     applyTheme(newMode);
   }
 
-  return { mode, setMode };
+  return { mode, isDark, setMode };
 }

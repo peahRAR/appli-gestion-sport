@@ -4,6 +4,12 @@ const latestVersion = [...releases].sort(
   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
 )[0]?.version ?? "0.0.0";
 
+const logoFiles = ["newLogo/logo2026_whiteTheme.png", "newLogo/logoBlackTheme.png"];
+const logoWidths = [320, 640, 768, 1024, 1280, 1536, 2048, 2560, 3072];
+const logoPrerenderRoutes = logoFiles.flatMap((file) =>
+  logoWidths.map((w) => `/_ipx/w_${w}&f_webp/${file}`)
+);
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   components: [
@@ -40,17 +46,7 @@ export default defineNuxtConfig({
 
   nitro: {
     prerender: {
-      routes: [
-        '/_ipx/w_320&f_webp/MMABsxLogo.png',
-        '/_ipx/w_640&f_webp/MMABsxLogo.png',
-        '/_ipx/w_768&f_webp/MMABsxLogo.png',
-        '/_ipx/w_1024&f_webp/MMABsxLogo.png',
-        '/_ipx/w_1280&f_webp/MMABsxLogo.png',
-        '/_ipx/w_1536&f_webp/MMABsxLogo.png',
-        '/_ipx/w_2048&f_webp/MMABsxLogo.png',
-        '/_ipx/w_2560&f_webp/MMABsxLogo.png',
-        '/_ipx/w_3072&f_webp/MMABsxLogo.png',
-      ]
+      routes: logoPrerenderRoutes
     }
   }
 

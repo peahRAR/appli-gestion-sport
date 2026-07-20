@@ -51,6 +51,11 @@
           <federation-manager :baseUrl="getUrl()" />
         </div>
 
+        <!-- Purge de fin de saison (Super Admin uniquement) -->
+        <div v-if="getUserRole() === 2" class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
+          <PurgeSection :baseUrl="getUrl()" />
+        </div>
+
       </div>
 
       <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" :licenses="selectedUserLicenses"

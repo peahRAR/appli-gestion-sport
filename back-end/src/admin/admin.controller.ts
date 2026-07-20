@@ -1,4 +1,4 @@
-import { Controller, Put, Param, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Put, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { SetMetadata } from '@nestjs/common';
 import { AdminRoleGuard } from '../common/guard/admin.guard';
@@ -23,5 +23,18 @@ export class AdminController {
     @Param('newRole') newRole: number,
   ): Promise<void> {
     await this.adminService.changeUserRole(id, newRole);
+  }
+
+  // Purge de fin de saison — Super Admin uniquement.
+  @Post('purge/licenses')
+  @UseGuards(SuperadminRoleGuard)
+  async purgeLicenses(@Req() req): Promise<{ affectedCount: number }> {
+    return this.adminService.purgeLicenses(req.user.id);
+  }
+
+  @Post('purge/payments')
+  @UseGuards(SuperadminRoleGuard)
+  async purgePayments(@Req() req): Promise<{ affectedCount: number }> {
+    return this.adminService.purgePayments(req.user.id);
   }
 }

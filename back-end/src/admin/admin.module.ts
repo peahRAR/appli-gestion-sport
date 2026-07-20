@@ -6,15 +6,18 @@ import { AdminController } from './admin.controller';
 
 import { UsersModule } from '../users/users.module';
 import { User } from '../users/entities/users.entity';
+import { UserLicense } from '../users/entities/user-license.entity';
 import { Federation } from '../federations/federations.entity';
+import { AuditModule } from '../audit/audit.module';
 
 import { AdminFederationsController } from '../federations/federations.controller';
-import { AdminFederationsService } from '../federations/federations.service';     
+import { AdminFederationsService } from '../federations/federations.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Federation]),
+    TypeOrmModule.forFeature([User, UserLicense, Federation]),
     UsersModule,
+    AuditModule,
   ],
   controllers: [
     AdminController,

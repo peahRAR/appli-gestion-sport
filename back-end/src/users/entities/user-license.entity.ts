@@ -17,7 +17,8 @@ export class UserLicense {
 
   // Encrypted at rest (same AES-256-CBC scheme as before); holds the plain
   // license number in memory once TypeORM's transformer decrypts it.
-  @EncryptedColumn()
+  // Nullable so a season purge can clear it while keeping the federation link.
+  @EncryptedColumn({ nullable: true })
   number_encrypted: string;
 
   @CreateDateColumn()

@@ -59,6 +59,15 @@ jobs:
         port: 22
         source: "back-end/ecosystem.config.js"
         target: "/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/"
+        # scp-action preserves the source's relative path under target by
+        # default, which would land this at .../appli-gestion-sport/back-end/
+        # ecosystem.config.js — NOT the .../appli-gestion-sport/ecosystem.config.js
+        # path the "Deploy with PM2" step's `pm2 start` command actually reads.
+        # That mismatch meant PM2 was loading a stale, never-updated copy of
+        # this file every single deploy. strip_components removes the
+        # "back-end/" source prefix so the fresh file lands exactly where
+        # it's read from.
+        strip_components: 1
 
     - name: Deploy with PM2
       uses: appleboy/ssh-action@v0.1.10

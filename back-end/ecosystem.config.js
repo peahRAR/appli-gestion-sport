@@ -3,8 +3,11 @@ const path = require('path');
 module.exports = {
     apps: [{
         name: "api-start",
-        // Resolved relative to this file's own location on disk, so it's
-        // correct regardless of the shell's cwd when `pm2 reload` runs.
+        // Deployed to appli-gestion-sport/ecosystem.config.js (the deploy
+        // workflow's `pm2 start` command targets that exact path, with
+        // strip_components stripping the "back-end/" prefix on copy — see
+        // deploy-back.yaml) — so __dirname is appli-gestion-sport/, and the
+        // app itself lives one level down in appli-gestion-sport/back-end/.
         cwd: path.join(__dirname, 'back-end'),
         // nest build emits dist/src/main.js here (data-source.ts at the repo
         // root makes tsc infer a rootDir that preserves the src/ folder),

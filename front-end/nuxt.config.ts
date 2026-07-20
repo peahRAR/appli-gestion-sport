@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     },
   ],
   ssr: false,
-  modules: ["@nuxt/image", "nuxt-icon", "@pinia/nuxt"],
+  modules: ["@nuxt/image", "@nuxt/icon", "@pinia/nuxt"],
   css: ["~/assets/main.css"],
   app: {
     head: {

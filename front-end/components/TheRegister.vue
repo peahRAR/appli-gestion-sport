@@ -75,7 +75,7 @@
 
     <div class="flex justify-center">
       <button type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-sm focus:outline-hidden focus:shadow-outline">
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-sm focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
         S'inscrire
       </button>
     </div>

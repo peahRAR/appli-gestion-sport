@@ -1,7 +1,7 @@
 <template>
     <div class="datepicker-wrapper w-full relative" ref="datepickerWrapper">
         <input type="text" :value="displayDate" @focus="openCalendar" readonly
-            class="datepicker-input w-full px-4 py-2 border rounded-lg outline-hidden cursor-pointer bg-surface text-text border-border"
+            class="datepicker-input w-full px-4 py-2 border rounded-lg cursor-pointer bg-surface text-text border-border focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
             :placeholder="placeholder" :required="required" />
         <Icon class="datepicker-icon" @click="toggleCalendar" name="material-symbols:calendar-month" />
         <div v-if="isOpen" class="datepicker-popover" @mousedown.stop>

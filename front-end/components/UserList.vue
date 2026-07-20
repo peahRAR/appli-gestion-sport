@@ -7,7 +7,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="currentSortBy"
-          class="block bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
+          class="block bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
         >
           <option value="null">Trier par ...</option>
           <option v-for="cat in sortByList" :key="cat.value" :value="cat.value">
@@ -50,7 +50,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="filterOption"
-          class="block w-24 bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
+          class="block w-24 bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
         >
           <option v-for="cat in filterList" :key="cat.value" :value="cat.value">
             {{ cat.filter }}
@@ -63,7 +63,7 @@
             v-model.trim="searchQuery"
             type="text"
             placeholder="Rechercher prénom ou nom…"
-            class="block w-64 bg-surface border border-border-strong hover:border-text-muted py-2 px-3 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
+            class="block w-64 bg-surface border border-border-strong hover:border-text-muted py-2 px-3 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
           />
           <button
             v-if="searchQuery"
@@ -146,7 +146,7 @@
             <td
               class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-text-muted"
             >
-              <button @click="openModal(user)" class="focus:outline-hidden text-text" type="button">
+              <button @click="openModal(user)" class="text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 text-text hover:text-text-muted transition duration-300"

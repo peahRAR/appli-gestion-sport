@@ -49,7 +49,7 @@
                         {{ event.overview }}
                     </p>
                     <button @click="emitToggleOverflow"
-                        class="text-text font-semibold text-sm focus:outline-hidden text-center"
+                        class="text-text font-semibold text-sm text-center focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
                         v-if="event.overview.length > 150 || showOverflow">
                         Afficher {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
                     </button>

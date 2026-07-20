@@ -5,8 +5,8 @@
                 <div class="relative w-20 h-20 mr-2 rounded-full">
                     <NuxtImg v-if="userDetails.avatar" :src="userDetails.avatar" alt="Avatar"
                         class="w-full h-full rounded-full" />
-                    <div v-else class="w-full h-full rounded-full bg-gray-300 flex items-center justify-center">
-                        <span class="text-gray-600 text-4xl">
+                    <div v-else class="w-full h-full rounded-full bg-gray-300 flex items-center justify-center dark:bg-gray-900">
+                        <span class="text-gray-600 text-4xl dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
                                 <path fill="currentColor" d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
                     3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 

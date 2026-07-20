@@ -3,25 +3,25 @@
     <h2 class="text-xl font-semibold mb-2">Liste des alertes</h2>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr class="bg-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-800">
+          <tr class="bg-gray-200 dark:bg-gray-700">
             <th scope="col"
-              class="px-3 py-1 text-center w-4/12 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              class="px-3 py-1 text-center w-4/12 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
               Titre
             </th>
-            <th scope="col" class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
               Date de fin
             </th>
             <th scope="col"
-              class="px-3 py-1 text-center text-xs font-medium w-2/12 text-gray-500 uppercase tracking-wider">
+              class="px-3 py-1 text-center text-xs font-medium w-2/12 text-gray-500 uppercase tracking-wider dark:text-gray-400">
               Supprimer
             </th>
           </tr>
         </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
+        <tbody class="bg-gray-300 divide-y divide-gray-200 dark:bg-gray-900">
           <tr v-for="(alert, index) in alerts" :key="alert.id" class="w-full justify-between items-center">
-            <td class="w-3 px-3 py-4 text-black text-center font-bold">{{ alert.titre }}</td>
-            <td class="w-3 px-3 py-4 text-black text-center font-bold whitespace-nowrap">{{
+            <td class="w-3 px-3 py-4 text-black text-center font-bold dark:text-gray-100">{{ alert.titre }}</td>
+            <td class="w-3 px-3 py-4 text-black text-center font-bold whitespace-nowrap dark:text-gray-100">{{
               formatAlertDate(alert.dateFin) }}</td>
             <td class="px-3 py-4 whitespace-nowrap text-center">
               <button @click="deleteAlert(alert.id)"

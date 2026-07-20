@@ -4,7 +4,7 @@
     <form @submit.prevent="signIn">
       <!-- Email input -->
       <div class="mb-4">
-        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email :</label>
+        <label for="email" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email :</label>
         <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
           name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg focus:outline-none"
           autocomplete="email" />
@@ -30,7 +30,7 @@
     <div class="flex justify-center items-center">
       <!-- Button to open modal -->
       <button @click="openResetPasswordModal"
-        class="mt-2 underline bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        class="mt-2 underline bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline dark:bg-gray-900 dark:text-gray-100">
         Réinitialiser le mot de passe
       </button>
     </div>
@@ -39,7 +39,7 @@
     <TheModal :isOpen="showResetPasswordModal" title="Réinitialiser le mot de passe" @close="closeResetPasswordModal">
       <form @submit.prevent="requestPasswordReset">
         <div class="mb-4">
-          <label for="resetEmail" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+          <label for="resetEmail" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email</label>
           <input v-model="resetEmail" type="email" id="resetEmail" name="resetEmail" placeholder="Votre email"
             class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
         </div>

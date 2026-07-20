@@ -9,6 +9,16 @@ export default defineNuxtConfig({
   ssr: false,
   modules: ["@nuxt/image", "nuxt-icon", "@pinia/nuxt"],
   css: ["~/assets/main.css"],
+  app: {
+    head: {
+      script: [
+        {
+          // Applies the persisted/system theme before the app mounts, to avoid a flash of the wrong theme (FOUC).
+          innerHTML: `(function(){try{var s=localStorage.getItem('theme-preference');var m=(s==='light'||s==='dark')?s:'system';var d=m==='dark'||(m==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}})();`,
+        },
+      ],
+    },
+  },
   postcss: {
     plugins: {
       tailwindcss: {},

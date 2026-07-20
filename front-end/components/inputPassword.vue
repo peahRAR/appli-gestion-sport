@@ -1,7 +1,7 @@
 <template>
-    <div class="passwordInput ">
-        <label :for="id" class="block text-sm font-bold text-gray-700 mb-2">{{ label }}</label>
-        <div class="border rounded p-2 flex flex-row justify-between bg-white" :class="passwordInputClasses">
+    <div class="passwordInput">
+        <label :for="id" class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-200">{{ label }}</label>
+        <div class="border rounded p-2 flex flex-row justify-between bg-white dark:bg-gray-800" :class="passwordInputClasses">
             <input placeholder="Mot de passe" :id="id" @input="emitPassword" :value="modelValue"
                 :type="showPassword ? 'text' : 'password'" class="outline-none focus-visible:outline-none w-full pl-2"
                 required autocomplete="current-password">

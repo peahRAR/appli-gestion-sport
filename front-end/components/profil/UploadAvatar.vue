@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar-picker bg-gray-200 p-4 mb-4 rounded flex flex-col items-center">
+  <div class="avatar-picker bg-gray-200 p-4 mb-4 rounded flex flex-col items-center dark:bg-gray-700">
     <div class="image-container">
       <img ref="image" :src="defaultImage" class="avatar-image w-full h-full" />
     </div>

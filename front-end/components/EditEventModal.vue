@@ -6,37 +6,37 @@
             <div class="flex flex-col mb-4">
                 <label for="title">Titre du cours : </label>
                 <input type="text" v-model="event.name_event" id="title"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" />
             </div>
             <!-- Description -->
             <div class="flex flex-col mb-4">
                 <label for="description">Description du cours : </label>
                 <textarea v-model="event.overview" id="description"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" placeholder=""></textarea>
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" placeholder=""></textarea>
             </div>
             <!-- Coach -->
             <div class="flex flex-col mb-4">
                 <label for="coach">Nom du coach : </label>
                 <input type="text" v-model="event.coach" id="coach"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" />
             </div>
             <!-- Date -->
             <div class="flex flex-col">
                 <label class="font-semibold" for="date">Date et heure de début</label>
                 <input type="datetime-local" v-model="formattedDate" @input="updateDate($event.target.value)" id="date"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" />
             </div>
             <!-- Duration -->
             <div class="flex flex-col">
                 <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
                 <input type="number" v-model="durationInMinutes" id="duration"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" />
             </div>
             <!-- Places -->
             <div class="flex flex-col mb-4">
                 <label for="totalSeats">Nombre de places total disponibles :</label>
                 <input type="number" v-model="event.totalPlaces" id="totalSeats"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700" />
             </div>
 
             <!-- Visibilité  -->
@@ -46,10 +46,10 @@
                     <input type="checkbox" v-model="event.isVisible" class="sr-only peer"
                         aria-label="Basculer la visibilité du cours" />
                     <div
-                        class="w-12 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-green-500">
+                        class="w-12 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-green-500 dark:bg-gray-900">
                     </div>
                     <div
-                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-6">
+                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-6 dark:bg-gray-800">
                     </div>
                 </label>
                 <span :class="event.isVisible ? 'text-green-600' : 'text-gray-500'" class="text-sm font-medium">

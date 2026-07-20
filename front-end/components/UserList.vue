@@ -7,7 +7,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="currentSortBy"
-          class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
+          class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
         >
           <option value="null">Trier par ...</option>
           <option v-for="cat in sortByList" :key="cat.value" :value="cat.value">
@@ -50,7 +50,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="filterOption"
-          class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
+          class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
         >
           <option v-for="cat in filterList" :key="cat.value" :value="cat.value">
             {{ cat.filter }}
@@ -63,12 +63,12 @@
             v-model.trim="searchQuery"
             type="text"
             placeholder="Rechercher prénom ou nom…"
-            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline"
+            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
           />
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded dark:bg-gray-700 dark:hover:bg-gray-900"
             type="button"
           >
             Effacer
@@ -79,11 +79,11 @@
 
     <div class="overflow-x-auto">
       <table class="mx-auto w-full min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr class="bg-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-800">
+          <tr class="bg-gray-200 dark:bg-gray-700">
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
             >
               Statut
             </th>
@@ -92,32 +92,32 @@
               v-for="col in currentColumns"
               :key="col"
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
             >
               {{ columnsNames[col] || col }}
             </th>
 
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
             >
               Actions
             </th>
           </tr>
         </thead>
 
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800">
           <tr
             v-for="user in paginatedUsers"
             :key="user.id"
             :class="userBgColor(user)"
           >
-            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
               <span class="inline-flex items-center gap-2">
                 <Icon
                   v-if="!user.date_end_pay || new Date(user.date_end_pay) < new Date()"
                   name="tabler:tax-euro"
-                  class="text-black text-3xl"
+                  class="text-black text-3xl dark:text-gray-100"
                 />
                 <svg
                   v-if="!user.license"
@@ -137,18 +137,18 @@
             <td
               v-for="col in currentColumns"
               :key="col"
-              class="px-3 py-2 whitespace-nowrap text-center text-sm text-black font-semibold capitalize"
+              class="px-3 py-2 whitespace-nowrap text-center text-sm text-black font-semibold capitalize dark:text-gray-100"
             >
               {{ user[col] }}
             </td>
 
             <td
-              class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500"
+              class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500 dark:text-gray-400"
             >
-              <button @click="openModal(user)" class="focus:outline-none text-black" type="button">
+              <button @click="openModal(user)" class="focus:outline-none text-black dark:text-gray-100" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 text-black hover:text-gray-600 transition duration-300"
+                  class="h-5 w-5 text-black hover:text-gray-600 transition duration-300 dark:text-gray-100 dark:hover:text-gray-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -163,7 +163,7 @@
           </tr>
 
           <tr v-if="paginatedUsers.length === 0">
-            <td :colspan="currentColumns.length + 2" class="px-3 py-6 text-center text-sm text-gray-500">
+            <td :colspan="currentColumns.length + 2" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
               Aucun utilisateur trouvé
             </td>
           </tr>
@@ -185,7 +185,7 @@
 
       <div class="flex justify-center w-full items-center">
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
           @click="prevPage"
           :class="{ hidden: currentPage === 1 }"
           :disabled="currentPage === 1"
@@ -202,7 +202,7 @@
         <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
 
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
           @click="nextPage"
           :class="{ hidden: currentPage === totalPages }"
           :disabled="currentPage === totalPages"

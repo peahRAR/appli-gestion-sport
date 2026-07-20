@@ -117,7 +117,7 @@
 
     <!-- Modal confirmation suppression -->
     <div v-if="confirmTarget" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-      <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+      <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
         <h4 class="text-base font-semibold">Supprimer la fédération</h4>
         <p class="mt-2 text-sm text-slate-600">
           Confirmer la suppression de

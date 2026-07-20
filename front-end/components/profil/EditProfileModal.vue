@@ -17,7 +17,7 @@
           v-model="editedWeight"
           @input="updateField('editedWeight', $event.target.value)"
           placeholder="Nouveau poids"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2"
+          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
         />
         <p class="ml-2">Kg</p>
       </div>
@@ -30,7 +30,7 @@
           v-model="editedTelNum"
           @input="updateField('editedTelNum', $event.target.value)"
           placeholder="Nouveau numéro"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2"
+          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 
@@ -41,7 +41,7 @@
           v-model="editedTelMedic"
           @input="updateField('editedTelMedic', $event.target.value)"
           placeholder="Nouveau téléphone médical"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2"
+          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 
@@ -52,7 +52,7 @@
           v-model="editedTelEmergency"
           @input="updateField('editedTelEmergency', $event.target.value)"
           placeholder="Nouveau téléphone d'urgence"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2"
+          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 

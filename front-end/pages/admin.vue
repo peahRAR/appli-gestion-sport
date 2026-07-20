@@ -7,40 +7,40 @@
           Administration
         </h1>
         <!-- Inactive Users Table -->
-        <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <div class="mb-8 bg-white mx-2 rounded p-2 dark:bg-gray-800" style="overflow-x: auto">
           <inactive-users-table :inactive-users="filterUsers(false)" :pageSize="10" @reactivate="reactivateUser"
             @delete="deleteUser" />
         </div>
         <!-- USERS List -->
-        <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <div class="mb-8 bg-white mx-2 rounded p-2 dark:bg-gray-800" style="overflow-x: auto">
           <UserList :key="usersKey" :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns
             :defaultColumns :columnsNames @update:users="updateUsers" @open-modal="openModal" />
         </div>
         <!-- Ajouté une alerte -->
-        <div class="bg-white mx-2 rounded p-2 mb-10">
+        <div class="bg-white mx-2 rounded p-2 mb-10 dark:bg-gray-800">
           <add-alert-form @new-alert="submitAlert" />
         </div>
         <!-- Liste des alertes -->
-        <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden">
+        <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden dark:bg-gray-800">
           <AlertList :alerts="alerts" @delete-alert="deleteAlert" />
         </div>
         <!-- Creer un cour  -->
-        <div class="bg-white mx-2 rounded p-2">
+        <div class="bg-white mx-2 rounded p-2 dark:bg-gray-800">
           <create-course-form @create="createCourse" />
         </div>
 
         <!-- Liste des cours -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
           <event-list :events="events" @edit-event="editEvent" :base-url="getUrl()" @delete-event="deleteEvent" />
         </div>
 
         <!-- Liste des clefs -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
           <key-manager :users="users" :baseUrl="getUrl()" />
         </div>
 
         <!-- Gestion des fédérations -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
           <federation-manager :baseUrl="getUrl()" />
         </div>
 

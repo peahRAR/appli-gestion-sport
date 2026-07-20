@@ -418,7 +418,7 @@ onMounted(async () => {
                     </div>
 
                     <div v-if="locationOpen && locationSuggestions.length"
-                        class="absolute z-50 mt-2 w-full border rounded-lg bg-white overflow-hidden">
+                        class="absolute z-50 mt-2 w-full border rounded-lg bg-white overflow-hidden dark:bg-gray-800">
                         <button v-for="(s, i) in locationSuggestions" :key="s.label + i" type="button"
                             class="w-full text-left px-3 py-2 text-sm hover:bg-black/5"
                             :class="i === activeIndex ? 'bg-black/5' : ''" @mousedown.prevent="selectLocation(s)">

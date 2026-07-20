@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-bold mb-6">{{ title }}</h1>
     <div v-for="(section, index) in sections" :key="index" class="mb-8">
       <h2 class="text-xl font-semibold mb-4">{{ section.title }}</h2>
-      <p class="text-gray-700">{{ section.content }}</p>
+      <p class="text-gray-700 dark:text-gray-200">{{ section.content }}</p>
     </div>
   </div>
 </template>

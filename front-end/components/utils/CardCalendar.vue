@@ -275,7 +275,7 @@ function downloadIcs() {
     <div v-if="canManage" class="absolute -top-[-0.25rem] right-3 flex gap-2">
       <!--
       <button
-        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-green-50 transition"
+        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-green-50 transition dark:bg-gray-800"
         type="button"
         @click="onEdit"
         aria-label="Modifier"
@@ -286,7 +286,7 @@ function downloadIcs() {
       -->
 
       <button
-        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-red-50 transition"
+        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-red-50 transition dark:bg-gray-800"
         type="button"
         @click="onDelete"
         aria-label="Supprimer"
@@ -356,7 +356,7 @@ function downloadIcs() {
           <div class="flex items-center gap-2">
             <a
               v-if="directionsHref"
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               :href="directionsHref"
               target="_blank"
               rel="noopener noreferrer"
@@ -368,7 +368,7 @@ function downloadIcs() {
             <!-- Ajouter au calendrier -->
             <a
               v-if="googleCalendarHref"
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               :href="googleCalendarHref"
               target="_blank"
               rel="noopener noreferrer"
@@ -378,7 +378,7 @@ function downloadIcs() {
             </a>
 
             <button
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               type="button"
               @click="downloadIcs"
               title="Télécharger .ics (Apple Calendar, etc.)"

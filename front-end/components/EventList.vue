@@ -3,38 +3,38 @@
     <h2 class="text-xl font-semibold mb-2">Liste des cours</h2>
     <div class="w-full">
       <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr class="bg-gray-200">
-            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th class="px-3 py-1 text-center max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <thead class="bg-gray-50 dark:bg-gray-800">
+          <tr class="bg-gray-200 dark:bg-gray-700">
+            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Date</th>
+            <th class="px-3 py-1 text-center max-w-2 text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
               Intitulé</th>
-            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Visibilité</th>
-            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Visibilité</th>
+            <th class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">Actions</th>
           </tr>
         </thead>
 
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
+        <tbody class="bg-gray-300 divide-y divide-gray-200 dark:bg-gray-900">
           <tr v-for="(event, index) in paginatedEvents" :key="event.id">
-            <td class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize">
+            <td class="px-3 py-2 whitespace-nowrap text-sm text-black font-semibold capitalize dark:text-gray-100">
               {{ formatDate(event.date_event) }}
             </td>
 
-            <td class="px-3 py-2 max-w-20 text-sm text-black font-semibold uppercase">
+            <td class="px-3 py-2 max-w-20 text-sm text-black font-semibold uppercase dark:text-gray-100">
               {{ event.name_event }}
             </td>
 
             <!-- Colonne Visibilité avec toggle -->
-            <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-black">
+            <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-black dark:text-gray-100">
               <div class="flex items-center justify-center gap-3">
                 <label class="relative inline-flex items-center cursor-pointer select-none">
                   <input type="checkbox" class="sr-only peer" :checked="isVisible(event)"
                     :disabled="loadingId === event.id" @change="onToggleVisibility(event)"
                     aria-label="Basculer la visibilité du cours" />
                   <div
-                    class="w-10 h-5 bg-gray-300 rounded-full peer-checked:bg-green-500 transition-colors duration-200">
+                    class="w-10 h-5 bg-gray-300 rounded-full peer-checked:bg-green-500 transition-colors duration-200 dark:bg-gray-900">
                   </div>
                   <div
-                    class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-5">
+                    class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-5 dark:bg-gray-800">
                   </div>
                 </label>
 
@@ -45,7 +45,7 @@
               </div>
             </td>
 
-            <td class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-black">
+            <td class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-black dark:text-gray-100">
               <button @click="emitEditEvent(event)"
                 class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600">
                 Modifier
@@ -63,7 +63,7 @@
     <!-- Pagination -->
     <div class="mt-4 flex justify-center">
       <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
         @click="prevPage" :class="{ hidden: currentPage === 1 }" :disabled="currentPage === 1">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
           <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z" />
@@ -71,7 +71,7 @@
       </button>
       <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
       <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
         @click="nextPage" :class="{ hidden: currentPage === totalPages }" :disabled="currentPage === totalPages">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
           <path fill="currentColor" d="m12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />

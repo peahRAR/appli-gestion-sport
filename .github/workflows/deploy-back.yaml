@@ -97,7 +97,12 @@ jobs:
           echo "Contenu de dist/src/:"
           ls -la dist/src/ | head -10 2>/dev/null || echo "Pas de dossier src"
           
-          # Configuration et reload PM2
+          # Configuration et (re)démarrage PM2
+          # `pm2 reload` réutilise le cwd/script déjà enregistrés pour un process
+          # existant et ne relit pas ces champs depuis le fichier ecosystem —
+          # seul un delete + start applique un cwd/script mis à jour.
           export GOOGLE_APPLICATION_CREDENTIALS=/home/${{ secrets.SERVER_USER }}/appli-gestion-sport/back-end/mma-baisieux-f9fcae8661ce.json
-          pm2 reload /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
+          pm2 delete api-start || true
+          pm2 start /home/${{ secrets.SERVER_USER }}/appli-gestion-sport/ecosystem.config.js --update-env
+          pm2 save
           pm2 ls

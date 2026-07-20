@@ -1,6 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { ListsMember } from './lists-member.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
@@ -173,5 +173,10 @@ export class ListsMembersService {
 
   async removeAllByUserId(userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ userId });
+  }
+
+  async removeAllByEventIds(eventIds: number[]): Promise<void> {
+    if (eventIds.length === 0) return;
+    await this.listsMemberRepository.delete({ eventId: In(eventIds) });
   }
 }

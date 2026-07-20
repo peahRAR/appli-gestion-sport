@@ -194,10 +194,7 @@ export class UsersController {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    const lists = await this.listsMembersService.findAllByIdUser(id);
-    lists.forEach((element) => {
-      this.listsMembersService.remove(element.eventId, element.userId);
-    });
+    await this.listsMembersService.removeAllByUserId(id);
 
     if (user.avatar) {
       const avatarPath = `avatars/${id}`;

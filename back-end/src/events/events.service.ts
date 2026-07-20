@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException, forwardRef, Logger } from '@nest
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Repository, FindManyOptions, DeepPartial } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 import { Event } from './events.entity';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 
@@ -138,17 +138,8 @@ export class EventsService {
 
     this.logger.debug(`Événements expirés récupérés : ${JSON.stringify(expiredEvents)}`);
 
-    // Supprimer les entrées correspondantes dans la table ListsMembers
-    for (const event of expiredEvents) {
-      this.logger.debug(`Traitement de l'événement : ${event.id}`);
-      const lists = await this.listsMembersService.findAllByIdEvent(event.id);
-      this.logger.debug(`Membres trouvés pour l'événement : ${JSON.stringify(lists)}`);
-
-      for (const element of lists) {
-        this.logger.debug(`Suppression du membre : eventId=${element.eventId}, userId=${element.userId}`);
-        await this.listsMembersService.remove(element.eventId, element.userId);
-      }
-    }
+    // Supprimer les entrées correspondantes dans la table ListsMembers (une seule requête groupée)
+    await this.listsMembersService.removeAllByEventIds(expiredEvents.map((event) => event.id));
 
     // Supprimer les événements expirés de la table Events
     this.logger.debug('Suppression des événements de la table Events');

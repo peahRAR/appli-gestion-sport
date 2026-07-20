@@ -3,16 +3,27 @@
     <div class="container mx-auto flex justify-between pb-2">
       <NuxtLink
         to="/versions"
-        class="text-black px-2 bg-white rounded-full inline text-sm hover:bg-gray-200 transition duration-200"
+        class="relative text-text px-2 bg-surface rounded-full inline text-sm hover:bg-surface-2 transition duration-200"
       >
         v{{ $config.public.frontVersion }}
+        <span
+          v-if="hasNewVersion"
+          class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 opacity-100"
+          title="Nouvelle version disponible"
+        ></span>
       </NuxtLink>
     </div>
   </div>
 </template>
 
 <script>
+import { useChangelogVersion } from '~/composables/useChangelogVersion';
+
 export default {
-  name: 'Footer'
+  name: 'Footer',
+  setup() {
+    const { hasNewVersion } = useChangelogVersion();
+    return { hasNewVersion };
+  },
 }
 </script>

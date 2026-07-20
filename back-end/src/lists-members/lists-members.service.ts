@@ -1,12 +1,11 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { ListsMember } from './lists-member.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { EventsService } from 'src/events/events.service';
 import { UsersService } from '../users/services/users.service';
-import { EncryptionService } from 'src/users/services/encryption.service';
 import { Event } from 'src/events/events.entity';
 
 @Injectable()
@@ -18,7 +17,6 @@ export class ListsMembersService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
-    private readonly encryptionService: EncryptionService,
     private readonly dataSource: DataSource, // Injection de DataSource
   ) { }
 
@@ -47,48 +45,17 @@ export class ListsMembersService {
         select: {
           user: {
             id: true,
-            license: {
-              identifier: true,
-              data: true
-            },
-            date_end_pay: {
-              identifier: true,
-              data: true
-            },
-            avatar: {
-              identifier: true,
-              data: true
-            },
-            firstname: {
-              identifier: true,
-              data: true
-            },
-            name: {
-              identifier: true,
-              data: true
-            },
+            license: true,
+            date_end_pay: true,
+            avatar: true,
+            firstname: true,
+            name: true,
           }
         }
       });
 
+      // Selected user fields are already decrypted by the @EncryptedColumn transformer.
       const listParticipants = participants.map(participant => participant.user);
-
-      const decryptFields = async (user) => {
-        for (const key in user) {
-          if (user[key] && typeof user[key] === 'object' && 'identifier' in user[key] && 'data' in user[key]) {
-            try {
-              user[key] = await this.encryptionService.decryptField(user[key]);
-            } catch (error) {
-              console.error(`Failed to decrypt ${key} for user ${user.id}:`, error);
-            }
-          }
-        }
-      };
-
-      // Décryptage des champs pour chaque utilisateur
-      for (const user of listParticipants) {
-        await decryptFields(user);
-      }
 
       console.log(listParticipants);
 
@@ -206,5 +173,10 @@ export class ListsMembersService {
 
   async removeAllByUserId(userId: string): Promise<void> {
     await this.listsMemberRepository.delete({ userId });
+  }
+
+  async removeAllByEventIds(eventIds: number[]): Promise<void> {
+    if (eventIds.length === 0) return;
+    await this.listsMemberRepository.delete({ eventId: In(eventIds) });
   }
 }

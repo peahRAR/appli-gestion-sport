@@ -7,41 +7,53 @@
           Administration
         </h1>
         <!-- Inactive Users Table -->
-        <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <div class="mb-8 bg-surface mx-2 rounded-sm p-2" style="overflow-x: auto">
           <inactive-users-table :inactive-users="filterUsers(false)" :pageSize="10" @reactivate="reactivateUser"
             @delete="deleteUser" />
         </div>
         <!-- USERS List -->
-        <div class="mb-8 bg-white mx-2 rounded p-2" style="overflow-x: auto">
+        <div class="mb-8 bg-surface mx-2 rounded-sm p-2" style="overflow-x: auto">
           <UserList :key="usersKey" :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns
             :defaultColumns :columnsNames @update:users="updateUsers" @open-modal="openModal" />
         </div>
         <!-- Ajouté une alerte -->
-        <div class="bg-white mx-2 rounded p-2 mb-10">
+        <div class="bg-surface mx-2 rounded-sm p-2 mb-10">
           <add-alert-form @new-alert="submitAlert" />
         </div>
         <!-- Liste des alertes -->
-        <div class="mb-8 bg-white mx-2 rounded p-2 overflow-x-hidden">
+        <div class="mb-8 bg-surface mx-2 rounded-sm p-2 overflow-x-hidden">
           <AlertList :alerts="alerts" @delete-alert="deleteAlert" />
         </div>
         <!-- Creer un cour  -->
-        <div class="bg-white mx-2 rounded p-2">
+        <div class="bg-surface mx-2 rounded-sm p-2">
           <create-course-form @create="createCourse" />
         </div>
 
         <!-- Liste des cours -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mt-8 bg-surface mx-2 rounded-sm p-2 overflow-x-auto">
           <event-list :events="events" @edit-event="editEvent" :base-url="getUrl()" @delete-event="deleteEvent" />
         </div>
 
         <!-- Liste des clefs -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
-          <key-manager :users="users" :baseUrl="getUrl()" />
+        <div class="mt-8 bg-surface mx-2 rounded-sm p-2 overflow-x-auto">
+          <HolderManager :users="users" :baseUrl="getUrl()" endpoint="/keys" number-field="keyNumber"
+            label-singular="Clé" label-plural="Clés" icon-name="material-symbols:key-outline" />
+        </div>
+
+        <!-- Liste des badges -->
+        <div class="mt-8 bg-surface mx-2 rounded-sm p-2 overflow-x-auto">
+          <HolderManager :users="users" :baseUrl="getUrl()" endpoint="/badges" number-field="badgeNumber"
+            label-singular="Badge" label-plural="Badges" icon-name="material-symbols:badge-outline" />
         </div>
 
         <!-- Gestion des fédérations -->
-        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto">
+        <div class="mt-8 bg-surface mx-2 rounded-sm p-2 overflow-x-auto">
           <federation-manager :baseUrl="getUrl()" />
+        </div>
+
+        <!-- Purge de fin de saison (Super Admin uniquement) -->
+        <div v-if="getUserRole() === 2" class="mt-8 bg-surface mx-2 rounded-sm p-2 overflow-x-auto">
+          <PurgeSection :baseUrl="getUrl()" />
         </div>
 
       </div>
@@ -58,6 +70,8 @@
   </div>
 </template>
 <script>
+import { formatDate, calculateAge } from "~/composables/useDateFormat";
+
 export default {
   data() {
     return {
@@ -130,14 +144,7 @@ export default {
       }));
     },
     calculateAge(birthday) {
-      const birthdate = new Date(birthday);
-      const today = new Date();
-      let age = today.getFullYear() - birthdate.getFullYear();
-      const m = today.getMonth() - birthdate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthdate.getDate())) {
-        age--;
-      }
-      return age;
+      return calculateAge(birthday);
     },
     getUrl() {
       const config = useRuntimeConfig();
@@ -324,32 +331,9 @@ export default {
       this.selectedUser = null;
       this.showModalSelectedUser = false;
     },
-    // Format date
+    // Format date (JJ/MM/AAAA)
     formatDate(dateString) {
-      // Convertir la chaîne en objet Date
-      const date = new Date(dateString);
-
-      // Options de formatage
-      const options = {
-        weekday: "short", // Utiliser les trois premières lettres du jour
-        year: "numeric",
-        month: "short", // Utiliser les trois premières lettres du mois
-        day: "numeric",
-      };
-
-      // Formater la date en utilisant les options
-      let formattedDate = date.toLocaleDateString("fr-FR", options);
-
-      // Extraire les deux derniers chiffres de l'année
-      const lastTwoDigitsOfYear = formattedDate.slice(-2);
-
-      // Remplacer l'année par les deux derniers chiffres de l'année
-      formattedDate = formattedDate.replace(
-        date.getFullYear(),
-        lastTwoDigitsOfYear
-      );
-
-      return formattedDate;
+      return formatDate(dateString);
     },
     // Update user method
     async updateUser(patch) {

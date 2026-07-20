@@ -2,26 +2,26 @@
   <div>
     <h2 class="text-xl font-semibold mb-2">Liste des alertes</h2>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr class="bg-gray-200">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
+          <tr class="bg-surface-2">
             <th scope="col"
-              class="px-3 py-1 text-center w-4/12 text-xs font-medium text-gray-500 uppercase tracking-wider">
+              class="px-3 py-1 text-center w-4/12 text-xs font-medium text-text-muted uppercase tracking-wider">
               Titre
             </th>
-            <th scope="col" class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th scope="col" class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">
               Date de fin
             </th>
             <th scope="col"
-              class="px-3 py-1 text-center text-xs font-medium w-2/12 text-gray-500 uppercase tracking-wider">
+              class="px-3 py-1 text-center text-xs font-medium w-2/12 text-text-muted uppercase tracking-wider">
               Supprimer
             </th>
           </tr>
         </thead>
-        <tbody class="bg-gray-300 divide-y divide-gray-200">
+        <tbody class="bg-bg divide-y divide-border">
           <tr v-for="(alert, index) in alerts" :key="alert.id" class="w-full justify-between items-center">
-            <td class="w-3 px-3 py-4 text-black text-center font-bold">{{ alert.titre }}</td>
-            <td class="w-3 px-3 py-4 text-black text-center font-bold whitespace-nowrap">{{
+            <td class="w-3 px-3 py-4 text-text text-center font-bold">{{ alert.titre }}</td>
+            <td class="w-3 px-3 py-4 text-text text-center font-bold whitespace-nowrap">{{
               formatAlertDate(alert.dateFin) }}</td>
             <td class="px-3 py-4 whitespace-nowrap text-center">
               <button @click="deleteAlert(alert.id)"
@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import { formatDate } from "~/composables/useDateFormat";
+
 export default {
   props: {
     alerts: {
@@ -53,7 +55,7 @@ export default {
       this.$emit('delete-alert', alertId);
     },
     formatAlertDate(date) {
-      return this.$parent.formatDate(date);
+      return formatDate(date);
     }
     // Autres méthodes...
   }

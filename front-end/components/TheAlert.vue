@@ -17,7 +17,7 @@
         <div class="alert bg-orange-300 rounded-md shadow-md p-3 mb-2" v-for="(alert, index) in alerts" :key="index">
           <div class="alert-details">
             <h4 class="text-lg font-semibold mb-1">{{ alert.titre }}</h4>
-            <p class="text-black-700 [&_a]:text-blue-600 [&_a]:underline" v-html="linkify(alert.contenu)"></p>
+            <p class="text-text [&_a]:text-blue-600 [&_a]:underline" v-html="linkify(alert.contenu)"></p>
           </div>
         </div>
       </div>

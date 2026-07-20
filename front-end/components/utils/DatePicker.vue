@@ -1,7 +1,7 @@
 <template>
     <div class="datepicker-wrapper w-full relative" ref="datepickerWrapper">
         <input type="text" :value="displayDate" @focus="openCalendar" readonly
-            class="datepicker-input w-full px-4 py-2 border rounded-lg outline-none cursor-pointer"
+            class="datepicker-input w-full px-4 py-2 border rounded-lg cursor-pointer bg-surface text-text border-border focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
             :placeholder="placeholder" :required="required" />
         <Icon class="datepicker-icon" @click="toggleCalendar" name="material-symbols:calendar-month" />
         <div v-if="isOpen" class="datepicker-popover" @mousedown.stop>
@@ -16,6 +16,7 @@ import { DatePicker as VCalendarDatePicker } from 'v-calendar'
 import type { PropType } from 'vue'
 import 'v-calendar/dist/style.css'
 import { defineProps, defineEmits } from 'vue'
+import { formatDate } from '~/composables/useDateFormat'
 
 const props = defineProps({
     modelValue: {
@@ -44,12 +45,7 @@ const date = computed({
 const isOpen = ref(false)
 const datepickerWrapper = ref<HTMLElement | null>(null)
 
-const formattedDate = (dateObj: Date) => {
-    const day = String(dateObj.getDate()).padStart(2, '0')
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0')
-    const year = dateObj.getFullYear()
-    return `${day}/${month}/${year}`
-}
+const formattedDate = (dateObj: Date) => formatDate(dateObj)
 
 const displayDate = ref('')
 
@@ -107,16 +103,15 @@ onUnmounted(() => {
 .datepicker-popover {
     position: absolute;
     z-index: 10;
-    background: white;
-    border: 1px solid #ccc;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
     border-radius: 4px;
     margin-top: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom styles to ensure the selected month text remains black */
+/* Custom styles to ensure the selected month text remains readable in both themes */
 .vc-nav-item.is-active {
-    --vc-nav-item-active-color: black;
-    /* Force text color to black */
+    --vc-nav-item-active-color: var(--color-text);
 }
 </style>

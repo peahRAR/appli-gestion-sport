@@ -1,7 +1,7 @@
 <template>
   <div
-    class="flex justify-between relative top-0 left-0  z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400">
-    <nuxt-picture src="MMABsxLogo.png" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16" />
+    class="flex justify-between relative top-0 left-0 z-50 items-center p-2 bg-surface text-text border-b-2 border-border-strong">
+    <img :src="logoSrc" alt="MMA Baisieux" class="h-14 md:h-20 w-auto object-contain" />
 
     <div v-if="isAuthenticated">
       <!-- Menu déroulant -->
@@ -9,34 +9,34 @@
         <button @click="toggleMenu" class="flex items-center">
           <!-- Icône de menu (à remplacer par votre propre icône) -->
           <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24">
-            <path fill="bg-black"
+            <path fill="currentColor"
               d="M19 18v-4h-2v4h-2l3 3l3-3zM11 4C8.8 4 7 5.8 7 8s1.8 4 4 4s4-1.8 4-4s-1.8-4-4-4m0 10c-4.4 0-8 1.8-8 4v2h9.5c-.3-.8-.5-1.6-.5-2.5c0-1.2.3-2.3.9-3.4c-.6 0-1.2-.1-1.9-.1" />
           </svg>
         </button>
         <!-- Contenu du menu déroulant -->
-        <div v-show="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/profil"
+        <div v-show="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-lg z-10">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/profil"
             @click="toggleMenu">
             Profil
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/calendar" @click="toggleMenu">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/calendar" @click="toggleMenu">
             Calendrier
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/" @click="toggleMenu">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/" @click="toggleMenu">
             Cours
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/assurance"
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/assurance"
             @click="toggleMenu">
             Déclarations d'assurance
           </NuxtLink>
           <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
           <div v-if="userRole === 1 || userRole === 2">
-            <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer" to="/admin"
+            <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/admin"
               @click="toggleMenu">
               Administration
             </NuxtLink>
           </div>
-          <NuxtLink @click="logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer">
+          <NuxtLink @click="logout" class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer">
             Déconnexion
           </NuxtLink>
         </div>
@@ -46,14 +46,28 @@
 </template>
 
 <script>
+import { useTheme } from "~/composables/useTheme";
+
 export default {
   name: "Header",
+  setup() {
+    const { isDark } = useTheme();
+    return { isDark };
+  },
   data() {
     return {
       isAuthenticated: false,
       userRole: 0,
       isMenuOpen: false,
     };
+  },
+  computed: {
+    logoSrc() {
+      // Served directly as a static PNG (bypassing @nuxt/image/IPX): the logo
+      // is small and this guarantees the transparent background is never
+      // lost or altered by a lossy webp re-encode.
+      return this.isDark ? "/newLogo/logoBlackTheme.png" : "/newLogo/logo2026_whiteTheme.png";
+    },
   },
   created() {
     this.checkAuthentication();

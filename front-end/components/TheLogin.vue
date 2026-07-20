@@ -4,9 +4,9 @@
     <form @submit.prevent="signIn">
       <!-- Email input -->
       <div class="mb-4">
-        <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email :</label>
+        <label for="email" class="block text-text-muted text-sm font-bold mb-2">Email :</label>
         <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
-          name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg bg-surface text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
           autocomplete="email" />
       </div>
       <!-- Password input -->
@@ -21,7 +21,7 @@
       <!-- Submit Button -->
       <div class="flex justify-center">
         <button type="submit"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-sm focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
           Se connecter
         </button>
       </div>
@@ -30,7 +30,7 @@
     <div class="flex justify-center items-center">
       <!-- Button to open modal -->
       <button @click="openResetPasswordModal"
-        class="mt-2 underline bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        class="mt-2 underline bg-bg hover:bg-surface-2 text-text text-sm font-bold py-2 px-4 rounded-sm focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
         Réinitialiser le mot de passe
       </button>
     </div>
@@ -39,13 +39,13 @@
     <TheModal :isOpen="showResetPasswordModal" title="Réinitialiser le mot de passe" @close="closeResetPasswordModal">
       <form @submit.prevent="requestPasswordReset">
         <div class="mb-4">
-          <label for="resetEmail" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+          <label for="resetEmail" class="block text-text-muted text-sm font-bold mb-2">Email</label>
           <input v-model="resetEmail" type="email" id="resetEmail" name="resetEmail" placeholder="Votre email"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+            class="w-full px-4 py-2 border rounded-lg bg-surface text-text focus:border-blue-400 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2" />
         </div>
         <div class="flex justify-center items-center">
           <button type="submit"
-            class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-sm focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
             Envoyer
           </button>
         </div>

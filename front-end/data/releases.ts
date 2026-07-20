@@ -8,6 +8,21 @@ export type Release = {
 
 export const releases: Release[] = [
   {
+    version: "1.7",
+    date: "2026-07-20",
+    title: "Thème sombre, mises à jour majeures et nouveautés admin",
+    changes: [
+      "Ajout d'un thème clair/sombre, avec suivi automatique du réglage de l'appareil et bascule manuelle dans les réglages",
+      "Mise à jour majeure de l'application (Nuxt 4, Tailwind 4, NestJS 11)",
+      "Admin : ajout de la gestion des badges, sur le même principe que les clés",
+      "Admin : purge de fin de saison des licences et des paiements (Super Admin uniquement)",
+      "Sécurité : correction d'une faille — les comptes admin classiques ont perdu le droit de supprimer le compte d'un autre membre ; seuls le titulaire d'un compte et le Super Admin peuvent désormais le faire",
+      "Sécurité : chiffrement des données automatisé et correction d'une faille sur la gestion des clés",
+      "Performance : temps de chargement de l'administration nettement amélioré",
+      "Corrections diverses d'affichage (dates, logos, contrastes en thème sombre)",
+    ],
+  },
+  {
     version: "1.6",
     date: "2026-02-19",
     title: "Améliorations administration et calendrier",

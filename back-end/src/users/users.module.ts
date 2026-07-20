@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/users.entity';
 import { ResetPassword } from './entities/reset-password.entity';
 import { ListsMembersModule } from 'src/lists-members/lists-members.module';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService, ConfigModule } from '@nestjs/config';
 import { EncryptionService } from './services/encryption.service';
 import { EmailService } from './services/email.service';
@@ -24,7 +24,7 @@ import { Federation } from '../federations/federations.entity';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXP') },
+        signOptions: { expiresIn: configService.get<string>('JWT_EXP') as JwtSignOptions['expiresIn'] },
       }),
     }),
   ],

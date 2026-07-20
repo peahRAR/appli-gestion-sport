@@ -6,96 +6,59 @@ import {
 } from 'typeorm';
 import { ListsMember } from 'src/lists-members/lists-member.entity';
 import { KeyHolder } from 'src/keyholder/entities/keyholder.entity';
+import { Badge } from 'src/badges/entities/badge.entity';
 import { UserLicense } from './user-license.entity';
+import { EncryptedColumn } from 'src/common/decorators/encrypted-column.decorator';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('json')
-  email: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ isEmail: true })
+  email: string;
 
-  @Column('json')
-  firstname: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn()
+  firstname: string;
 
-  @Column('json')
-  name: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn()
+  name: string;
 
   @Column()
   password: string;
 
-  @Column('json')
-  birthday: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn()
+  birthday: string;
 
   @Column({ type: 'boolean' })
   gender: boolean;
 
-  @Column('json', { nullable: true })
-  tel_num: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  tel_num: string;
 
-  @Column('json', { nullable: true })
-  tel_medic: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  tel_medic: string;
 
-  @Column('json', { nullable: true })
-  tel_emergency: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  tel_emergency: string;
 
-  @Column('json', { nullable: true })
-  weight: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  weight: string;
 
-  @Column('json', { nullable: true })
-  license: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  license: string;
 
-  @Column('json', { nullable: true })
-  date_subscribe: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  date_subscribe: string;
 
-  @Column('json', { nullable: true })
-  date_payment: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  date_payment: string;
 
-  @Column('json', { nullable: true })
-  date_end_pay: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  date_end_pay: string;
 
-  @Column('json', { nullable: true })
-  avatar: {
-    identifier: string;
-    data: string;
-  };
+  @EncryptedColumn({ nullable: true })
+  avatar: string;
 
   @Column({ default: false })
   isActive: boolean;
@@ -114,4 +77,7 @@ export class User {
 
   @OneToMany(() => KeyHolder, keyHolder => keyHolder.user)
   keys: KeyHolder[];
+
+  @OneToMany(() => Badge, badge => badge.user)
+  badges: Badge[];
 }

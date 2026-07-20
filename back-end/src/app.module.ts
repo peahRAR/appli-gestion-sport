@@ -16,6 +16,7 @@ import { AppService } from './app.service';
 import { mailerConfig } from './mailer.config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { KeyHolderModule } from './keyholder/keyholder.module';
+import { BadgesModule } from './badges/badges.module';
 import { ClubCalendarModule } from './club-calendar/club-calendar.module';
 
 @Module({})
@@ -69,7 +70,8 @@ export class AppModule  {
         AdminModule,
         AlertModule,
         CronjobsModule,
-        KeyHolderModule, 
+        KeyHolderModule,
+        BadgesModule,
         ClubCalendarModule,
       ],
       controllers: [AppController],

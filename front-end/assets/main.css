@@ -1,3 +1,66 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: Roboto, sans-serif;
+
+  /* Semantic tokens — light values (default). See the .dark override below
+     for the dark values. Every pair here is WCAG AA-verified (>=4.5:1 for
+     text, >=3:1 for UI/border elements) — see the plan for the computed
+     ratios. Elevation is expressed via these luminance steps (bg -> surface
+     -> surface-2), not via box-shadow, since shadows don't read on a near-
+     black background. */
+  --color-bg: #f7f7f8;
+  --color-surface: #ffffff;
+  --color-surface-2: #ffffff;
+  --color-border: #e5e5e5;
+  --color-border-strong: #8a8a8e;
+  --color-text: #111111;
+  --color-text-muted: #52525b;
+  --color-accent: #2563eb;
+  --color-accent-fg: #ffffff;
+  --color-success: #15803d;
+  --color-warning: #b45309;
+  --color-error: #b91c1c;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4.
+  Rather than pinning this back to a fixed gray (which wouldn't adapt to the
+  dark palette below), default unspecified borders to our --color-border
+  token so every bare `border`/`border-*` class stays theme-aware even
+  without an explicit border-<color> utility.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentcolor);
+  }
+}
+
+html.dark {
+  color-scheme: dark;
+
+  /* Near-black, never pure white text — see the plan for the contrast math. */
+  --color-bg: #0a0a0a;
+  --color-surface: #171717;
+  --color-surface-2: #1f1f1f;
+  --color-border: #2a2a2a;
+  --color-border-strong: #6b6b6b;
+  --color-text: #ededed;
+  --color-text-muted: #a1a1aa;
+  --color-accent: #60a5fa;
+  --color-accent-fg: #0a0a0a;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-error: #f87171;
+}
+
+html.dark body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

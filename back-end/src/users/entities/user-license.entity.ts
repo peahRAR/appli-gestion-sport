@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { Federation } from "../../federations/federations.entity";
 import { User } from "./users.entity";
+import { EncryptedColumn } from "../../common/decorators/encrypted-column.decorator";
 
 @Entity()
 @Unique(['user', 'federation'])
@@ -14,9 +15,11 @@ export class UserLicense {
   @ManyToOne(() => Federation, f => f.licenses, { eager: true, onDelete: 'RESTRICT' })
   federation: Federation;
 
-  // On conserve ton format chiffré (tu réutilises ton service de chiffrement)
-  @Column('json')
-  number_encrypted: { identifier: string; data: string };
+  // Encrypted at rest (same AES-256-CBC scheme as before); holds the plain
+  // license number in memory once TypeORM's transformer decrypts it.
+  // Nullable so a season purge can clear it while keeping the federation link.
+  @EncryptedColumn({ nullable: true })
+  number_encrypted: string;
 
   @CreateDateColumn()
   createdAt: Date;

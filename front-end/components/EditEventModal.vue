@@ -6,37 +6,37 @@
             <div class="flex flex-col mb-4">
                 <label for="title">Titre du cours : </label>
                 <input type="text" v-model="event.name_event" id="title"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" />
             </div>
             <!-- Description -->
             <div class="flex flex-col mb-4">
                 <label for="description">Description du cours : </label>
                 <textarea v-model="event.overview" id="description"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" placeholder=""></textarea>
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" placeholder=""></textarea>
             </div>
             <!-- Coach -->
             <div class="flex flex-col mb-4">
                 <label for="coach">Nom du coach : </label>
                 <input type="text" v-model="event.coach" id="coach"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" />
             </div>
             <!-- Date -->
             <div class="flex flex-col">
                 <label class="font-semibold" for="date">Date et heure de début</label>
                 <input type="datetime-local" v-model="formattedDate" @input="updateDate($event.target.value)" id="date"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" />
             </div>
             <!-- Duration -->
             <div class="flex flex-col">
                 <label class="font-semibold" for="duration">Durée du cours (en minutes)</label>
                 <input type="number" v-model="durationInMinutes" id="duration"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" />
             </div>
             <!-- Places -->
             <div class="flex flex-col mb-4">
                 <label for="totalSeats">Nombre de places total disponibles :</label>
                 <input type="number" v-model="event.totalPlaces" id="totalSeats"
-                    class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md" />
+                    class="border border-border bg-surface-2 px-4 py-2 rounded-md" />
             </div>
 
             <!-- Visibilité  -->
@@ -46,20 +46,20 @@
                     <input type="checkbox" v-model="event.isVisible" class="sr-only peer"
                         aria-label="Basculer la visibilité du cours" />
                     <div
-                        class="w-12 h-6 bg-gray-300 rounded-full transition-colors duration-200 peer-checked:bg-green-500">
+                        class="w-12 h-6 bg-bg rounded-full transition-colors duration-200 peer-checked:bg-green-500">
                     </div>
                     <div
-                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-6">
+                        class="absolute left-0.5 top-0.5 w-5 h-5 bg-surface rounded-full transition-transform duration-200 peer-checked:translate-x-6">
                     </div>
                 </label>
-                <span :class="event.isVisible ? 'text-green-600' : 'text-gray-500'" class="text-sm font-medium">
+                <span :class="event.isVisible ? 'text-green-600' : 'text-text-muted'" class="text-sm font-medium">
                     {{ event.isVisible ? 'Visible' : 'Masqué' }}
                 </span>
             </div>
 
             <!-- Save -->
             <button type="submit"
-                class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-hidden focus:ring-2 focus:ring-green-500">
                 Sauvegarder
             </button>
         </form>

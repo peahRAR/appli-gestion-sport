@@ -1,8 +1,10 @@
-import { Controller, Post, Param, Body, Delete, Get, Patch } from '@nestjs/common';
+import { Controller, Post, Param, Body, Delete, Get, Patch, UseGuards } from '@nestjs/common';
 import { KeyHolderService } from '../services/keyholder.service';
 import { UsersService } from 'src/users/services/users.service';
+import { AdminRoleGuard } from 'src/common/guard/admin.guard';
 
 @Controller('keys')
+@UseGuards(AdminRoleGuard)
 export class KeyHolderController {
     constructor(
         private readonly keyHolderService: KeyHolderService,

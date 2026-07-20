@@ -2,7 +2,7 @@
   <div>
     <TheSkeleton v-if="loading" />
     <div class="min-h-screen" v-else>
-      <TheAlert class="mx-2 rounded mb-4" :alerts="alerts" />
+      <TheAlert class="mx-2 rounded-sm mb-4" :alerts="alerts" />
       <NoEvents v-if="events.length < 1" />
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <EventCard v-for="(event, index) in formattedEvents" :key="event.id" :event="event" @open-modal="openModal"
@@ -36,6 +36,7 @@ import EventCard from './EventCard.vue';
 import ParticipantsListModal from './ParticipantsListModal.vue';
 import ParticipantDetailsModal from './ParticipantDetailsModal.vue';
 import AlertBubble from './AlertBubble.vue';
+import { formatDate } from '~/composables/useDateFormat';
 
 export default {
   data() {
@@ -176,17 +177,7 @@ export default {
       }
     },
     formatDate(dateString) {
-      const date = new Date(dateString);
-      const options = {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      };
-      let formattedDate = date.toLocaleDateString("fr-FR", options);
-      const lastTwoDigitsOfYear = formattedDate.slice(-2);
-      formattedDate = formattedDate.replace(date.getFullYear(), lastTwoDigitsOfYear);
-      return formattedDate;
+      return formatDate(dateString);
     },
     formatTime(timeString) {
       const startTime = new Date(timeString);

@@ -6,6 +6,7 @@
       <UserInfo :user="user" :baseUrl="getUrl()" />
       <UserActions :isEditing="isEditing" @editProfile="editProfile" @confirmDelete="confirmDelete"
         @openModal="openModal" />
+      <ThemeSettings />
       <EditProfileModal :isOpen="isEditing" :user="user" :baseUrl="getUrl()" @cancelEdit="cancelEdit"
         @saveChanges="saveChanges" />
       <ChangePasswordModal :isOpen="showChangePasswordModal" @close="closeModal" @changePassword="changePassword"

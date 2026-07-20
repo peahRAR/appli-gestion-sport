@@ -6,6 +6,7 @@ import {
 } from 'typeorm';
 import { ListsMember } from 'src/lists-members/lists-member.entity';
 import { KeyHolder } from 'src/keyholder/entities/keyholder.entity';
+import { Badge } from 'src/badges/entities/badge.entity';
 import { UserLicense } from './user-license.entity';
 import { EncryptedColumn } from 'src/common/decorators/encrypted-column.decorator';
 
@@ -76,4 +77,7 @@ export class User {
 
   @OneToMany(() => KeyHolder, keyHolder => keyHolder.user)
   keys: KeyHolder[];
+
+  @OneToMany(() => Badge, badge => badge.user)
+  badges: Badge[];
 }

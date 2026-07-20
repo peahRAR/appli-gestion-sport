@@ -36,7 +36,14 @@
 
         <!-- Liste des clefs -->
         <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
-          <key-manager :users="users" :baseUrl="getUrl()" />
+          <HolderManager :users="users" :baseUrl="getUrl()" endpoint="/keys" number-field="keyNumber"
+            label-singular="Clé" label-plural="Clés" icon-name="material-symbols:key-outline" />
+        </div>
+
+        <!-- Liste des badges -->
+        <div class="mt-8 bg-white mx-2 rounded p-2 overflow-x-auto dark:bg-gray-800">
+          <HolderManager :users="users" :baseUrl="getUrl()" endpoint="/badges" number-field="badgeNumber"
+            label-singular="Badge" label-plural="Badges" icon-name="material-symbols:badge-outline" />
         </div>
 
         <!-- Gestion des fédérations -->

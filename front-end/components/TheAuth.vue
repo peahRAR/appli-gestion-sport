@@ -1,12 +1,12 @@
 <template>
   <div class="background min-h-screen container mx-auto py-4">
 
-    <div class="border border-gray-400 border-opacity-50 rounded-lg p-4 mx-4 dark:border-gray-600">
+    <div class="border border-border-strong border-opacity-50 rounded-lg p-4 mx-4">
 
       <p class="font-bold text-2xl mb-4">
         {{ openLabel }}
       </p>
-      <div class="mb-4 border-b border-gray-400 border-opacity-50 dark:border-gray-600" ></div>
+      <div class="mb-4 border-b border-border-strong border-opacity-50" ></div>
 
 
       <keep-alive>

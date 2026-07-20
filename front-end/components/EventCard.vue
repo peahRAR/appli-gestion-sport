@@ -1,14 +1,14 @@
 <template>
     <div class="card">
-        <div class="bg-white rounded-lg relative shadow-md overflow-hidden border border-gray-200 mx-2 dark:bg-gray-800 dark:border-gray-700">
+        <div class="bg-surface rounded-lg relative shadow-md overflow-hidden border border-border mx-2">
             <div class="py-2 px-4 flex justify-between">
                 <!--TOP CARD -->
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-50">{{ event.formattedDate }}</h2>
+                <h2 class="text-lg font-semibold text-text">{{ event.formattedDate }}</h2>
 
                 <div class="flex flex-row justify-between items-center rounded-sm px-1 cursor-pointer"
                     :class="placesClass">
                     <Icon name="streamline:tickets-solid" class="mr-1" />
-                    <p class="text-gray-800 font-semibold text-xs dark:text-gray-100">
+                    <p class="text-text font-semibold text-xs">
                         {{ event.places }}
                     </p>
                 </div>
@@ -19,37 +19,37 @@
             <div class="flex flex-col py-2 px-4">
                 <div class="flex justify-between items-center">
                     <!--Event Name-->
-                    <h3 class="text-lg font-semibold text-gray-800 uppercase dark:text-gray-100">
+                    <h3 class="text-lg font-semibold text-text uppercase">
                         {{ event.name_event }}
                     </h3>
 
                     <!--Coach Name-->
                     <div class="flex items-center">
                         <Icon name="material-symbols:sports-mma" class="text-xl mr-1" />
-                        <p class="text-gray-500 dark:text-gray-400">{{ event.coach }}</p>
+                        <p class="text-text-muted">{{ event.coach }}</p>
                     </div>
                 </div>
 
                 <!--Time & Duration-->
                 <div class="time flex items-center">
                     <Icon name="material-symbols:nest-clock-farsight-analog-outline" class="mr-1 text-xl" />
-                    <p class="text-gray-800 font-semibold dark:text-gray-100">De:</p>
-                    <p class="text-gray-800 font-semibold ml-1 dark:text-gray-100">
+                    <p class="text-text font-semibold">De:</p>
+                    <p class="text-text font-semibold ml-1">
                         {{ event.formattedTime }} à {{ event.formattedEndTime }}
                     </p>
 
-                    <p class="text-gray-500 ml-1 dark:text-gray-400">
+                    <p class="text-text-muted ml-1">
                         ({{ event.formattedDuration }})
                     </p>
                 </div>
 
                 <!--More informations-->
                 <div v-if="event.overview" class="flex flex-col my-4">
-                    <p class="text-gray-500 mb-4 p-1 text-left dark:text-gray-400" :class="{ 'line-clamp-3': !event.showOverflow }">
+                    <p class="text-text-muted mb-4 p-1 text-left" :class="{ 'line-clamp-3': !event.showOverflow }">
                         {{ event.overview }}
                     </p>
                     <button @click="emitToggleOverflow"
-                        class="text-gray-800 font-semibold text-sm focus:outline-hidden text-center dark:text-gray-100"
+                        class="text-text font-semibold text-sm focus:outline-hidden text-center"
                         v-if="event.overview.length > 150 || showOverflow">
                         Afficher {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
                     </button>
@@ -77,14 +77,14 @@
                             @mouseup="isPresentButtonActive = false" @mouseleave="isPresentButtonActive = false"
                             :class="[presentButtonClass, { 'cursor-not-allowed ': event.isParticipating === true }]"
                             :disabled="event.isParticipating === true"
-                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
+                            class="border border-border-strong drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
                             Présent
                         </button>
                         <button @click.stop="participate(event, false)" @mousedown="isAbsentButtonActive = true"
                             @mouseup="isAbsentButtonActive = false" @mouseleave="isAbsentButtonActive = false"
                             :class="[absentButtonClass, { 'cursor-not-allowed ': event.isParticipating === false }]"
                             :disabled="event.isParticipating === false"
-                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
+                            class="border border-border-strong drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
                             Absent
                         </button>
                     </div>
@@ -126,18 +126,14 @@ export default {
         presentButtonClass() {
             if (this.event.isParticipating === true) {
                 return 'bg-green-600 text-white'; // Non cliquable et vert
-            } else if (this.isPresentButtonActive) {
-                return 'bg-white text-black'; // Cliquable et blanc
             }
-            return 'bg-white text-black'; // Par défaut blanc quand cliquable
+            return 'bg-surface-2 text-text'; // Cliquable, état neutre
         },
         absentButtonClass() {
             if (this.event.isParticipating === false) {
                 return 'bg-red-600 text-white'; // Non cliquable et rouge
-            } else if (this.isAbsentButtonActive) {
-                return 'bg-white text-black'; // Cliquable et blanc
             }
-            return 'bg-white text-black'; // Par défaut blanc quand cliquable
+            return 'bg-surface-2 text-text'; // Cliquable, état neutre
         },
         participants() {
             return this.event.totalPlaces - this.event.places;

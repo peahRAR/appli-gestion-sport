@@ -2,9 +2,9 @@
   <transition name="modal">
     <div v-if="isOpen" @click="handleBackdropClick" ref="backdrop"
       class="fixed p-2 inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black bg-opacity-50">
-      <div class="relative p-8 min-w-full max-h-full overflow-y-auto mx-auto bg-white rounded-lg shadow-lg dark:bg-gray-800">
+      <div class="relative p-8 min-w-full max-h-full overflow-y-auto mx-auto bg-surface rounded-lg shadow-lg">
         <button v-if="showClose" @click="closeModal"
-          class="absolute top-0 right-0 m-4 text-gray-600 hover:text-gray-800 focus:outline-hidden dark:text-gray-300 dark:hover:text-gray-100">
+          class="absolute top-0 right-0 m-4 text-text-muted hover:text-text focus:outline-hidden">
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>

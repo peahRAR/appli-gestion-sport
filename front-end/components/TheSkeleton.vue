@@ -8,7 +8,7 @@
 .dot {
   width: 10px;
   height: 10px;
-  background-color: #333;
+  background-color: var(--color-text-muted);
   border-radius: 50%;
   margin: 0 5px;
   animation: jump 1s infinite;

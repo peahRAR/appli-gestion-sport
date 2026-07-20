@@ -6,7 +6,7 @@
                 Confirmer
             </button>
             <button @click="cancel"
-                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-900 dark:text-gray-100">
+                class="px-4 py-2 bg-surface-2 hover:opacity-80 text-text font-semibold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-border-strong focus:ring-offset-2">
                 Annuler
             </button>
         </div>

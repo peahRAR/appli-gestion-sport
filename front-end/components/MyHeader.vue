@@ -1,7 +1,7 @@
 <template>
   <div
-    class="flex justify-between relative top-0 left-0 z-50 items-center p-2 bg-white text-white border-b-2 border-gray-400 dark:bg-gray-800 dark:border-gray-600">
-    <nuxt-picture :src="logoSrc" alt="MMA Baisieux" class="text-2xl text-black font-bold h-16 w-16 dark:text-gray-100" />
+    class="flex justify-between relative top-0 left-0 z-50 items-center p-2 bg-surface text-text border-b-2 border-border-strong">
+    <nuxt-picture :src="logoSrc" alt="MMA Baisieux" class="text-2xl text-text font-bold h-16 w-16" />
 
     <div v-if="isAuthenticated">
       <!-- Menu déroulant -->
@@ -9,34 +9,34 @@
         <button @click="toggleMenu" class="flex items-center">
           <!-- Icône de menu (à remplacer par votre propre icône) -->
           <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24">
-            <path fill="bg-black"
+            <path fill="currentColor"
               d="M19 18v-4h-2v4h-2l3 3l3-3zM11 4C8.8 4 7 5.8 7 8s1.8 4 4 4s4-1.8 4-4s-1.8-4-4-4m0 10c-4.4 0-8 1.8-8 4v2h9.5c-.3-.8-.5-1.6-.5-2.5c0-1.2.3-2.3.9-3.4c-.6 0-1.2-.1-1.9-.1" />
           </svg>
         </button>
         <!-- Contenu du menu déroulant -->
-        <div v-show="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 dark:bg-gray-800">
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700" to="/profil"
+        <div v-show="isMenuOpen" class="absolute right-0 mt-2 w-48 bg-surface rounded-lg shadow-lg z-10">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/profil"
             @click="toggleMenu">
             Profil
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700" to="/calendar" @click="toggleMenu">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/calendar" @click="toggleMenu">
             Calendrier
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700" to="/" @click="toggleMenu">
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/" @click="toggleMenu">
             Cours
           </NuxtLink>
-          <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700" to="/assurance"
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/assurance"
             @click="toggleMenu">
             Déclarations d'assurance
           </NuxtLink>
           <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
           <div v-if="userRole === 1 || userRole === 2">
-            <NuxtLink class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700" to="/admin"
+            <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/admin"
               @click="toggleMenu">
               Administration
             </NuxtLink>
           </div>
-          <NuxtLink @click="logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer dark:text-gray-100 dark:hover:bg-gray-700">
+          <NuxtLink @click="logout" class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer">
             Déconnexion
           </NuxtLink>
         </div>

@@ -3,7 +3,7 @@
     <div class="container mx-auto flex justify-between pb-2">
       <NuxtLink
         to="/versions"
-        class="relative text-black px-2 bg-white rounded-full inline text-sm hover:bg-gray-200 transition duration-200 dark:text-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
+        class="relative text-text px-2 bg-surface rounded-full inline text-sm hover:bg-surface-2 transition duration-200"
       >
         v{{ $config.public.frontVersion }}
         <span

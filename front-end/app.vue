@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-300 dark:bg-gray-900">
+  <div class="bg-bg">
     <header>
       <my-header class="mb-2"/>
     </header>

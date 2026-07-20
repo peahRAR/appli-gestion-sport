@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="signUp">
     <div>
-      <label class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Genre</label>
+      <label class="block text-text-muted text-sm font-bold mb-2">Genre</label>
       <div class="flex">
         <label class="inline-flex items-center mr-4">
           <input v-model="user.gender" type="radio" name="gender" value="true" class="form-radio" />
@@ -14,18 +14,18 @@
       </div>
     </div>
     <div class="mb-4">
-      <label for="name" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Nom</label>
+      <label for="name" class="block text-text-muted text-sm font-bold mb-2">Nom</label>
       <input v-model="user.name" type="name" id="name" required name="name" placeholder="Votre Nom"
         class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
     </div>
     <div class="mb-4">
-      <label for="firstname" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Prénom</label>
+      <label for="firstname" class="block text-text-muted text-sm font-bold mb-2">Prénom</label>
       <input v-model="user.firstname" type="firstname" id="firstname" required name="firstname"
         placeholder="Votre Prénom"
         class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
     </div>
     <div class="mb-4">
-      <label for="email" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email</label>
+      <label for="email" class="block text-text-muted text-sm font-bold mb-2">Email</label>
       <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
         required name="email" placeholder="Votre email"
         class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
@@ -41,17 +41,17 @@
       :isValid="validerConfirmPassword" ref="confirmPassword" class="mb-4" />
 
     <div class="mb-4">
-      <label for="birthdate" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Date de naissance</label>
+      <label for="birthdate" class="block text-text-muted text-sm font-bold mb-2">Date de naissance</label>
       <DatePicker v-model="user.birthday" required />
     </div>
 
     <!-- Bloc Règlement intérieur -->
     <div class="mb-2">
-      <h3 class="font-semibold text-gray-800 mb-2 dark:text-gray-100">
+      <h3 class="font-semibold text-text mb-2">
         {{ rules.title }}
       </h3>
 
-      <div class="border rounded-lg p-3 bg-gray-50 text-sm text-gray-700 max-h-64 overflow-y-auto leading-relaxed dark:bg-gray-800 dark:text-gray-200">
+      <div class="border rounded-lg p-3 bg-surface text-sm text-text-muted max-h-64 overflow-y-auto leading-relaxed">
         <template v-for="(section, i) in rules.sections" :key="i">
           <div class="font-medium mb-1">{{ section.title }}</div>
           <p class="whitespace-pre-line mb-3">

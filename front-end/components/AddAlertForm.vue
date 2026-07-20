@@ -9,7 +9,7 @@
           type="text"
           v-model="newAlert.titre"
           id="titre"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
           required
         />
       </div>
@@ -19,7 +19,7 @@
         <textarea
           v-model="newAlert.contenu"
           id="contenu"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
           required
         ></textarea>
       </div>
@@ -32,7 +32,7 @@
           type="date"
           v-model="newAlert.dateFin"
           id="dateFin"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
           required
         />
       </div>

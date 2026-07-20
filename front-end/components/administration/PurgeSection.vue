@@ -1,7 +1,7 @@
 <template>
   <div v-if="isSuperAdmin">
     <h2 class="text-xl font-semibold mb-2 text-red-600">Purge de fin de saison</h2>
-    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+    <p class="text-sm text-text-muted mb-4">
       Action réservée au Super Admin. Vide définitivement le numéro de licence ou les dates de
       paiement de <strong>tous les adhérents</strong>. Les comptes et le reste de leurs informations
       ne sont pas touchés.
@@ -28,7 +28,7 @@
           Tapez <strong>PURGER</strong> pour confirmer.
         </p>
         <input v-model="confirmationInput" type="text"
-          class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-sm px-3 py-2 text-center"
+          class="border border-border bg-surface rounded-sm px-3 py-2 text-center"
           placeholder="PURGER" />
         <div class="flex gap-3">
           <button @click="confirmPurge" :disabled="confirmationInput !== 'PURGER' || isPurging"
@@ -37,7 +37,7 @@
             {{ isPurging ? 'Purge en cours…' : 'Confirmer la purge' }}
           </button>
           <button @click="cancel"
-            class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold dark:bg-gray-900 dark:text-gray-100">
+            class="px-4 py-2 rounded-lg bg-surface-2 hover:opacity-80 text-text font-semibold">
             Annuler
           </button>
         </div>

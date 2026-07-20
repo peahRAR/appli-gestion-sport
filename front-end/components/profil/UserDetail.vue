@@ -1,5 +1,5 @@
 <template>
-    <p class="text-gray-600 mb-2 dark:text-gray-300">
+    <p class="text-text-muted mb-2">
         <strong>{{ label }} :</strong>
         {{ displayValue }}
     </p>

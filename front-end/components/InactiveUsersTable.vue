@@ -1,33 +1,33 @@
 <template>
-  <div class="mb-8 bg-white rounded-sm dark:bg-gray-800" style="overflow-x: auto">
+  <div class="mb-8 bg-surface rounded-sm" style="overflow-x: auto">
     <h2 class="text-xl font-semibold mb-2">Utilisateurs inactifs</h2>
     <div class="w-full mx-auto">
-      <table class="mx-auto min-w-full divide-y divide-gray-200">
+      <table class="mx-auto min-w-full divide-y divide-border">
         <!-- Table header  -->
-        <thead class="bg-gray-200 dark:bg-gray-700">
+        <thead class="bg-surface-2">
           <tr class="flex justify-between w-full">
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Nom
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Prénom
             </th>
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Actions
             </th>
           </tr>
         </thead>
         <tbody
-          class="flex flex-col justify-between bg-gray-300 divide-y divide-gray-200 dark:bg-gray-900"
+          class="flex flex-col justify-between bg-bg divide-y divide-border"
         >
           <!-- Table rows -->
           <tr
@@ -36,17 +36,17 @@
             class="flex justify-between items-center w-full"
           >
             <td
-              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize dark:text-gray-100"
+              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-text capitalize"
             >
               {{ user.name }}
             </td>
             <td
-              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black capitalize dark:text-gray-100"
+              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-text capitalize"
             >
               {{ user.firstname }}
             </td>
             <td
-              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-black dark:text-gray-100"
+              class="px-3 py-2 whitespace-nowrap font-semibold text-sm text-text"
             >
               <button
                 @click="reactivate(user)"
@@ -95,7 +95,7 @@
       <!-- Pagination -->
       <div class="mt-4 flex items-center justify-center">
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-text font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="prevPage"
           :class="{ hidden: currentPage === 1 }"
           :disabled="currentPage === 1"
@@ -114,7 +114,7 @@
         </button>
         <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-text font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="nextPage"
           :class="{ hidden: currentPage === totalPages }"
           :disabled="currentPage === totalPages"

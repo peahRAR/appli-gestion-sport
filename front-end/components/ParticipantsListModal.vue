@@ -2,11 +2,11 @@
     <TheModal :isOpen="isOpen" @close="close" title="Liste des participants">
         <ul class="w-full">
             <li v-for="participant in eventParticipants" :key="participant.id"
-                :class="['flex', 'w-full', 'items-center', 'py-2', 'px-4', 'border', userBgColor(participant)]">
+                :class="['flex', 'w-full', 'items-center', 'py-2', 'px-4', 'border', 'text-text', userBgColor(participant)]">
                 <NuxtImg v-if="participant.avatar" :src="participant.avatar" alt="Avatar"
                     class="w-10 h-10 rounded-full mr-2" />
-                <div v-else class="w-10 h-10 mr-2 rounded-full bg-gray-300 flex items-center justify-center dark:bg-gray-900">
-                    <span class="text-gray-600 text-4xl dark:text-gray-300">
+                <div v-else class="w-10 h-10 mr-2 rounded-full bg-bg flex items-center justify-center">
+                    <span class="text-text-muted text-4xl">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                             <path fill="currentColor" d="M11.5 14c4.14 0 7.5 1.57 7.5 3.5V20H4v-2.5c0-1.93 3.36-3.5 7.5-3.5m6.5 
                   3.5c0-1.38-2.91-2.5-6.5-2.5S5 16.12 5 17.5V19h13zM11.5 5A3.5 3.5 0 0 1 15 
@@ -42,31 +42,31 @@ export default {
         },
         userBgColor(participant) {
             if (this.userRole === 0) {
-                return "bg-white";
+                return "";
             }
             if (participant) {
                 if (
                     !participant.license &&
                     (!participant.date_end_pay || new Date(participant.date_end_pay) < new Date())
                 ) {
-                    return "bg-red-500 bg-opacity-75";
+                    return "bg-error/20";
                 }
                 if (
                     !participant.license ||
                     !participant.date_end_pay ||
                     new Date(participant.date_end_pay) < new Date()
                 ) {
-                    return "bg-orange-500 bg-opacity-75";
+                    return "bg-warning/20";
                 }
                 if (
                     participant.license &&
                     participant.date_end_pay &&
                     new Date(participant.date_end_pay) >= new Date()
                 ) {
-                    return "bg-white";
+                    return ""; // Rien à signaler : garde le fond de la modale
                 }
             }
-            return "bg-white";
+            return "";
         },
         openDetailsModal(participant) {
             this.$emit('open-details-modal', participant);

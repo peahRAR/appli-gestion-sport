@@ -9,7 +9,7 @@
           type="text"
           v-model="newCourse.name_event"
           id="title"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         />
       </div>
       <!-- Overview -->
@@ -18,7 +18,7 @@
         <textarea
           v-model="newCourse.overview"
           id="description"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         ></textarea>
       </div>
       <!-- Coach -->
@@ -28,7 +28,7 @@
           type="text"
           v-model="newCourse.coach"
           id="coach"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         />
       </div>
       <!-- Date -->
@@ -38,7 +38,7 @@
           type="datetime-local"
           v-model="newCourse.date_event"
           id="date"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         />
       </div>
       <!-- Duration -->
@@ -48,7 +48,7 @@
           type="number"
           v-model="newCourse.duration"
           id="duration"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         />
       </div>
       <!-- Total places -->
@@ -60,7 +60,7 @@
           type="number"
           v-model="newCourse.totalPlaces"
           id="totalSeats"
-          class="border border-gray-300 bg-gray-200 px-4 py-2 rounded-md dark:border-gray-600 dark:bg-gray-700"
+          class="border border-border bg-surface-2 px-4 py-2 rounded-md"
         />
       </div>
 
@@ -69,15 +69,15 @@
         <label class="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" v-model="newCourse.isVisible" class="sr-only peer" />
           <div
-            class="w-12 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 transition-colors duration-200 dark:bg-gray-900"
+            class="w-12 h-6 bg-bg rounded-full peer peer-checked:bg-green-500 transition-colors duration-200"
           ></div>
           <div
-            class="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition-transform duration-200 peer-checked:translate-x-6 dark:bg-gray-800"
+            class="absolute left-0.5 top-0.5 bg-surface w-5 h-5 rounded-full transition-transform duration-200 peer-checked:translate-x-6"
           ></div>
         </label>
         <span
           class="text-sm font-medium"
-          :class="newCourse.isVisible ? 'text-green-600' : 'text-gray-500'"
+          :class="newCourse.isVisible ? 'text-green-600' : 'text-text-muted'"
         >
           {{ newCourse.isVisible ? "Visible" : "Masqué" }}
         </span>

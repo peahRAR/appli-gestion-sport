@@ -4,14 +4,14 @@
             <!-- Contenu (scrollable) -->
             <div class="border rounded-md p-4 max-h-64 overflow-y-auto">
                 <template v-if="loading">
-                    <p class="text-sm text-slate-500">Chargement du règlement…</p>
+                    <p class="text-sm text-text-muted">Chargement du règlement…</p>
                 </template>
                 <template v-else-if="error">
                     <p class="text-sm text-red-600">{{ error }}</p>
                 </template>
                 <template v-else>
                     <h3 class="text-base font-semibold">{{ rules.title }}</h3>
-                    <p class="text-sm text-slate-700 mt-1">{{ rules.intro }}</p>
+                    <p class="text-sm text-text-muted mt-1">{{ rules.intro }}</p>
 
                     <div class="mt-3 space-y-3">
                         <div v-for="(section, si) in rules.sections" :key="si">
@@ -20,7 +20,7 @@
                         </div>
                     </div>
 
-                    <p class="text-xs text-slate-500 mt-3">{{ rules.footer }}</p>
+                    <p class="text-xs text-text-muted mt-3">{{ rules.footer }}</p>
                 </template>
             </div>
 
@@ -28,7 +28,7 @@
             <form @submit.prevent="submit" class="space-y-3">
                 <label class="flex items-start gap-2">
                     <input v-model="checked" type="checkbox" required class="mt-1" />
-                    <span class="text-sm text-slate-800">
+                    <span class="text-sm text-text">
                         J’ai lu et j’approuve le règlement.
                     </span>
                 </label>

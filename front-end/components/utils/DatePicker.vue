@@ -1,7 +1,7 @@
 <template>
     <div class="datepicker-wrapper w-full relative" ref="datepickerWrapper">
         <input type="text" :value="displayDate" @focus="openCalendar" readonly
-            class="datepicker-input w-full px-4 py-2 border rounded-lg outline-hidden cursor-pointer bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
+            class="datepicker-input w-full px-4 py-2 border rounded-lg outline-hidden cursor-pointer bg-surface text-text border-border"
             :placeholder="placeholder" :required="required" />
         <Icon class="datepicker-icon" @click="toggleCalendar" name="material-symbols:calendar-month" />
         <div v-if="isOpen" class="datepicker-popover" @mousedown.stop>
@@ -103,25 +103,15 @@ onUnmounted(() => {
 .datepicker-popover {
     position: absolute;
     z-index: 10;
-    background: white;
-    border: 1px solid #ccc;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-strong);
     border-radius: 4px;
     margin-top: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-html.dark .datepicker-popover {
-    background: #1f2937;
-    border-color: #4b5563;
-}
-
 /* Custom styles to ensure the selected month text remains readable in both themes */
 .vc-nav-item.is-active {
-    --vc-nav-item-active-color: black;
-    /* Force text color to black */
-}
-
-html.dark .vc-nav-item.is-active {
-    --vc-nav-item-active-color: white;
+    --vc-nav-item-active-color: var(--color-text);
 }
 </style>

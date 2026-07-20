@@ -209,11 +209,11 @@ export default {
 
 th,
 td {
-    @apply border text-center border-solid border-slate-200 dark:border-slate-600 p-3;
+    @apply border text-center border-solid border-border p-3;
 }
 
 th {
-    @apply bg-gray-50 dark:bg-gray-700;
+    @apply bg-surface-2;
 }
 
 select {

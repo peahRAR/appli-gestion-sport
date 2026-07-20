@@ -17,7 +17,7 @@
           v-model="editedWeight"
           @input="updateField('editedWeight', $event.target.value)"
           placeholder="Nouveau poids"
-          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-border-strong border-b-2"
         />
         <p class="ml-2">Kg</p>
       </div>
@@ -30,7 +30,7 @@
           v-model="editedTelNum"
           @input="updateField('editedTelNum', $event.target.value)"
           placeholder="Nouveau numéro"
-          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-border-strong border-b-2"
         />
       </div>
 
@@ -41,7 +41,7 @@
           v-model="editedTelMedic"
           @input="updateField('editedTelMedic', $event.target.value)"
           placeholder="Nouveau téléphone médical"
-          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-border-strong border-b-2"
         />
       </div>
 
@@ -52,7 +52,7 @@
           v-model="editedTelEmergency"
           @input="updateField('editedTelEmergency', $event.target.value)"
           placeholder="Nouveau téléphone d'urgence"
-          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-border-strong border-b-2"
         />
       </div>
 
@@ -60,7 +60,7 @@
       <div class="mt-6">
         <div class="flex items-center justify-between">
           <p class="font-semibold">Licences</p>
-          <span v-if="licensesLoading" class="text-sm text-slate-500">Chargement…</span>
+          <span v-if="licensesLoading" class="text-sm text-text-muted">Chargement…</span>
         </div>
 
         <p v-if="licensesError" class="mt-2 text-sm text-red-600">{{ licensesError }}</p>
@@ -69,28 +69,28 @@
           <div
             v-for="fed in federationsForDisplay"
             :key="fed.id"
-            class="rounded-xl border border-slate-200 bg-slate-50 p-3"
+            class="rounded-xl border border-border bg-surface-2 p-3"
           >
             <div class="flex items-center justify-between">
-              <div class="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <div class="text-xs font-semibold text-text-muted uppercase tracking-wide">
                 {{ fed.code }}
               </div>
-              <div class="text-[11px] text-slate-500">
+              <div class="text-[11px] text-text-muted">
                 {{ fed.name }}
               </div>
             </div>
             <div class="mt-2">
-              <label class="block text-xs font-medium text-slate-600 mb-1">Numéro de licence</label>
+              <label class="block text-xs font-medium text-text-muted mb-1">Numéro de licence</label>
               <input
                 v-model="licenseMap[fed.code].number"
                 @input="markTouched(fed.code)"
                 type="text"
                 placeholder="Non renseigné"
-                class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                class="w-full rounded-sm border border-border-strong bg-surface text-text px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
               <p
                 v-if="licenseMap[fed.code].original && !licenseMap[fed.code].touched"
-                class="mt-1 text-[11px] text-slate-500"
+                class="mt-1 text-[11px] text-text-muted"
               >
                 Actuel : {{ licenseMap[fed.code].original }}
               </p>
@@ -98,7 +98,7 @@
           </div>
         </div>
 
-        <p v-if="!licensesLoading && federationsForDisplay.length === 0" class="mt-2 text-sm text-slate-500">
+        <p v-if="!licensesLoading && federationsForDisplay.length === 0" class="mt-2 text-sm text-text-muted">
           Aucune fédération disponible.
         </p>
       </div>

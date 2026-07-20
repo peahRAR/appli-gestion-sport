@@ -27,7 +27,7 @@
               <input
                 v-model="editName"
                 type="text"
-                class="w-64 rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                class="w-64 rounded-sm border border-border-strong bg-surface text-text px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                 placeholder="Nom de la fédération"
               />
             </div>
@@ -43,7 +43,7 @@
                 Enregistrer
               </button>
               <button
-                class="px-3 py-1 rounded-sm border border-slate-300 hover:bg-slate-50"
+                class="px-3 py-1 rounded-sm border border-border-strong hover:bg-surface-2"
                 :disabled="loading"
                 @click="cancelEdit"
               >
@@ -52,7 +52,7 @@
             </div>
             <div v-else class="flex items-center justify-center gap-2">
               <button
-                class="px-3 py-1 rounded-sm border border-slate-300 hover:bg-slate-50"
+                class="px-3 py-1 rounded-sm border border-border-strong hover:bg-surface-2"
                 :disabled="loading"
                 @click="startEdit(f)"
               >
@@ -70,7 +70,7 @@
         </tr>
 
         <tr v-if="!loading && feds.length === 0">
-          <td colspan="3" class="text-center py-4 text-slate-500">
+          <td colspan="3" class="text-center py-4 text-text-muted">
             Aucune fédération.
           </td>
         </tr>
@@ -78,15 +78,15 @@
     </table>
 
     <!-- Formulaire création -->
-    <div class="rounded-xl border border-slate-200 p-4">
+    <div class="rounded-xl border border-border p-4">
       <h3 class="text-sm font-semibold mb-3">Ajouter une fédération</h3>
       <form class="flex flex-col md:flex-row gap-3" @submit.prevent="createFed">
         <div class="flex-1">
-          <label class="block text-xs font-medium text-slate-600 mb-1">Code (unique, ex: FSGT)</label>
+          <label class="block text-xs font-medium text-text-muted mb-1">Code (unique, ex: FSGT)</label>
           <input
             v-model="createForm.code"
             type="text"
-            class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm uppercase tracking-wider focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            class="w-full rounded-sm border border-border-strong bg-surface text-text px-3 py-2 text-sm uppercase tracking-wider focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             maxlength="16"
             @input="createForm.code = createForm.code.toUpperCase().replace(/\s+/g,'')"
             placeholder="FMMAF"
@@ -94,11 +94,11 @@
           />
         </div>
         <div class="flex-1">
-          <label class="block text-xs font-medium text-slate-600 mb-1">Nom</label>
+          <label class="block text-xs font-medium text-text-muted mb-1">Nom</label>
           <input
             v-model="createForm.name"
             type="text"
-            class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            class="w-full rounded-sm border border-border-strong bg-surface text-text px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             placeholder="Fédération Française de MMA"
             required
           />
@@ -117,14 +117,14 @@
 
     <!-- Modal confirmation suppression -->
     <div v-if="confirmTarget" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-      <div class="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl dark:bg-gray-800">
+      <div class="w-full max-w-sm rounded-2xl bg-surface p-5 shadow-xl">
         <h4 class="text-base font-semibold">Supprimer la fédération</h4>
-        <p class="mt-2 text-sm text-slate-600">
+        <p class="mt-2 text-sm text-text-muted">
           Confirmer la suppression de
           <span class="font-medium">{{ confirmTarget.name }}</span> ({{ confirmTarget.code }}) ?
         </p>
         <div class="mt-4 flex justify-end gap-2">
-          <button class="px-3 py-1.5 rounded-sm border border-slate-300 hover:bg-slate-50"
+          <button class="px-3 py-1.5 rounded-sm border border-border-strong hover:bg-surface-2"
                   :disabled="loading"
                   @click="confirmTarget = null">
             Annuler
@@ -295,6 +295,6 @@ export default {
 <style scoped>
 @reference "../../assets/main.css";
 
-th, td { @apply border text-center border-solid border-slate-200 p-3; }
-th { background-color: #f9f9f9; }
+th, td { @apply border text-center border-solid border-border p-3; }
+th { @apply bg-surface-2; }
 </style>

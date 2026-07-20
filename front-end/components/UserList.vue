@@ -7,7 +7,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="currentSortBy"
-          class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+          class="block bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
         >
           <option value="null">Trier par ...</option>
           <option v-for="cat in sortByList" :key="cat.value" :value="cat.value">
@@ -50,7 +50,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="filterOption"
-          class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+          class="block w-24 bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
         >
           <option v-for="cat in filterList" :key="cat.value" :value="cat.value">
             {{ cat.filter }}
@@ -63,12 +63,12 @@
             v-model.trim="searchQuery"
             type="text"
             placeholder="Rechercher prénom ou nom…"
-            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+            class="block w-64 bg-surface border border-border-strong hover:border-text-muted py-2 px-3 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline"
           />
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-sm dark:bg-gray-700 dark:hover:bg-gray-900"
+            class="px-3 py-2 bg-surface-2 hover:bg-bg rounded-sm"
             type="button"
           >
             Effacer
@@ -78,12 +78,12 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="mx-auto w-full min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50 dark:bg-gray-800">
-          <tr class="bg-gray-200 dark:bg-gray-700">
+      <table class="mx-auto w-full min-w-full divide-y divide-border">
+        <thead class="bg-surface">
+          <tr class="bg-surface-2">
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Statut
             </th>
@@ -92,42 +92,43 @@
               v-for="col in currentColumns"
               :key="col"
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               {{ columnsNames[col] || col }}
             </th>
 
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400"
+              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Actions
             </th>
           </tr>
         </thead>
 
-        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800">
+        <tbody class="bg-surface divide-y divide-border">
           <tr
             v-for="user in paginatedUsers"
             :key="user.id"
             :class="userBgColor(user)"
           >
-            <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+            <td class="px-3 py-2 whitespace-nowrap text-sm text-text-muted">
               <span class="inline-flex items-center gap-2">
                 <Icon
                   v-if="!user.date_end_pay || new Date(user.date_end_pay) < new Date()"
                   name="tabler:tax-euro"
-                  class="text-black text-3xl dark:text-gray-100"
+                  class="text-text text-3xl"
                 />
                 <svg
                   v-if="!user.license"
+                  class="text-text"
                   xmlns="http://www.w3.org/2000/svg"
                   width="32"
                   height="32"
                   viewBox="0 0 24 24"
                 >
                   <path
-                    fill="text-black"
+                    fill="currentColor"
                     d="M14 13h5v-2h-5zm0-3h5V8h-5zm-9 6h8v-.55q0-1.125-1.1-1.787T9 13q-1.8 0-2.9.663T5 15.45zm4-4q.825 0 1.413-.587T11 10q0-.825-.587-1.412T9 8q-.825 0-1.412.588T7 10q0 .825.588 1.413T9 12m-5 8q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
                   />
                 </svg>
@@ -137,18 +138,18 @@
             <td
               v-for="col in currentColumns"
               :key="col"
-              class="px-3 py-2 whitespace-nowrap text-center text-sm text-black font-semibold capitalize dark:text-gray-100"
+              class="px-3 py-2 whitespace-nowrap text-center text-sm text-text font-semibold capitalize"
             >
               {{ user[col] }}
             </td>
 
             <td
-              class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500 dark:text-gray-400"
+              class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-text-muted"
             >
-              <button @click="openModal(user)" class="focus:outline-hidden text-black dark:text-gray-100" type="button">
+              <button @click="openModal(user)" class="focus:outline-hidden text-text" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 text-black hover:text-gray-600 transition duration-300 dark:text-gray-100 dark:hover:text-gray-300"
+                  class="h-5 w-5 text-text hover:text-text-muted transition duration-300"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -163,7 +164,7 @@
           </tr>
 
           <tr v-if="paginatedUsers.length === 0">
-            <td :colspan="currentColumns.length + 2" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+            <td :colspan="currentColumns.length + 2" class="px-3 py-6 text-center text-sm text-text-muted">
               Aucun utilisateur trouvé
             </td>
           </tr>
@@ -185,7 +186,7 @@
 
       <div class="flex justify-center w-full items-center">
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-text font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="prevPage"
           :class="{ hidden: currentPage === 1 }"
           :disabled="currentPage === 1"
@@ -202,7 +203,7 @@
         <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
 
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-text font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
           @click="nextPage"
           :class="{ hidden: currentPage === totalPages }"
           :disabled="currentPage === totalPages"
@@ -288,16 +289,16 @@ export default {
     userBgColor(user) {
       if (user) {
         if (!user.license && (!user.date_end_pay || new Date(user.date_end_pay) < new Date())) {
-          return "bg-red-500 bg-opacity-75";
+          return "bg-error/20";
         }
         if (!user.license || !user.date_end_pay || new Date(user.date_end_pay) < new Date()) {
-          return "bg-orange-500 bg-opacity-75";
+          return "bg-warning/20";
         }
         if (user.license && user.date_end_pay && new Date(user.date_end_pay) >= new Date()) {
-          return "bg-white";
+          return ""; // Rien à signaler : garde le fond de la table (bg-surface)
         }
       }
-      return "bg-gray-300";
+      return "";
     },
   },
   watch: {

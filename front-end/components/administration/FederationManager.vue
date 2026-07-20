@@ -27,7 +27,7 @@
               <input
                 v-model="editName"
                 type="text"
-                class="w-64 rounded border border-slate-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-64 rounded-sm border border-slate-300 px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                 placeholder="Nom de la fédération"
               />
             </div>
@@ -36,14 +36,14 @@
           <td class="text-center">
             <div v-if="editingId === f.id" class="flex items-center justify-center gap-2">
               <button
-                class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 disabled:opacity-50"
+                class="bg-indigo-600 text-white px-3 py-1 rounded-sm hover:bg-indigo-500 disabled:opacity-50"
                 :disabled="loading || !editName.trim()"
                 @click="saveEdit(f)"
               >
                 Enregistrer
               </button>
               <button
-                class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                class="px-3 py-1 rounded-sm border border-slate-300 hover:bg-slate-50"
                 :disabled="loading"
                 @click="cancelEdit"
               >
@@ -52,14 +52,14 @@
             </div>
             <div v-else class="flex items-center justify-center gap-2">
               <button
-                class="px-3 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                class="px-3 py-1 rounded-sm border border-slate-300 hover:bg-slate-50"
                 :disabled="loading"
                 @click="startEdit(f)"
               >
                 Modifier
               </button>
               <button
-                class="px-3 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50"
+                class="px-3 py-1 rounded-sm border border-red-200 text-red-600 hover:bg-red-50"
                 :disabled="loading"
                 @click="askDelete(f)"
               >
@@ -86,7 +86,7 @@
           <input
             v-model="createForm.code"
             type="text"
-            class="w-full rounded border border-slate-300 px-3 py-2 text-sm uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm uppercase tracking-wider focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             maxlength="16"
             @input="createForm.code = createForm.code.toUpperCase().replace(/\s+/g,'')"
             placeholder="FMMAF"
@@ -98,14 +98,14 @@
           <input
             v-model="createForm.name"
             type="text"
-            class="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
             placeholder="Fédération Française de MMA"
             required
           />
         </div>
         <div class="md:self-end">
           <button
-            class="w-full md:w-auto bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-500 disabled:opacity-50"
+            class="w-full md:w-auto bg-indigo-600 text-white px-4 py-2 rounded-sm hover:bg-indigo-500 disabled:opacity-50"
             :disabled="loading || !createForm.code.trim() || !createForm.name.trim()"
             type="submit"
           >
@@ -124,12 +124,12 @@
           <span class="font-medium">{{ confirmTarget.name }}</span> ({{ confirmTarget.code }}) ?
         </p>
         <div class="mt-4 flex justify-end gap-2">
-          <button class="px-3 py-1.5 rounded border border-slate-300 hover:bg-slate-50"
+          <button class="px-3 py-1.5 rounded-sm border border-slate-300 hover:bg-slate-50"
                   :disabled="loading"
                   @click="confirmTarget = null">
             Annuler
           </button>
-          <button class="px-3 py-1.5 rounded bg-red-600 text-white hover:bg-red-500 disabled:opacity-50"
+          <button class="px-3 py-1.5 rounded-sm bg-red-600 text-white hover:bg-red-500 disabled:opacity-50"
                   :disabled="loading"
                   @click="doDelete">
             Supprimer
@@ -293,6 +293,8 @@ export default {
 </script>
 
 <style scoped>
+@reference "../../assets/main.css";
+
 th, td { @apply border text-center border-solid border-slate-200 p-3; }
 th { background-color: #f9f9f9; }
 </style>

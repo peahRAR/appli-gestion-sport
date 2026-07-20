@@ -1,6 +1,6 @@
 <template>
   <div
-    class="overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-purple-700 to-indigo-500 shadow-sm ring-1 ring-slate-200"
+    class="overflow-hidden rounded-2xl bg-linear-to-r from-blue-700 via-purple-700 to-indigo-500 shadow-xs ring-1 ring-slate-200"
   >
     <div class="grid grid-cols-1 md:grid-cols-3">
       <!-- Col gauche: Avatar + nom -->
@@ -73,7 +73,7 @@
 
         <!-- Séparateur -->
         <div
-          class="my-6 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"
+          class="my-6 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent"
         ></div>
 
         <!-- Licences -->

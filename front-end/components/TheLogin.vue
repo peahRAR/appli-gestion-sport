@@ -6,7 +6,7 @@
       <div class="mb-4">
         <label for="email" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email :</label>
         <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
-          name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+          name="email" placeholder="Votre email" class="w-full px-4 py-2 border rounded-lg focus:outline-hidden"
           autocomplete="email" />
       </div>
       <!-- Password input -->
@@ -21,7 +21,7 @@
       <!-- Submit Button -->
       <div class="flex justify-center">
         <button type="submit"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-sm focus:outline-hidden focus:shadow-outline">
           Se connecter
         </button>
       </div>
@@ -30,7 +30,7 @@
     <div class="flex justify-center items-center">
       <!-- Button to open modal -->
       <button @click="openResetPasswordModal"
-        class="mt-2 underline bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline dark:bg-gray-900 dark:text-gray-100">
+        class="mt-2 underline bg-gray-300 hover:bg-gray-400 text-gray-800 text-sm font-bold py-2 px-4 rounded-sm focus:outline-hidden focus:shadow-outline dark:bg-gray-900 dark:text-gray-100">
         Réinitialiser le mot de passe
       </button>
     </div>
@@ -41,11 +41,11 @@
         <div class="mb-4">
           <label for="resetEmail" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email</label>
           <input v-model="resetEmail" type="email" id="resetEmail" name="resetEmail" placeholder="Votre email"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+            class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
         </div>
         <div class="flex justify-center items-center">
           <button type="submit"
-            class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            class="bg-green-500 ml-24 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-sm focus:outline-hidden focus:shadow-outline">
             Envoyer
           </button>
         </div>

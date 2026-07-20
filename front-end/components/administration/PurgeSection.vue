@@ -28,7 +28,7 @@
           Tapez <strong>PURGER</strong> pour confirmer.
         </p>
         <input v-model="confirmationInput" type="text"
-          class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded px-3 py-2 text-center"
+          class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-sm px-3 py-2 text-center"
           placeholder="PURGER" />
         <div class="flex gap-3">
           <button @click="confirmPurge" :disabled="confirmationInput !== 'PURGER' || isPurging"

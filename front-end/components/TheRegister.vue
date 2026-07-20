@@ -16,19 +16,19 @@
     <div class="mb-4">
       <label for="name" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Nom</label>
       <input v-model="user.name" type="name" id="name" required name="name" placeholder="Votre Nom"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
     </div>
     <div class="mb-4">
       <label for="firstname" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Prénom</label>
       <input v-model="user.firstname" type="firstname" id="firstname" required name="firstname"
         placeholder="Votre Prénom"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
     </div>
     <div class="mb-4">
       <label for="email" class="block text-gray-700 text-sm font-bold mb-2 dark:text-gray-200">Email</label>
       <input v-model="user.email" @input="user.email = $event.target.value.toLowerCase()" type="email" id="email"
         required name="email" placeholder="Votre email"
-        class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-400" />
+        class="w-full px-4 py-2 border rounded-lg focus:outline-hidden focus:border-blue-400" />
     </div>
     <div class="mb-6">
       <inputPassword v-model="user.password" :regex="regexPassword" label="Nouveau mot de passe : " id="password"
@@ -75,7 +75,7 @@
 
     <div class="flex justify-center">
       <button type="submit"
-        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-sm focus:outline-hidden focus:shadow-outline">
         S'inscrire
       </button>
     </div>

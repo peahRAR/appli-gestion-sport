@@ -36,7 +36,7 @@
                 <div class="flex items-center justify-center gap-3">
                     <span v-if="saveError" class="text-sm text-red-600">{{ saveError }}</span>
                     <button type="submit"
-                        class="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2 rounded disabled:opacity-50"
+                        class="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2 rounded-sm disabled:opacity-50"
                         :disabled="saving">
                         {{ saving ? "Enregistrement…" : "J'approuve" }}
                     </button>

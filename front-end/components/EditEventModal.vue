@@ -59,7 +59,7 @@
 
             <!-- Save -->
             <button type="submit"
-                class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                class="bg-green-500 w-full mt-4 text-white px-4 py-1 rounded-md hover:bg-green-600 focus:outline-hidden focus:ring-2 focus:ring-green-500">
                 Sauvegarder
             </button>
         </form>

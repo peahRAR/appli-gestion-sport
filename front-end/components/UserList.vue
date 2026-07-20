@@ -7,7 +7,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="currentSortBy"
-          class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+          class="block bg-white border border-gray-400 hover:border-gray-500 py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
         >
           <option value="null">Trier par ...</option>
           <option v-for="cat in sortByList" :key="cat.value" :value="cat.value">
@@ -17,7 +17,7 @@
 
         <button
           @click="updateSortOrder()"
-          class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           type="button"
         >
           <svg
@@ -50,7 +50,7 @@
       <div class="flex items-center space-x-4 mb-4">
         <select
           v-model="filterOption"
-          class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+          class="block w-24 bg-white border border-gray-400 hover:border-gray-500 py-2 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
         >
           <option v-for="cat in filterList" :key="cat.value" :value="cat.value">
             {{ cat.filter }}
@@ -63,12 +63,12 @@
             v-model.trim="searchQuery"
             type="text"
             placeholder="Rechercher prénom ou nom…"
-            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded shadow leading-tight focus:outline-none focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
+            class="block w-64 bg-white border border-gray-400 hover:border-gray-500 py-2 px-3 rounded-sm shadow-sm leading-tight focus:outline-hidden focus:border-blue-500 focus:shadow-outline dark:bg-gray-800 dark:border-gray-600"
           />
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded dark:bg-gray-700 dark:hover:bg-gray-900"
+            class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-sm dark:bg-gray-700 dark:hover:bg-gray-900"
             type="button"
           >
             Effacer
@@ -145,7 +145,7 @@
             <td
               class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-gray-500 dark:text-gray-400"
             >
-              <button @click="openModal(user)" class="focus:outline-none text-black dark:text-gray-100" type="button">
+              <button @click="openModal(user)" class="focus:outline-hidden text-black dark:text-gray-100" type="button">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5 text-black hover:text-gray-600 transition duration-300 dark:text-gray-100 dark:hover:text-gray-300"
@@ -185,7 +185,7 @@
 
       <div class="flex justify-center w-full items-center">
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
           @click="prevPage"
           :class="{ hidden: currentPage === 1 }"
           :disabled="currentPage === 1"
@@ -202,7 +202,7 @@
         <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
 
         <button
-          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+          class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
           @click="nextPage"
           :class="{ hidden: currentPage === totalPages }"
           :disabled="currentPage === totalPages"

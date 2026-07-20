@@ -1,8 +1,8 @@
 <template>
     <div class="p-4">
-        <div class="flex flex-col items-center rounded py-8 px-4 bg-gray-50 min-h-screen dark:bg-gray-800">
+        <div class="flex flex-col items-center rounded-sm py-8 px-4 bg-gray-50 min-h-screen dark:bg-gray-800">
             <!-- Note délai -->
-            <p class="mb-6 text-center p-3 text-white font-semibold rounded bg-red-600">
+            <p class="mb-6 text-center p-3 text-white font-semibold rounded-sm bg-red-600">
                 Déclare l’accident le plus vite possible, idéalement dans les 24 h suivant l’incident.
             </p>
 
@@ -12,7 +12,7 @@
                     Sélectionne ta fédération
                 </label>
                 <select id="fed" v-model="selectedCode"
-                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800">
+                    class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800">
                     <option disabled value="">Choisir...</option>
                     <option v-for="fed in federations" :key="fed.code" :value="fed.code">
                         {{ fed.name }}

@@ -2,7 +2,7 @@
   <div>
     <TheSkeleton v-if="loading" />
     <div class="min-h-screen" v-else>
-      <TheAlert class="mx-2 rounded mb-4" :alerts="alerts" />
+      <TheAlert class="mx-2 rounded-sm mb-4" :alerts="alerts" />
       <NoEvents v-if="events.length < 1" />
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <EventCard v-for="(event, index) in formattedEvents" :key="event.id" :event="event" @open-modal="openModal"

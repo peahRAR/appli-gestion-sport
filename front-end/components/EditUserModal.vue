@@ -1,7 +1,7 @@
 <template>
     <TheModal :isOpen="isOpen" :title="null" :showClose="true" @close="close">
         <div
-            class="overflow-hidden rounded-2xl bg-gradient-to-r from-blue-700 via-purple-700 to-indigo-500 shadow-sm ring-1 ring-slate-200">
+            class="overflow-hidden rounded-2xl bg-linear-to-r from-blue-700 via-purple-700 to-indigo-500 shadow-xs ring-1 ring-slate-200">
             <div class="grid grid-cols-1 md:grid-cols-3">
                 <!-- Col gauche: Avatar + nom -->
                 <div class="relative p-6 md:p-8 flex flex-col items-center justify-center">
@@ -30,7 +30,7 @@
                             <dd class="mt-1 text-sm text-white">
                                 <template v-if="isAdmin">
                                     <input type="text" v-model.trim="localUser.firstname" placeholder="Non Renseigné"
-                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60" />
+                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-hidden focus:ring-2 focus:ring-white/60" />
                                 </template>
                                 <template v-else>
                                     {{ user?.firstname || "Non Renseigné" }}
@@ -44,7 +44,7 @@
                             <dd class="mt-1 text-sm text-white">
                                 <template v-if="isAdmin">
                                     <input type="text" v-model.trim="localUser.name" placeholder="Non Renseigné"
-                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60" />
+                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-hidden focus:ring-2 focus:ring-white/60" />
                                 </template>
                                 <template v-else>
                                     {{ user?.name || "Non Renseigné" }}
@@ -60,7 +60,7 @@
                             <dd class="mt-1 text-sm text-white">
                                 <template v-if="isAdmin">
                                     <input id="birthday" type="date" :max="todayISO" v-model="localUser.birthday"
-                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60" />
+                                        class="w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-hidden focus:ring-2 focus:ring-white/60" />
                                     <p v-if="localUser.birthday" class="mt-1 text-xs text-white/80">
                                         {{ formatBirthday(localUser.birthday) }}
                                     </p>
@@ -120,7 +120,7 @@
                     </dl>
 
                     <!-- Séparateur -->
-                    <div class="my-6 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                    <div class="my-6 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent"></div>
 
                     <!-- Licences -->
                     <div>
@@ -151,7 +151,7 @@
                     </div>
 
                     <!-- Séparateur -->
-                    <div class="my-6 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
+                    <div class="my-6 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent"></div>
 
                     <!-- Actions + champs éditables (paiement) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -160,7 +160,7 @@
                                 de
                                 paiement</label>
                             <input id="datePayment" type="date" v-model="localUser.date_payment"
-                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60" />
+                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-hidden focus:ring-2 focus:ring-white/60" />
                             <span v-if="!localUser.date_payment" class="text-xs text-white/80">
                                 Aucun paiement en cours
                             </span>
@@ -171,7 +171,7 @@
                                 fin de
                                 paiement</label>
                             <input id="dateEndPay" type="date" v-model="localUser.date_end_pay"
-                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/60" />
+                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white placeholder-white/60 focus:outline-hidden focus:ring-2 focus:ring-white/60" />
                             <span v-if="!localUser.date_end_pay" class="text-xs text-white/80">
                                 Aucun paiement en cours
                             </span>

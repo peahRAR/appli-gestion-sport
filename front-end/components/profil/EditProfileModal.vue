@@ -17,7 +17,7 @@
           v-model="editedWeight"
           @input="updateField('editedWeight', $event.target.value)"
           placeholder="Nouveau poids"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
         />
         <p class="ml-2">Kg</p>
       </div>
@@ -30,7 +30,7 @@
           v-model="editedTelNum"
           @input="updateField('editedTelNum', $event.target.value)"
           placeholder="Nouveau numéro"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 
@@ -41,7 +41,7 @@
           v-model="editedTelMedic"
           @input="updateField('editedTelMedic', $event.target.value)"
           placeholder="Nouveau téléphone médical"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 
@@ -52,7 +52,7 @@
           v-model="editedTelEmergency"
           @input="updateField('editedTelEmergency', $event.target.value)"
           placeholder="Nouveau téléphone d'urgence"
-          class="w-32 mb-4 ml-2 focus-visible:outline-none border-solid border-black border-b-2 dark:border-gray-500"
+          class="w-32 mb-4 ml-2 focus-visible:outline-hidden border-solid border-black border-b-2 dark:border-gray-500"
         />
       </div>
 
@@ -86,7 +86,7 @@
                 @input="markTouched(fed.code)"
                 type="text"
                 placeholder="Non renseigné"
-                class="w-full rounded border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full rounded-sm border border-slate-300 px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
               />
               <p
                 v-if="licenseMap[fed.code].original && !licenseMap[fed.code].touched"
@@ -106,7 +106,7 @@
       <!-- Actions -->
       <button
         @click="saveChanges"
-        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded mt-6"
+        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 text-center rounded-sm mt-6"
         :disabled="saving"
       >
         {{ saving ? 'Enregistrement…' : 'Enregistrer les modifications' }}

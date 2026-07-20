@@ -63,7 +63,7 @@
     <!-- Pagination -->
     <div class="mt-4 flex justify-center">
       <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
         @click="prevPage" :class="{ hidden: currentPage === 1 }" :disabled="currentPage === 1">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
           <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8l8 8l1.41-1.41L7.83 13H20z" />
@@ -71,7 +71,7 @@
       </button>
       <span class="mx-4">{{ currentPage }}/{{ totalPages }}</span>
       <button
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-center text-black font-bold rounded-lg shadow-md focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center dark:text-gray-100"
         @click="nextPage" :class="{ hidden: currentPage === totalPages }" :disabled="currentPage === totalPages">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24">
           <path fill="currentColor" d="m12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" />

@@ -205,6 +205,7 @@ export default {
 </script>
 
 <style scoped>
+@reference "../../assets/main.css";
 
 th,
 td {

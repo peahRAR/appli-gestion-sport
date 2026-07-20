@@ -1,9 +1,9 @@
 <template>
     <div class="passwordInput">
         <label :for="id" class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-200">{{ label }}</label>
-        <div class="border rounded p-2 flex flex-row justify-between bg-white dark:bg-gray-800" :class="passwordInputClasses">
+        <div class="border rounded-sm p-2 flex flex-row justify-between bg-white dark:bg-gray-800" :class="passwordInputClasses">
             <input placeholder="Mot de passe" :id="id" @input="emitPassword" :value="modelValue"
-                :type="showPassword ? 'text' : 'password'" class="outline-none focus-visible:outline-none w-full pl-2"
+                :type="showPassword ? 'text' : 'password'" class="outline-hidden focus-visible:outline-hidden w-full pl-2"
                 required autocomplete="current-password">
             <span @click="toggleShowPassword">
                 <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -63,6 +63,8 @@ export default {
 </script>
 
 <style>
+@reference "../assets/main.css";
+
 .is-valid {
     @apply border border-2 border-solid border-green-500
 }

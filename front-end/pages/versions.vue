@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-semibold mb-6">Historique des versions</h1>
 
     <ol class="space-y-6">
-      <li v-for="(r, i) in sorted" :key="r.version" class="bg-white rounded-xl p-4 shadow dark:bg-gray-800">
+      <li v-for="(r, i) in sorted" :key="r.version" class="bg-white rounded-xl p-4 shadow-sm dark:bg-gray-800">
         <div class="flex items-baseline gap-3">
           <span class="text-lg font-bold">v{{ r.version }}</span>
           <span class="text-sm text-gray-500 dark:text-gray-400">

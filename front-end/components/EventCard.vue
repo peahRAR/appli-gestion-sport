@@ -5,7 +5,7 @@
                 <!--TOP CARD -->
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-50">{{ event.formattedDate }}</h2>
 
-                <div class="flex flex-row justify-between items-center rounded px-1 cursor-pointer"
+                <div class="flex flex-row justify-between items-center rounded-sm px-1 cursor-pointer"
                     :class="placesClass">
                     <Icon name="streamline:tickets-solid" class="mr-1" />
                     <p class="text-gray-800 font-semibold text-xs dark:text-gray-100">
@@ -49,7 +49,7 @@
                         {{ event.overview }}
                     </p>
                     <button @click="emitToggleOverflow"
-                        class="text-gray-800 font-semibold text-sm focus:outline-none text-center dark:text-gray-100"
+                        class="text-gray-800 font-semibold text-sm focus:outline-hidden text-center dark:text-gray-100"
                         v-if="event.overview.length > 150 || showOverflow">
                         Afficher {{ event.showOverflow ? "moins &#x25B2;" : "plus &#x25BC;" }}
                     </button>
@@ -77,14 +77,14 @@
                             @mouseup="isPresentButtonActive = false" @mouseleave="isPresentButtonActive = false"
                             :class="[presentButtonClass, { 'cursor-not-allowed ': event.isParticipating === true }]"
                             :disabled="event.isParticipating === true"
-                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded mb-2 flex justify-center items-center">
+                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
                             Présent
                         </button>
                         <button @click.stop="participate(event, false)" @mousedown="isAbsentButtonActive = true"
                             @mouseup="isAbsentButtonActive = false" @mouseleave="isAbsentButtonActive = false"
                             :class="[absentButtonClass, { 'cursor-not-allowed ': event.isParticipating === false }]"
                             :disabled="event.isParticipating === false"
-                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded mb-2 flex justify-center items-center">
+                            class="border border-slate-500 drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
                             Absent
                         </button>
                     </div>

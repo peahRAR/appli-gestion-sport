@@ -363,7 +363,7 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div v-if="errorMsg" class="border rounded p-3">
+        <div v-if="errorMsg" class="border rounded-sm p-3">
             {{ errorMsg }}
         </div>
 
@@ -376,14 +376,14 @@ onMounted(async () => {
                     <label class="text-sm opacity-70">
                         Titre <span class="text-red-500">*</span>
                     </label>
-                    <input v-model="form.title" class="border rounded px-3 py-2 w-full min-w-0" />
+                    <input v-model="form.title" class="border rounded-sm px-3 py-2 w-full min-w-0" />
                 </div>
 
                 <div class="space-y-1 min-w-0">
                     <label class="text-sm opacity-70">
                         Type <span class="text-red-500">*</span>
                     </label>
-                    <select v-model="form.type" class="border rounded px-3 py-2 w-full min-w-0">
+                    <select v-model="form.type" class="border rounded-sm px-3 py-2 w-full min-w-0">
                         <option v-for="opt in TYPE_OPTIONS" :key="opt" :value="opt">
                             {{ opt }}
                         </option>
@@ -394,7 +394,7 @@ onMounted(async () => {
                     <label class="text-sm opacity-70">
                         Pour qui <span class="text-red-500">*</span>
                     </label>
-                    <select v-model="form.forWho" class="border rounded px-3 py-2 w-full min-w-0">
+                    <select v-model="form.forWho" class="border rounded-sm px-3 py-2 w-full min-w-0">
                         <option v-for="opt in FOR_WHO_OPTIONS" :key="opt" :value="opt">
                             {{ opt }}
                         </option>
@@ -406,7 +406,7 @@ onMounted(async () => {
                         Lieu <span class="text-red-500">*</span>
                     </label>
 
-                    <input v-model="locationQuery" class="border rounded px-3 py-2 w-full min-w-0" autocomplete="off"
+                    <input v-model="locationQuery" class="border rounded-sm px-3 py-2 w-full min-w-0" autocomplete="off"
                         @focus="onLocationFocus" @blur="onLocationBlur" @keydown="onLocationKeydown" />
 
                     <div class="absolute right-3 top-[38px] text-xs opacity-60">
@@ -441,13 +441,13 @@ onMounted(async () => {
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Date</label>
                             <input v-model="form.startDate" type="date"
-                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                                class="border rounded-sm px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
 
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Heure (optionnel)</label>
                             <input v-model="form.startTime" type="time"
-                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                                class="border rounded-sm px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
                     </div>
                 </div>
@@ -461,13 +461,13 @@ onMounted(async () => {
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Date (optionnel)</label>
                             <input v-model="form.endDate" type="date"
-                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                                class="border rounded-sm px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
 
                         <div class="space-y-1 min-w-0">
                             <label class="text-xs opacity-60">Heure (optionnel)</label>
                             <input v-model="form.endTime" type="time"
-                                class="border rounded px-3 py-2 w-full min-w-0 max-w-full" />
+                                class="border rounded-sm px-3 py-2 w-full min-w-0 max-w-full" />
                         </div>
                     </div>
                 </div>
@@ -481,12 +481,12 @@ onMounted(async () => {
                     </div>
 
                     <textarea v-model="form.description"
-                        class="border rounded px-3 py-2 w-full min-h-[90px] resize-none min-w-0"
+                        class="border rounded-sm px-3 py-2 w-full min-h-[90px] resize-none min-w-0"
                         :maxlength="DESCRIPTION_MAX" />
                 </div>
             </div>
 
-            <button @click="createEvent" class="bg-red-600 text-white px-4 py-2 rounded">
+            <button @click="createEvent" class="bg-red-600 text-white px-4 py-2 rounded-sm">
                 Créer
             </button>
         </section>
@@ -495,7 +495,7 @@ onMounted(async () => {
         <section class="border rounded-xl p-4 md:p-6 space-y-4">
             <div class="flex items-center justify-between gap-4">
                 <h3 class="text-lg font-bold">Filtres</h3>
-                <button class="border px-3 py-2 rounded" type="button" @click="resetFilters">
+                <button class="border px-3 py-2 rounded-sm" type="button" @click="resetFilters">
                     Réinitialiser
                 </button>
             </div>

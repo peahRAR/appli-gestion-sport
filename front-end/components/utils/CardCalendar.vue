@@ -272,10 +272,10 @@ function downloadIcs() {
 <template>
   <div class="relative border rounded-2xl p-4 overflow-hidden flex flex-col gap-3" :class="[styleForType.border, styleForType.bg]">
     <!-- actions (top-right) -->
-    <div v-if="canManage" class="absolute -top-[-0.25rem] right-3 flex gap-2">
+    <div v-if="canManage" class="absolute top-1 right-3 flex gap-2">
       <!--
       <button
-        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-green-50 transition dark:bg-gray-800"
+        class="border bg-white rounded-full px-3 py-2 shadow-xs hover:bg-green-50 transition dark:bg-gray-800"
         type="button"
         @click="onEdit"
         aria-label="Modifier"
@@ -286,7 +286,7 @@ function downloadIcs() {
       -->
 
       <button
-        class="border bg-white rounded-full px-3 py-2 shadow-sm hover:bg-red-50 transition dark:bg-gray-800"
+        class="border bg-white rounded-full px-3 py-2 shadow-xs hover:bg-red-50 transition dark:bg-gray-800"
         type="button"
         @click="onDelete"
         aria-label="Supprimer"
@@ -330,7 +330,7 @@ function downloadIcs() {
           {{ dateParts.day }}
         </div>
 
-        <div class="mt-1 w-[4.5rem]">
+        <div class="mt-1 w-18">
           <div class="text-sm font-semibold uppercase tracking-wide leading-none">
             {{ dateParts.monyy }}
           </div>
@@ -339,7 +339,7 @@ function downloadIcs() {
 
       <!-- bas droite : adresse + horaires + actions -->
       <div class="text-right min-w-0 max-w-[65%]">
-        <div class="text-xs opacity-90 break-words line-clamp-2">
+        <div class="text-xs opacity-90 wrap-break-word line-clamp-2">
           📍 {{ event.location }}
         </div>
 
@@ -356,7 +356,7 @@ function downloadIcs() {
           <div class="flex items-center gap-2">
             <a
               v-if="directionsHref"
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-xs hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               :href="directionsHref"
               target="_blank"
               rel="noopener noreferrer"
@@ -368,7 +368,7 @@ function downloadIcs() {
             <!-- Ajouter au calendrier -->
             <a
               v-if="googleCalendarHref"
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-xs hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               :href="googleCalendarHref"
               target="_blank"
               rel="noopener noreferrer"
@@ -378,7 +378,7 @@ function downloadIcs() {
             </a>
 
             <button
-              class="border bg-white rounded-full px-3 py-2 text-xs shadow-sm hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
+              class="border bg-white rounded-full px-3 py-2 text-xs shadow-xs hover:bg-black/5 transition shrink-0 dark:bg-gray-800"
               type="button"
               @click="downloadIcs"
               title="Télécharger .ics (Apple Calendar, etc.)"

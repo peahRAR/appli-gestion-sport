@@ -21,8 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { releases } from '../data/releases'
+import { useChangelogVersion } from '../composables/useChangelogVersion'
 
 const sorted = computed(() =>
   [...releases].sort(
@@ -32,6 +33,9 @@ const sorted = computed(() =>
 
 const formatDate = (d: string) =>
   new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(new Date(d))
+
+const { markVersionSeen } = useChangelogVersion()
+onMounted(() => markVersionSeen())
 
 useSeoMeta({
   title: 'Historique des versions',

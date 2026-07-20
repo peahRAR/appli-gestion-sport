@@ -1,3 +1,9 @@
+import { releases } from "./data/releases";
+
+const latestVersion = [...releases].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+)[0]?.version ?? "0.0.0";
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   components: [
@@ -28,7 +34,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       siteUrl: process.env.API_URL || "https://mma-app-api.mmabaisieux.fr",
-      frontVersion: "1.6",
+      frontVersion: latestVersion,
     },
   },
 

@@ -6,7 +6,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';  // Assurez-vous que ConfigService est importé
 import { AuthController } from './auth.controller';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
 
@@ -20,7 +20,7 @@ import { JwtAuthGuard } from '../common/guard/jwt-auth.guard';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');
-        const expiresIn = configService.get<string>('JWT_EXP');
+        const expiresIn = configService.get<string>('JWT_EXP') as JwtSignOptions['expiresIn'];
         return {
           secret: secret,
           signOptions: { expiresIn: expiresIn },

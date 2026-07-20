@@ -23,6 +23,14 @@ export default defineNuxtConfig({
   css: ["~/assets/main.css"],
   app: {
     head: {
+      link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+        { rel: "apple-touch-icon", sizes: "180x180", href: "/icons/apple-touch-icon.png" },
+        { rel: "manifest", href: "/manifest.webmanifest" },
+      ],
+      meta: [
+        { name: "theme-color", content: "#000000" },
+      ],
       script: [
         {
           // Applies the persisted/system theme before the app mounts, to avoid a flash of the wrong theme (FOUC).

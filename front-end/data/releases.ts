@@ -8,6 +8,14 @@ export type Release = {
 
 export const releases: Release[] = [
   {
+    version: "1.8",
+    date: "2026-07-21",
+    title: "Nouvelle rubrique Tutoriel",
+    changes: [
+      "Ajout d'une rubrique « Tutoriel » (grades MMA), grâce au travail de Mikolaï, accessible depuis le menu à tous les utilisateurs connectés",
+    ],
+  },
+  {
     version: "1.7",
     date: "2026-07-20",
     title: "Thème sombre, mises à jour majeures et nouveautés admin",

@@ -22,7 +22,12 @@ export class EmbedProxyController {
 
   @All('*path')
   async proxySubPath(@Req() req: Request, @Res() res: Response) {
-    await this.embedProxyService.proxy(req, res, req.params.path as unknown as string);
+    // req.params.path is an array of segments under Express 5's
+    // path-to-regexp v6 (not a joined string) — naively interpolating it
+    // stringifies to comma-separated segments and 404s upstream. req.path
+    // is the reliable source here regardless of the wildcard capture shape.
+    const subPath = req.path.replace(/^\/embed\/mma\/?/, '');
+    await this.embedProxyService.proxy(req, res, subPath);
   }
 }
 
@@ -39,7 +44,9 @@ export class EmbedAssetsController {
 
   @All('*path')
   async proxyAsset(@Req() req: Request, @Res() res: Response) {
-    const path = req.params.path as unknown as string;
-    await this.embedProxyService.proxy(req, res, `_next/${path}`);
+    // req.path already includes the leading /_next/... segment — see the
+    // comment in EmbedProxyController.proxySubPath for why req.params.path
+    // isn't used here.
+    await this.embedProxyService.proxy(req, res, req.path.replace(/^\//, ''));
   }
 }

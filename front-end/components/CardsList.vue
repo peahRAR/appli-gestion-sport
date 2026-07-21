@@ -122,29 +122,36 @@ export default {
       return response.json();
     },
     async initialization() {
-      const userId = await this.getUserIdFromToken();
-      const eventsData = await this.loadEvents();
+      try {
+        const userId = await this.getUserIdFromToken();
+        const eventsData = await this.loadEvents();
+        const rawEvents = eventsData?.value;
 
-      if (eventsData && Array.isArray(eventsData._rawValue)) {
-        // ✅ Ceinture et bretelles : on garde uniquement les visibles
-        const visibleOnly = eventsData._rawValue.filter(ev => (ev?.is_visible ?? true) === true);
+        if (Array.isArray(rawEvents)) {
+          // ✅ Ceinture et bretelles : on garde uniquement les visibles
+          const visibleOnly = rawEvents.filter(ev => (ev?.is_visible ?? true) === true);
 
-        const eventsWithParticipation = await Promise.all(
-          visibleOnly.map(async (event) => {
-            if (event && event.id) {
-              const isParticipating = await this.checkParticipation(event.id, userId);
-              return { ...event, isParticipating };
-            } else {
-              console.error("L'objet event ne contient pas de propriété id :", event);
-              return null;
-            }
-          })
-        );
+          const eventsWithParticipation = await Promise.all(
+            visibleOnly.map(async (event) => {
+              if (event && event.id) {
+                const isParticipating = await this.checkParticipation(event.id, userId);
+                return { ...event, isParticipating };
+              } else {
+                console.error("L'objet event ne contient pas de propriété id :", event);
+                return null;
+              }
+            })
+          );
 
-        this.events = eventsWithParticipation.filter(event => event !== null);
+          this.events = eventsWithParticipation.filter(event => event !== null);
+        } else {
+          console.error("eventsData.value n'est pas un tableau :", eventsData);
+          this.events = [];
+        }
+      } finally {
+        // Toujours sortir du chargement, même en cas d'erreur ou de liste
+        // vide, pour laisser la place à l'état "Aucun cours prévu".
         this.loading = false;
-      } else {
-        console.error("eventsData n'est pas un objet avec la propriété _rawValue qui est un tableau :", eventsData);
       }
     },
 

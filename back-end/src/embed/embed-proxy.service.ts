@@ -53,7 +53,7 @@ export class EmbedProxyService {
 
     if (!baseUrl) {
       this.logger.error('PARTNER_VERCEL_BASE_URL non configurée');
-      this.sendErrorPage(res, 502, 'Le contenu n\'est pas disponible pour le moment.');
+      this.sendErrorPage(res, 'Le contenu n\'est pas disponible pour le moment.');
       return;
     }
 
@@ -63,7 +63,7 @@ export class EmbedProxyService {
     // propre domaine (ce qui indiquerait une URL Vercel mal résolue).
     if (target.host === req.get('host')) {
       this.logger.error(`Boucle de proxy détectée pour ${target.toString()}`);
-      this.sendErrorPage(res, 502, 'Le contenu n\'est pas disponible pour le moment.');
+      this.sendErrorPage(res, 'Le contenu n\'est pas disponible pour le moment.');
       return;
     }
 
@@ -105,7 +105,7 @@ export class EmbedProxyService {
       });
     } catch (error) {
       this.logger.error(`Échec de la requête vers le partenaire (${target.pathname}) : ${(error as Error).message}`);
-      this.sendErrorPage(res, 502, 'Le contenu n\'a pas pu être chargé. Réessayez plus tard.');
+      this.sendErrorPage(res, 'Le contenu n\'a pas pu être chargé. Réessayez plus tard.');
       return;
     }
 
@@ -168,9 +168,14 @@ export class EmbedProxyService {
       .join('; ');
   }
 
-  private sendErrorPage(res: Response, status: number, message: string): void {
+  // Toujours 200 : Cloudflare substitue sa propre page d'erreur générique
+  // pour certains statuts (502/504/520-527), quel que soit le corps que
+  // l'origine renvoie réellement — notre page de repli ne parvenait donc
+  // jamais au navigateur avec un 502. L'iframe a seulement besoin d'un
+  // message propre à afficher, pas d'un vrai code d'échec HTTP.
+  private sendErrorPage(res: Response, message: string): void {
     res
-      .status(status)
+      .status(200)
       .type('html')
       .send(`<!doctype html>
 <html lang="fr">

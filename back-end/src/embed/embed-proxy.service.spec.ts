@@ -160,7 +160,10 @@ describe('EmbedProxyService', () => {
 
       await service.proxy(req as any, res as any, '');
 
-      expect(res.statusCode).toBe(502);
+      // 200, pas 502 : Cloudflare remplace le corps par sa propre page
+      // d'erreur générique pour 502/504/520-527, quel que soit ce que
+      // l'origine renvoie — voir le commentaire sur sendErrorPage.
+      expect(res.statusCode).toBe(200);
       expect(res.ended).toBe(true);
     });
 
@@ -171,7 +174,7 @@ describe('EmbedProxyService', () => {
       await service.proxy(req as any, res as any, '');
 
       expect(fetchMock).not.toHaveBeenCalled();
-      expect(res.statusCode).toBe(502);
+      expect(res.statusCode).toBe(200);
     });
   });
 });

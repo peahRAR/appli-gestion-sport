@@ -35,7 +35,13 @@ jobs:
 
     - name: Archive Production Build
       working-directory: back-end
-      run: tar -czf ../production.tar.gz dist templates
+      # package.json/package-lock.json ride along so the server can run
+      # `npm ci` below — without them, the server's node_modules only ever
+      # reflects whatever was last installed by hand, and silently falls
+      # out of sync the moment a commit adds/bumps a runtime dependency
+      # (this is exactly what broke prod when cookie-parser was added: the
+      # server's package.json was still dated June 2024).
+      run: tar -czf ../production.tar.gz dist templates package.json package-lock.json
 
     - name: Verify Archive Content
       run: tar -tzf production.tar.gz | head -20
@@ -106,7 +112,14 @@ jobs:
           ls -la dist/ | head -10
           echo "Contenu de dist/src/:"
           ls -la dist/src/ | head -10 2>/dev/null || echo "Pas de dossier src"
-          
+
+          # Installe/synchronise les dépendances de production avant de
+          # redémarrer : sans ça, node_modules ne reflète que le dernier
+          # `npm install` lancé manuellement sur le serveur (potentiellement
+          # des années auparavant) et toute nouvelle dépendance ajoutée dans
+          # un commit fait planter l'appli au démarrage (Cannot find module).
+          npm ci --omit=dev
+
           # Configuration et (re)démarrage PM2
           # `pm2 reload` réutilise le cwd/script déjà enregistrés pour un process
           # existant et ne relit pas ces champs depuis le fichier ecosystem —

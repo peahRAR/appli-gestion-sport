@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import loadSecrets from './config/configuration';
 import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
+import cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const secrets = await loadSecrets();

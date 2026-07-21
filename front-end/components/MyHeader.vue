@@ -29,6 +29,10 @@
             @click="toggleMenu">
             Déclarations d'assurance
           </NuxtLink>
+          <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/tutoriel"
+            @click="toggleMenu">
+            Tutoriel
+          </NuxtLink>
           <!-- Affichage de la page d'administration pour les utilisateurs avec un rôle spécifique -->
           <div v-if="userRole === 1 || userRole === 2">
             <NuxtLink class="block px-4 py-2 text-text hover:bg-surface-2 cursor-pointer" to="/admin"

@@ -213,7 +213,7 @@ export class UsersService {
     return savedUser;
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<any[]> {
     const users = await this.userRepository.find({
       select: [
         'id',
@@ -234,8 +234,18 @@ export class UsersService {
         'date_subscribe',
         'role',
       ],
+      relations: ['licenses', 'licenses.federation'],
     });
-    return users;
+
+    // `license` (legacy single-field) can be empty even when a licence
+    // exists in the new per-federation system, so also check `licenses`.
+    // Only a derived boolean is returned — not the licence numbers
+    // themselves, to keep this list endpoint's response as lean as before.
+    return users.map(({ licenses, ...user }) => ({
+      ...user,
+      hasLicense: !!user.license
+        || (licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted),
+    }));
   }
 
   async findOne(id: string): Promise<User | undefined> {

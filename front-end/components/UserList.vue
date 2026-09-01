@@ -120,7 +120,7 @@
                   class="text-text text-3xl"
                 />
                 <svg
-                  v-if="!user.license"
+                  v-if="!user.hasLicense"
                   class="text-text"
                   xmlns="http://www.w3.org/2000/svg"
                   width="32"
@@ -288,13 +288,13 @@ export default {
     // Couleur de ligne selon licence / paiement
     userBgColor(user) {
       if (user) {
-        if (!user.license && (!user.date_end_pay || new Date(user.date_end_pay) < new Date())) {
+        if (!user.hasLicense && (!user.date_end_pay || new Date(user.date_end_pay) < new Date())) {
           return "bg-error/20";
         }
-        if (!user.license || !user.date_end_pay || new Date(user.date_end_pay) < new Date()) {
+        if (!user.hasLicense || !user.date_end_pay || new Date(user.date_end_pay) < new Date()) {
           return "bg-warning/20";
         }
-        if (user.license && user.date_end_pay && new Date(user.date_end_pay) >= new Date()) {
+        if (user.hasLicense && user.date_end_pay && new Date(user.date_end_pay) >= new Date()) {
           return ""; // Rien à signaler : garde le fond de la table (bg-surface)
         }
       }

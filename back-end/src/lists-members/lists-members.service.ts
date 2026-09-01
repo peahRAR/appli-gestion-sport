@@ -41,7 +41,7 @@ export class ListsMembersService {
     try {
       const participants = await this.listsMemberRepository.find({
         where: { eventId, isParticipant: true },
-        relations: ['user'],
+        relations: ['user', 'user.licenses', 'user.licenses.federation'],
         select: {
           user: {
             id: true,
@@ -55,9 +55,14 @@ export class ListsMembersService {
       });
 
       // Selected user fields are already decrypted by the @EncryptedColumn transformer.
-      const listParticipants = participants.map(participant => participant.user);
-
-      console.log(listParticipants);
+      // `license` (legacy single-field) can be empty even when a licence
+      // exists in the new per-federation system, so also check `licenses`.
+      const listParticipants = participants.map(({ user }) => {
+        const hasLicense = !!user.license
+          || (user.licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted);
+        const { licenses, ...rest } = user;
+        return { ...rest, hasLicense };
+      });
 
       return listParticipants;
 

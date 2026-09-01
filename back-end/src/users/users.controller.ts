@@ -234,7 +234,7 @@ export class UsersController {
   @Post(':id/licenses')
   addOrUpdateLicense(
     @Param('id') id: string,
-    @Body() dto: { federationCode: string; number: string },
+    @Body() dto: { federationCode: string; number: string | null },
   ) {
     return this.usersService.upsertUserLicense(id, dto.federationCode, dto.number);
   }

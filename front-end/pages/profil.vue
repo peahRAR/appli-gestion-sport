@@ -3,7 +3,7 @@
     <TheSkeleton v-if="loading" />
     <div v-else class="container mx-auto px-4 py-8 min-h-screen">
       <h1 class="text-3xl font-bold mb-8">Profil Utilisateur</h1>
-      <UserInfo :user="user" :baseUrl="getUrl()" />
+      <UserInfo ref="userInfo" :user="user" :baseUrl="getUrl()" />
       <UserActions :isEditing="isEditing" @editProfile="editProfile" @confirmDelete="confirmDelete"
         @openModal="openModal" />
       <ThemeSettings />
@@ -204,7 +204,7 @@ export default {
         }
       }
 
-      // 3) Upsert licences (seulement celles modifiées et non vides — déjà filtrées côté enfant)
+      // 3) Upsert licences (celles modifiées — number peut être null pour effacer)
       for (const lic of (licenses || [])) {
         const r = await fetch(`${url}/users/${userId}/licenses`, {
           method: "POST",
@@ -222,6 +222,10 @@ export default {
 
       // 4) refresh
       await this.fetchUserData();
+      // fetchUserData() ne recharge que `user`, pas les licences (endpoint
+      // séparé) — et comme user.id ne change pas ici, le watcher de
+      // UserInfo ne se redéclenche pas tout seul : on le force explicitement.
+      await this.$refs.userInfo?.loadLicenses();
       this.isEditing = false;
     },
 

@@ -46,20 +46,20 @@ export default {
             }
             if (participant) {
                 if (
-                    !participant.license &&
+                    !participant.hasLicense &&
                     (!participant.date_end_pay || new Date(participant.date_end_pay) < new Date())
                 ) {
                     return "bg-error/20";
                 }
                 if (
-                    !participant.license ||
+                    !participant.hasLicense ||
                     !participant.date_end_pay ||
                     new Date(participant.date_end_pay) < new Date()
                 ) {
                     return "bg-warning/20";
                 }
                 if (
-                    participant.license &&
+                    participant.hasLicense &&
                     participant.date_end_pay &&
                     new Date(participant.date_end_pay) >= new Date()
                 ) {

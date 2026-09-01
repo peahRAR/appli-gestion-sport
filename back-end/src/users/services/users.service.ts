@@ -106,13 +106,17 @@ export class UsersService {
   async upsertUserLicense(
     userId: string,
     federationCode: string,
-    licensePlainNumber: string,
+    licensePlainNumber: string | null,
   ) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
     const federation = await this.fedRepo.findOne({ where: { code: federationCode } });
     if (!federation) throw new BadRequestException('Fédération inconnue');
+
+    // Un champ vidé côté front arrive ici en "" ou null : les deux doivent
+    // effacer la licence (number_encrypted nullable), pas stocker une chaîne vide.
+    const normalizedNumber = licensePlainNumber?.trim() ? licensePlainNumber.trim() : null;
 
     // number_encrypted is encrypted automatically on save by the @EncryptedColumn transformer.
     let lic = await this.userLicenseRepo.findOne({
@@ -124,10 +128,10 @@ export class UsersService {
       lic = this.userLicenseRepo.create({
         user,
         federation,
-        number_encrypted: licensePlainNumber,
+        number_encrypted: normalizedNumber,
       });
     } else {
-      lic.number_encrypted = licensePlainNumber;
+      lic.number_encrypted = normalizedNumber;
     }
 
     return this.userLicenseRepo.save(lic);

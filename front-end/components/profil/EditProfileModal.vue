@@ -229,10 +229,11 @@ export default {
         tel_emergency: this.editedTelEmergency,
       };
 
-      // payload licences (seulement les modifiées ET non vides)
+      // payload licences (les modifiées ; un champ vidé envoie number: null
+      // pour que le back-end efface la licence de cette fédération)
       const licenses = Object.entries(this.licenseMap)
-        .filter(([, v]) => v.touched && v.number.trim() !== '')
-        .map(([federationCode, v]) => ({ federationCode, number: v.number.trim() }));
+        .filter(([, v]) => v.touched)
+        .map(([federationCode, v]) => ({ federationCode, number: v.number.trim() || null }));
 
       this.$emit('saveChanges', { profile, licenses });
     },

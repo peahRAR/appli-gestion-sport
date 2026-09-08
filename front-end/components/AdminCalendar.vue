@@ -349,8 +349,25 @@ async function deleteEvent(id) {
     await fetchEvents()
 }
 
+// -----------------------------
+// Vue Liste / Calendrier (préférence mémorisée)
+// -----------------------------
+const VIEW_MODE_STORAGE_KEY = "calendarViewMode"
+const viewMode = ref("list") // "list" | "calendar" — liste par défaut
+
+function setViewMode(mode) {
+    viewMode.value = mode
+    try {
+        localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
+    } catch { }
+}
+
 onMounted(async () => {
     token.value = localStorage.getItem("accessToken") || ""
+    try {
+        const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+        if (stored === "list" || stored === "calendar") viewMode.value = stored
+    } catch { }
     await fetchEvents()
 })
 </script>
@@ -525,21 +542,37 @@ onMounted(async () => {
             </div>
         </section>
 
-        <!-- LIST -->
+        <!-- LIST / CALENDAR -->
         <section class="space-y-3">
-            <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center justify-between gap-4 flex-wrap">
                 <h3 class="text-lg font-bold">Événements</h3>
-                <div class="text-sm opacity-70">
-                    {{ filteredEvents.length }} / {{ safeEvents.length }}
+                <div class="flex items-center gap-3">
+                    <div class="text-sm opacity-70" v-if="viewMode === 'list'">
+                        {{ filteredEvents.length }} / {{ safeEvents.length }}
+                    </div>
+                    <div class="border rounded-full p-1 flex gap-1">
+                        <button type="button" class="px-3 py-1 rounded-full text-sm"
+                            :class="viewMode === 'list' ? 'bg-accent text-accent-fg' : 'text-text'"
+                            @click="setViewMode('list')">
+                            Liste
+                        </button>
+                        <button type="button" class="px-3 py-1 rounded-full text-sm"
+                            :class="viewMode === 'calendar' ? 'bg-accent text-accent-fg' : 'text-text'"
+                            @click="setViewMode('calendar')">
+                            Calendrier
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <div v-if="loading" class="opacity-70">Chargement…</div>
 
-            <div v-else class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div v-else-if="viewMode === 'list'" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 <CardCalendar v-for="event in filteredEvents" :key="event.id" :event="event" :can-manage="canManage"
                     @delete="deleteEvent" />
             </div>
+
+            <MonthCalendar v-else :events="filteredEvents" :can-manage="canManage" @delete="deleteEvent" />
         </section>
     </div>
 </template>

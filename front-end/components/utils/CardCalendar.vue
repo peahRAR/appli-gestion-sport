@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue"
+import { eventTypeStyle } from "~/utils/eventTypeStyles"
 
 const props = defineProps({
   event: { type: Object, required: true },
@@ -15,39 +16,9 @@ function onEdit() {
   emit("edit", props.event)
 }
 
-// Styles par type
-const TYPE_STYLES = {
-  "Réunion": {
-    border: "border-l-8 border-l-green-600",
-    badge: "bg-black text-white",
-    bg: "bg-surface",
-  },
-  "Compétition": {
-    border: "border-l-8 border-l-red-600",
-    badge: "bg-black text-white",
-    bg: "bg-surface",
-  },
-  "Invitation club externe": {
-    border: "border-l-8 border-l-cyan-600",
-    badge: "bg-black text-white",
-    bg: "bg-surface",
-  },
-  "Vie associatif": {
-    border: "border-l-8 border-l-black",
-    badge: "bg-black text-white",
-    bg: "bg-surface",
-  },
-}
-
-const styleForType = computed(() => {
-  return (
-    TYPE_STYLES[props.event?.type] || {
-      border: "border-l-8 border-l-black",
-      badge: "bg-black text-white",
-      bg: "bg-surface",
-    }
-  )
-})
+// Styles par type — source unique dans utils/eventTypeStyles.ts (partagée
+// avec MonthCalendar.vue), ne pas redéfinir de palette ici.
+const styleForType = computed(() => eventTypeStyle(props.event?.type))
 
 // Date bloc (jour / mon yy)
 const dateParts = computed(() => {

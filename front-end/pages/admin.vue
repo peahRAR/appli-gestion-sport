@@ -217,7 +217,11 @@ export default {
       const url = this.getUrl();
       try {
         const token = localStorage.getItem("accessToken");
-        const response = await useFetch(`${url}/events/all`, {
+        // fetch() classique (pas useFetch) : useFetch met sa réponse en cache
+        // par clé dérivée de l'URL — un rappel après une mutation (création,
+        // édition, suppression d'un cours) pouvait renvoyer l'ancienne liste
+        // en cache au lieu de refaire un vrai appel réseau.
+        const response = await fetch(`${url}/events/all`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -225,8 +229,10 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
 
-        const arr = Array.isArray(response.data.value) ? response.data.value : [];
+        const arr = Array.isArray(data) ? data : [];
         // normalise camelCase / snake_case
         this.events = arr.map(ev => ({
           ...ev,
@@ -275,9 +281,12 @@ export default {
     async loadAllUsers() {
       try {
         const token = localStorage.getItem("accessToken");
-        // Get Request at the Api for users
         const url = this.getUrl();
-        const response = await useFetch(`${url}/users`, {
+        // fetch() classique (pas useFetch) : useFetch met sa réponse en cache
+        // par clé dérivée de l'URL — un rappel après une mutation (activation,
+        // suppression...) pouvait renvoyer l'ancienne liste en cache au lieu
+        // de refaire un vrai appel réseau.
+        const response = await fetch(`${url}/users`, {
           method: "GET",
           mode: "cors",
           headers: {
@@ -285,9 +294,9 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         });
-        this.loading = false
-        // Keep all in Users Array
-        this.users = response.data;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        this.users = await response.json();
+        this.loading = false;
       } catch (error) {
         console.error("Erreur lors du chargement des utilisateurs", error);
       }
@@ -343,10 +352,22 @@ export default {
         this.licensesLoading = false;
       }
     },
-    onLicensesSaved() {
+    async onLicensesSaved() {
       if (this.selectedUser?.id) {
         this.licensesCache.delete(this.selectedUser.id);
-        this.loadLicensesFor(this.selectedUser.id);
+        await this.loadLicensesFor(this.selectedUser.id);
+
+        // loadLicensesFor() only refreshes the read-only licence display —
+        // hasFmmafLicense (drives the grade/formation section + name badge)
+        // needs to be recomputed too, otherwise it stays stale until the
+        // modal is closed and reopened.
+        const hasFmmafLicense = this.selectedUserLicenses.some(
+          (l) => l?.federation?.code === 'FMMAF' && !!l?.number_plain
+        );
+        this.selectedUser = { ...this.selectedUser, hasFmmafLicense };
+        this.users = this.users.map((u) =>
+          u.id === this.selectedUser.id ? { ...u, hasFmmafLicense } : u
+        );
       }
     },
 

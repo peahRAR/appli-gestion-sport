@@ -18,8 +18,16 @@ async function loadSecrets() {
             logger.debug(`Secret loaded successfully: ${secretId}`);
         }
     } catch (error) {
-        logger.error('Failed to load secrets:', error.stack);
-        throw new Error('Failed to load secrets');
+        if (process.env.NODE_ENV === 'production') {
+            logger.error('Failed to load secrets:', error.stack);
+            throw new Error('Failed to load secrets');
+        }
+        // Local/dev only (PM2 sets NODE_ENV=production, see ecosystem.config.js):
+        // fall back to the values already in .env / process.env instead of
+        // hard-crashing on a Google Cloud auth issue unrelated to the app itself.
+        logger.warn(
+            `Google Secret Manager unavailable (${error.message || error}) — falling back to local .env values.`,
+        );
     }
     return secrets;
 }

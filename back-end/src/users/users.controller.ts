@@ -239,8 +239,16 @@ export class UsersController {
     await this.listsMembersService.removeAllByUserId(id);
 
     if (user.avatar) {
-      const avatarPath = `avatars/${id}`;
-      await this.deleteFolderFromGCS(avatarPath);
+      // Best-effort: an unreachable/misconfigured storage bucket must never
+      // block account deletion itself (a security-relevant action) — an
+      // orphaned avatar folder is a much smaller problem than an account
+      // that can't be removed.
+      try {
+        const avatarPath = `avatars/${id}`;
+        await this.deleteFolderFromGCS(avatarPath);
+      } catch (error) {
+        this.logger.warn(`Échec de la suppression de l'avatar GCS pour l'utilisateur ${id}: ${error?.message || error}`);
+      }
     }
 
     return this.usersService.remove(id);

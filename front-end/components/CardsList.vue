@@ -133,8 +133,7 @@ export default {
     async initialization() {
       try {
         const userId = await this.getUserIdFromToken();
-        const eventsData = await this.loadEvents();
-        const rawEvents = eventsData?.value;
+        const rawEvents = await this.loadEvents();
 
         if (Array.isArray(rawEvents)) {
           // ✅ Ceinture et bretelles : on garde uniquement les visibles
@@ -154,7 +153,7 @@ export default {
 
           this.events = eventsWithParticipation.filter(event => event !== null);
         } else {
-          console.error("eventsData.value n'est pas un tableau :", eventsData);
+          console.error("rawEvents n'est pas un tableau :", rawEvents);
           this.events = [];
         }
       } finally {
@@ -168,14 +167,19 @@ export default {
       try {
         const token = this.getToken();
         const url = this.getUrl();
-        const response = await useFetch(`${url}/events`, {
+        // fetch() classique (pas useFetch) : useFetch met sa réponse en cache
+        // par clé dérivée de l'URL — un rappel après une mutation (un cours
+        // créé/modifié en admin) pouvait renvoyer l'ancienne liste en cache
+        // au lieu de refaire un vrai appel réseau.
+        const response = await fetch(`${url}/events`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
-        return response.data;
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
       } catch (error) {
         console.error("Erreur lors du chargement des événements", error);
       }

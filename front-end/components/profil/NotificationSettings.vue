@@ -14,6 +14,9 @@
     <div v-else class="flex items-center justify-between gap-4">
       <div>
         <p class="text-sm text-text">Recevoir une notification quand un nouveau cours est ajouté.</p>
+        <p class="text-xs text-text-muted mt-1">
+          Sur iPhone, cela nécessite d'avoir ajouté l'application à l'écran d'accueil.
+        </p>
         <p v-if="permission === 'denied'" class="text-xs text-red-500 mt-1">
           Les notifications sont bloquées pour ce site dans les réglages de votre navigateur.
         </p>

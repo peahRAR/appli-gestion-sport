@@ -122,6 +122,26 @@
                                 {{ user?.date_end_pay ? formatDate(user.date_end_pay) : "Non Renseigné" }}
                             </dd>
                         </div>
+
+                        <!-- Dernière connexion -->
+                        <div>
+                            <dt class="text-xs font-semibold tracking-wide text-white">
+                                Dernière connexion
+                            </dt>
+                            <dd class="mt-1 text-sm text-white">
+                                {{ user?.last_login_at ? formatDate(user.last_login_at) : "Jamais" }}
+                            </dd>
+                        </div>
+
+                        <!-- Dernière inscription à un cours -->
+                        <div>
+                            <dt class="text-xs font-semibold tracking-wide text-white">
+                                Dernière inscription à un cours
+                            </dt>
+                            <dd class="mt-1 text-sm text-white">
+                                {{ user?.last_course_registration_at ? formatDate(user.last_course_registration_at) : "Jamais" }}
+                            </dd>
+                        </div>
                     </dl>
 
                     <!-- Séparateur -->

@@ -78,6 +78,25 @@ export class User {
   @Column({ type: 'varchar', length: 20, default: DEFAULT_FORMATION })
   formation: Formation;
 
+  // Suivi d'activité — indépendant de `isActive` (qui gère l'activation
+  // initiale du compte, pas l'inactivité). Voir CronjobsService pour la
+  // désactivation automatique.
+  @Column({ type: 'timestamp', nullable: true })
+  last_login_at: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  last_course_registration_at: Date | null;
+
+  // 'active' | 'deactivated_inactivity'
+  @Column({ type: 'varchar', length: 30, default: 'active' })
+  status: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deactivated_at: Date | null;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  deactivation_reason: string | null;
+
   @OneToMany(() => ListsMember, listsMember => listsMember.user, { cascade: ['remove'] })
   listsMembers: ListsMember[];
 

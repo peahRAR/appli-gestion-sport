@@ -11,6 +11,11 @@
           <inactive-users-table :inactive-users="filterUsers(false)" :pageSize="10" @reactivate="reactivateUser"
             @delete="deleteUser" />
         </div>
+        <!-- Comptes désactivés automatiquement pour inactivité (distinct de la table ci-dessus) -->
+        <div class="mb-8 bg-surface mx-2 rounded-sm p-2" style="overflow-x: auto">
+          <InactivityDeactivatedTable :users="inactivityDeactivatedUsers" @reactivate="reactivateInactivityAccount"
+            @delete="deleteUser" />
+        </div>
         <!-- USERS List -->
         <div class="mb-8 bg-surface mx-2 rounded-sm p-2" style="overflow-x: auto">
           <UserList :key="usersKey" :users="preprocessUsers(filterUsers(true))" :sortByList :filterList :activeColumns
@@ -94,6 +99,7 @@ export default {
       licensesError: '',
       licensesCache: new Map(),
       alerts: [],
+      inactivityDeactivatedUsers: [],
       sortByList: [
         { cat: "Nom", value: "name" },
         { cat: "Prénom", value: "firstname" },
@@ -118,6 +124,7 @@ export default {
     await this.loadEvents(); // Events
     await this.loadAllUsers(); // Users
     await this.fetchAlerts(); // Alerts
+    await this.loadInactivityDeactivatedUsers();
   },
   computed: {
     // Duration In Hours from minutes
@@ -446,6 +453,7 @@ export default {
           this.errorMessage = "L'utilisateur a été supprimé !";
           this.closeModalUser();
           this.loadAllUsers();
+          this.loadInactivityDeactivatedUsers();
         } else {
           this.openErrorModal();
           this.errorMessage = "Erreur lors de la suppression de l'utilisateur";
@@ -457,6 +465,37 @@ export default {
           error
         );
         // Afficher un message d'erreur ou effectuer d'autres actions en cas d'erreur
+      }
+    },
+    async loadInactivityDeactivatedUsers() {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+        const response = await fetch(`${url}/users/inactive/deactivated`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        this.inactivityDeactivatedUsers = await response.json();
+      } catch (error) {
+        console.error("Erreur lors du chargement des comptes désactivés pour inactivité :", error);
+      }
+    },
+    async reactivateInactivityAccount(user) {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const url = this.getUrl();
+        const response = await fetch(`${url}/users/${user.id}/reactivate`, {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        this.openErrorModal();
+        this.errorMessage = "Compte réactivé avec succès";
+        await this.loadInactivityDeactivatedUsers();
+        await this.loadAllUsers();
+      } catch (error) {
+        this.openErrorModal();
+        this.errorMessage = "Erreur lors de la réactivation du compte";
       }
     },
     // Extract the user role from the token in localStorage

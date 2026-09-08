@@ -24,6 +24,7 @@ import { multerOptions } from '../multer/multer.config';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UserIdOradminRoleGuard } from '../common/guard/users.guard';
 import { SelfOrSuperAdminGuard } from '../common/guard/self-or-superadmin.guard';
+import { AdminRoleGuard } from '../common/guard/admin.guard';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -129,6 +130,21 @@ export class UsersController {
   @Get('federations')
   listFeds() {
     return this.usersService.listFederations();
+  }
+
+  // Comptes désactivés automatiquement pour inactivité (distinct de la
+  // notion existante `isActive` / comptes en attente d'activation).
+  @UseGuards(AdminRoleGuard)
+  @Get('inactive/deactivated')
+  listDeactivatedForInactivity() {
+    return this.usersService.findDeactivatedForInactivity();
+  }
+
+  @UseGuards(AdminRoleGuard)
+  @Patch(':id/reactivate')
+  async reactivateUser(@Param('id') id: string) {
+    await this.usersService.reactivateUser(id);
+    return { message: 'Compte réactivé.' };
   }
 
   // Vérifier la validité d'un lien de réinitialisation (sans le consommer),

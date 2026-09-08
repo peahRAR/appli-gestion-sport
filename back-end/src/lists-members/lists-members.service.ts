@@ -141,6 +141,9 @@ export class ListsMembersService {
           existingMember.isParticipant = true;
           await transactionalEntityManager.save(existingMember);
         }
+        // Fire-and-forget, outside the transaction: a "last seen" timestamp
+        // doesn't need atomicity with the ListsMember write.
+        this.usersService.touchLastCourseRegistration(userId).catch(() => {});
       } else {
         // Cas où l'utilisateur choisit de ne pas participer
         if (!existingMember) {

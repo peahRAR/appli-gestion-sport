@@ -20,6 +20,7 @@ export class AuthService {
     const user = await this.validateUser(email, password);
     const payload = { sub: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(payload);
+    await this.usersService.touchLastLogin(user.id);
     return { access_token: token };
   }
 
@@ -31,6 +32,13 @@ export class AuthService {
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (isMatch) {
+        // Checked only after a correct password, so a wrong-password attempt
+        // doesn't reveal whether the account is deactivated (no enumeration).
+        if (user.status === 'deactivated_inactivity') {
+          throw new UnauthorizedException(
+            'Votre compte a été désactivé pour inactivité. Contactez un administrateur pour le réactiver.',
+          );
+        }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password, ...result } = user;
         return user;

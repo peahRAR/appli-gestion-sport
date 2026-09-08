@@ -234,6 +234,9 @@ export class UsersService {
         'role',
         'grade',
         'formation',
+        'last_login_at',
+        'last_course_registration_at',
+        'status',
       ],
       relations: ['licenses', 'licenses.federation'],
     });
@@ -323,6 +326,54 @@ export class UsersService {
       ...rest,
       hasFmmafLicense: (licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
     };
+  }
+
+  async touchLastLogin(userId: string): Promise<void> {
+    await this.userRepository.update({ id: userId }, { last_login_at: new Date() });
+  }
+
+  // role = 0 (plain member) only — admins/superadmins are never
+  // auto-deactivated. Returns the number of accounts deactivated.
+  async deactivateInactiveUsers(months: number): Promise<number> {
+    const threshold = new Date();
+    threshold.setMonth(threshold.getMonth() - months);
+
+    // last_login_at IS NULL is excluded on purpose: it means the account was
+    // never activated/logged in yet (still gated by the separate `isActive`
+    // approval flow), not that it went quiet after being used.
+    const result = await this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ status: 'deactivated_inactivity', deactivated_at: new Date(), deactivation_reason: 'inactivity' })
+      .where('role = 0')
+      .andWhere('status = :active', { active: 'active' })
+      .andWhere('last_login_at < :threshold', { threshold })
+      .execute();
+
+    return result.affected ?? 0;
+  }
+
+  async findDeactivatedForInactivity(): Promise<User[]> {
+    return this.userRepository.find({
+      where: { status: 'deactivated_inactivity' },
+      select: [
+        'id', 'name', 'firstname', 'email',
+        'last_login_at', 'last_course_registration_at', 'deactivated_at',
+      ],
+    });
+  }
+
+  async reactivateUser(userId: string): Promise<void> {
+    // Reset last_login_at to now so the account isn't immediately
+    // re-deactivated by the next run of the inactivity cron.
+    await this.userRepository.update(
+      { id: userId },
+      { status: 'active', deactivated_at: null, deactivation_reason: null, last_login_at: new Date() },
+    );
+  }
+
+  async touchLastCourseRegistration(userId: string): Promise<void> {
+    await this.userRepository.update({ id: userId }, { last_course_registration_at: new Date() });
   }
 
   async findByEmail(email: string): Promise<User | undefined> {

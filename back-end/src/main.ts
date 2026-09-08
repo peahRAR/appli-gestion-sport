@@ -20,6 +20,14 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  // API responses must never be cached by a service worker or the browser —
+  // this app is a static SPA and the API is the only source of fresh data
+  // (relevant now that a service worker exists, see front-end Lot 8/7).
+  app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+
   const allowedOrigins = ['http://localhost:3000', 'https://app.mmabaisieux.fr'];
 
   const corsOptions = {

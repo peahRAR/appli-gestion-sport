@@ -3,9 +3,12 @@
     <TheSkeleton v-if="loading" />
     <div v-else>
       <div class="container mx-auto py-8">
-        <h1 class="text-3xl ml-2 font-semibold mb-4">
-          Administration
-        </h1>
+        <div class="flex items-center justify-between gap-4 flex-wrap ml-2 mb-4">
+          <h1 class="text-3xl font-semibold">
+            Administration
+          </h1>
+          <StandaloneRefreshButton @refresh="refreshAll" />
+        </div>
         <!-- Inactive Users Table -->
         <div class="mb-8 bg-surface mx-2 rounded-sm p-2" style="overflow-x: auto">
           <inactive-users-table :inactive-users="filterUsers(false)" :pageSize="10" @reactivate="reactivateUser"
@@ -125,6 +128,13 @@ export default {
     await this.loadAllUsers(); // Users
     await this.fetchAlerts(); // Alerts
     await this.loadInactivityDeactivatedUsers();
+    // iOS standalone PWA: re-fetch everything when the app comes back from
+    // the background instead of staying stuck on stale data
+    // (see plugins/refetch-on-foreground.client.ts).
+    window.addEventListener("app:refresh", this.refreshAll);
+  },
+  beforeUnmount() {
+    window.removeEventListener("app:refresh", this.refreshAll);
   },
   computed: {
     // Duration In Hours from minutes
@@ -140,6 +150,13 @@ export default {
     },
   },
   methods: {
+
+    refreshAll() {
+      this.loadEvents();
+      this.loadAllUsers();
+      this.fetchAlerts();
+      this.loadInactivityDeactivatedUsers();
+    },
 
     preprocessUsers(users) {
       return users.map((user) => ({

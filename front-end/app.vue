@@ -7,6 +7,7 @@
     <footer>
       <my-footer class="mt-2"/>
     </footer>
+    <AppUpdateBanner />
   </div>
 </template>
 

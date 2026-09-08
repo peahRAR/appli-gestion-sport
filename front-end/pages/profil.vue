@@ -53,6 +53,10 @@ export default {
   async mounted() {
     await this.fetchUserData();
     this.checkAccessToken();
+    window.addEventListener("app:refresh", this.fetchUserData);
+  },
+  beforeUnmount() {
+    window.removeEventListener("app:refresh", this.fetchUserData);
   },
   methods: {
     getUrl() {

@@ -17,8 +17,27 @@ export default defineNuxtConfig({
     },
   ],
   ssr: false,
-  modules: ["@nuxt/image", "@nuxt/icon", "@pinia/nuxt"],
+  modules: ["@nuxt/image", "@nuxt/icon", "@pinia/nuxt", "@vite-pwa/nuxt"],
   css: ["~/assets/main.css"],
+  pwa: {
+    registerType: "prompt",
+    // injectManifest (not generateSW) because Lot 7 needs a custom `push` /
+    // `notificationclick` handler in the same worker.
+    strategies: "injectManifest",
+    srcDir: "service-worker",
+    filename: "sw.ts",
+    // The manifest already exists and is linked below — don't generate/inject a second one.
+    manifest: false,
+    injectManifest: {
+      globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
+    },
+    devOptions: {
+      enabled: false,
+    },
+    client: {
+      installPrompt: true,
+    },
+  },
   app: {
     head: {
       link: [

@@ -2,6 +2,9 @@
   <div>
     <TheSkeleton v-if="loading" />
     <div class="min-h-screen" v-else>
+      <div class="flex justify-end px-2 mb-2">
+        <StandaloneRefreshButton @refresh="initialization" />
+      </div>
       <TheAlert class="mx-2 rounded-sm mb-4" :alerts="alerts" />
       <NoEvents v-if="events.length < 1" />
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -65,6 +68,12 @@ export default {
     await this.initialization();
     this.checkUserAlert();
     this.fetchAlerts();
+    // iOS standalone PWA: re-fetch when the app comes back from the
+    // background instead of staying stuck on stale data (see plugins/refetch-on-foreground.client.ts).
+    window.addEventListener("app:refresh", this.initialization);
+  },
+  beforeUnmount() {
+    window.removeEventListener("app:refresh", this.initialization);
   },
   computed: {
     formattedEvents() {

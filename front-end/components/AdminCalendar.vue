@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue"
+import { ref, computed, onMounted, onUnmounted, watch } from "vue"
 
 const config = useRuntimeConfig()
 const API_URL = config.public.siteUrl
@@ -369,6 +369,11 @@ onMounted(async () => {
         if (stored === "list" || stored === "calendar") viewMode.value = stored
     } catch { }
     await fetchEvents()
+    window.addEventListener("app:refresh", fetchEvents)
+})
+
+onUnmounted(() => {
+    window.removeEventListener("app:refresh", fetchEvents)
 })
 </script>
 
@@ -378,6 +383,7 @@ onMounted(async () => {
             <div>
                 <h2 class="text-2xl font-bold">Calendrier</h2>
             </div>
+            <StandaloneRefreshButton @refresh="fetchEvents" />
         </div>
 
         <div v-if="errorMsg" class="border rounded-sm p-3">

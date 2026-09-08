@@ -15,5 +15,41 @@ clientsClaim()
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
 
-// Push notification handling (Lot 7) is added here, in the same SW file,
-// rather than a second worker — a page can only control one active SW.
+// ---- Push notifications ----
+// A page can only control one active service worker, so this lives in the
+// same file rather than a second worker.
+self.addEventListener('push', (event) => {
+  let data: { title?: string; body?: string; url?: string } = {}
+  try {
+    data = event.data?.json() || {}
+  } catch {
+    data = { title: 'Nouveau cours disponible', body: event.data?.text() || '' }
+  }
+
+  const title = data.title || 'Nouveau cours disponible'
+  const options: NotificationOptions = {
+    body: data.body || "Un cours vient d'être ajouté, pense à t'y inscrire !",
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    data: { url: data.url || '/' },
+  }
+
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = (event.notification.data && event.notification.data.url) || '/'
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsList) => {
+      for (const client of clientsList) {
+        if ('focus' in client) {
+          client.navigate?.(url)
+          return client.focus()
+        }
+      }
+      return self.clients.openWindow(url)
+    }),
+  )
+})

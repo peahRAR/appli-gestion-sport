@@ -313,6 +313,7 @@ export class UsersService {
         'approove_rules',
         'grade',
         'formation',
+        'push_notifications_enabled',
       ],
       relations: ['licenses', 'licenses.federation'],
     });

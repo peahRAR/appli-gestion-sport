@@ -65,6 +65,10 @@ export default defineNuxtConfig({
     public: {
       siteUrl: process.env.API_URL || "https://mma-app-api.mmabaisieux.fr",
       frontVersion: latestVersion,
+      // Baked in at build time (nuxt generate) since this is a static SPA —
+      // VAPID_PUBLIC_KEY is not secret (it's shipped to every browser
+      // anyway), see .github/workflows/deploy-front.yaml for the CI value.
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY || "",
     },
   },
 });

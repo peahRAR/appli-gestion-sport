@@ -19,6 +19,7 @@ import { KeyHolderModule } from './keyholder/keyholder.module';
 import { BadgesModule } from './badges/badges.module';
 import { ClubCalendarModule } from './club-calendar/club-calendar.module';
 import { EmbedModule } from './embed/embed.module';
+import { PushNotificationsModule } from './push-notifications/push-notifications.module';
 
 @Module({})
 export class AppModule  {
@@ -75,6 +76,7 @@ export class AppModule  {
         BadgesModule,
         ClubCalendarModule,
         EmbedModule,
+        PushNotificationsModule,
       ],
       controllers: [AppController],
       providers: [AppService],

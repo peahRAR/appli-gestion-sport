@@ -7,6 +7,7 @@
       <UserActions :isEditing="isEditing" @editProfile="editProfile" @confirmDelete="confirmDelete"
         @openModal="openModal" />
       <ThemeSettings />
+      <NotificationSettings :user="user" />
       <EditProfileModal :isOpen="isEditing" :user="user" :baseUrl="getUrl()" @cancelEdit="cancelEdit"
         @saveChanges="saveChanges" />
       <ChangePasswordModal :isOpen="showChangePasswordModal" @close="closeModal" @changePassword="changePassword"

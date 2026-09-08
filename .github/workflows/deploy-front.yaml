@@ -29,6 +29,12 @@ jobs:
 
     - name: Generate static files
       working-directory: front-end
+      # VAPID_PUBLIC_KEY is baked into the static bundle at build time (this
+      # is a pure SPA, no server-side runtime) — it's not secret (shipped to
+      # every browser regardless), but still comes from a GitHub secret so
+      # it isn't hand-typed in two places.
+      env:
+        VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
       run: npm run generate
 
     - name: List files after generate

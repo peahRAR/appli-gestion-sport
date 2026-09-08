@@ -97,6 +97,9 @@ export class User {
   @Column({ type: 'varchar', length: 50, nullable: true })
   deactivation_reason: string | null;
 
+  @Column({ type: 'boolean', default: true })
+  push_notifications_enabled: boolean;
+
   @OneToMany(() => ListsMember, listsMember => listsMember.user, { cascade: ['remove'] })
   listsMembers: ListsMember[];
 

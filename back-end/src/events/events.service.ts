@@ -5,6 +5,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { Repository, DeepPartial } from 'typeorm';
 import { Event } from './events.entity';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
+import { PushNotificationsService } from '../push-notifications/push-notifications.service';
 
 
 @Injectable()
@@ -17,6 +18,7 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     @Inject(forwardRef(() => ListsMembersService))
     private listsMembersService: ListsMembersService,
+    private readonly pushNotificationsService: PushNotificationsService,
   ) { }
 
   async create(createEventDto: CreateEventDto): Promise<Event> {
@@ -37,6 +39,14 @@ export class EventsService {
     });
 
     await this.eventRepository.save(newEvent);
+
+    if (newEvent.isVisible) {
+      // Fire-and-forget: a failing push send must never break course creation.
+      this.pushNotificationsService
+        .notifyNewVisibleCourse({ name_event: newEvent.name_event })
+        .catch((error) => this.logger.warn(`notifyNewVisibleCourse failed: ${error?.message || error}`));
+    }
+
     return newEvent;
   }
 
@@ -62,6 +72,10 @@ export class EventsService {
 
   // events.service.ts (extrait)
   async update(id: number, updateEventDto: UpdateEventDto): Promise<Event | undefined> {
+    // Needed to detect a false→true visibility transition below, so a
+    // simple edit of an already-visible course never re-sends a notification.
+    const before = await this.eventRepository.findOne({ where: { id } });
+
     const updatedEvent: DeepPartial<Event> = {};
 
     if (updateEventDto.date_event) updatedEvent.date_event = updateEventDto.date_event;
@@ -104,7 +118,15 @@ export class EventsService {
     }
 
     await this.eventRepository.update(id, updatedEvent);
-    return this.eventRepository.findOne({ where: { id } });
+    const fresh = await this.eventRepository.findOne({ where: { id } });
+
+    if (before && !before.isVisible && fresh?.isVisible) {
+      this.pushNotificationsService
+        .notifyNewVisibleCourse({ name_event: fresh.name_event })
+        .catch((error) => this.logger.warn(`notifyNewVisibleCourse failed: ${error?.message || error}`));
+    }
+
+    return fresh;
   }
 
 

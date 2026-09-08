@@ -50,6 +50,8 @@ export class ListsMembersService {
             avatar: true,
             firstname: true,
             name: true,
+            grade: true,
+            formation: true,
           }
         }
       });
@@ -60,8 +62,9 @@ export class ListsMembersService {
       const listParticipants = participants.map(({ user }) => {
         const hasLicense = !!user.license
           || (user.licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted);
+        const hasFmmafLicense = (user.licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted);
         const { licenses, ...rest } = user;
-        return { ...rest, hasLicense };
+        return { ...rest, hasLicense, hasFmmafLicense };
       });
 
       return listParticipants;

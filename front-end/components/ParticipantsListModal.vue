@@ -17,10 +17,9 @@
                 </div>
 
                 <div class="ml-3 flex w-full justify-between">
-                    <span v-if="userRole > 0" @click="openDetailsModal(participant)"
-                        class="cursor-pointer font-bold capitalize">{{ participant.firstname }} {{ participant.name
-                        }}</span>
-                    <span v-else class="font-bold capitalize"> {{ participant.firstname }} {{ participant.name }}</span>
+                    <UserNameWithGrade v-if="userRole > 0" @click="openDetailsModal(participant)" :user="participant"
+                        class="cursor-pointer font-bold capitalize" />
+                    <UserNameWithGrade v-else :user="participant" class="font-bold capitalize" />
                     <button v-if="userRole > 0" @click="openDetailsModal(participant)" class="underline">Voir
                         détails</button>
                 </div>

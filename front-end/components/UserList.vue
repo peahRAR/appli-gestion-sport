@@ -132,6 +132,20 @@
                     d="M14 13h5v-2h-5zm0-3h5V8h-5zm-9 6h8v-.55q0-1.125-1.1-1.787T9 13q-1.8 0-2.9.663T5 15.45zm4-4q.825 0 1.413-.587T11 10q0-.825-.587-1.412T9 8q-.825 0-1.412.588T7 10q0 .825.588 1.413T9 12m-5 8q-.825 0-1.412-.587T2 18V6q0-.825.588-1.412T4 4h16q.825 0 1.413.588T22 6v12q0 .825-.587 1.413T20 20zm0-2h16V6H4zm0 0V6z"
                   />
                 </svg>
+                <span
+                  v-if="user.hasFmmafLicense"
+                  class="inline-flex items-center gap-1"
+                  :title="`Grade : ${gradeLabel(user.grade)}`"
+                >
+                  <span
+                    class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                    :class="{ 'ring-1 ring-border-strong': (user.grade || 'blanc') === 'blanc' }"
+                    :style="{ backgroundColor: gradeColor(user.grade) }"
+                  ></span>
+                  <span v-if="user.formation && user.formation !== 'aucune'" class="text-[10px] font-semibold text-text-muted">
+                    {{ user.formation }}
+                  </span>
+                </span>
               </span>
             </td>
 
@@ -222,6 +236,8 @@
 </template>
 
 <script>
+import { gradeLabel, gradeColor } from "~/utils/fmmaf";
+
 export default {
   props: {
     users: { type: Array, required: true },
@@ -243,6 +259,12 @@ export default {
     };
   },
   methods: {
+    gradeLabel(g) {
+      return gradeLabel(g);
+    },
+    gradeColor(g) {
+      return gradeColor(g);
+    },
     openModal(user) {
       this.$emit("open-modal", user);
     },

@@ -8,8 +8,25 @@
           Réinitialiser votre mot de passe
         </h2>
       </div>
+
+      <!-- Vérification du lien en cours -->
+      <p v-if="tokenState === 'checking'" class="text-center text-text-muted">
+        Vérification du lien…
+      </p>
+
+      <!-- Lien expiré / invalide / déjà utilisé -->
+      <div v-else-if="tokenState === 'error'" class="text-center space-y-4">
+        <p class="text-text">{{ tokenErrorMessage }}</p>
+        <NuxtLink
+          to="/?resetPassword=1"
+          class="inline-block py-2 px-4 rounded-md text-white bg-blue-600 hover:bg-blue-700"
+        >
+          Mot de passe oublié
+        </NuxtLink>
+      </div>
+
       <!-- Reset Password Form -->
-      <form class="mt-8 space-y-6" @submit.prevent="resetPassword">
+      <form v-else class="mt-8 space-y-6" @submit.prevent="resetPassword">
         <!-- Input for the reset-Token -->
         <input type="hidden" name="token" v-model="token" />
         <div class="rounded-md shadow-xs -space-y-px">
@@ -30,6 +47,7 @@
               :isMin="isMin"
               :isNumber="isNumber"
             />
+            <p class="mt-1 text-xs text-text-muted">{{ passwordRuleMessage }}</p>
           </div>
           <div>
             <!-- Input for the confirmation of the new password have to be === newPassword -->
@@ -68,22 +86,22 @@ export default {
       token: "", // Reset Token
       password: "", // New password
       confirmPassword: "", // Confirmation of the new password
-      regexPassword:
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      regexPassword: PASSWORD_REGEX,
+      passwordRuleMessage: PASSWORD_RULE_MESSAGE,
       showErrorModal: false,
       errorMessage: null,
+      // 'checking' | 'valid' | 'error'
+      tokenState: "checking",
+      tokenErrorMessage: "",
     };
   },
-  created() {
+  async created() {
     // Take the reset Token from the URL
     const urlParams = new URLSearchParams(window.location.search);
     this.token = urlParams.get("token");
+    await this.checkTokenValidity();
   },
   computed: {
-    // Pattern Regex
-    patternRegex() {
-      return this.regexPassword.toString().slice(1, -1);
-    },
     // Validate New Password
     validerPassword() {
       return this.regexPassword.test(this.password);
@@ -104,8 +122,7 @@ export default {
       return regex.test(this.password);
     },
     isSpecial() {
-      const regex = /[@$!%*?&]/;
-      return regex.test(this.password);
+      return [...this.password].some((ch) => PASSWORD_SPECIAL_CHARS.includes(ch));
     },
     isNumber() {
       const regex = /\d/;
@@ -118,21 +135,45 @@ export default {
       const url = config.public.siteUrl;
       return url;
     },
+    // Checked once on page load, so the user finds out the link is
+    // expired/invalid before typing a new password.
+    async checkTokenValidity() {
+      if (!this.token) {
+        this.tokenState = "error";
+        this.tokenErrorMessage = "Ce lien de réinitialisation est invalide.";
+        return;
+      }
+      try {
+        const url = this.getUrl();
+        const response = await fetch(
+          `${url}/users/reset-password/validate?token=${encodeURIComponent(this.token)}`
+        );
+        if (response.ok) {
+          this.tokenState = "valid";
+          return;
+        }
+        const body = await response.json().catch(() => ({}));
+        this.tokenState = "error";
+        this.tokenErrorMessage =
+          body?.message || "Ce lien de réinitialisation est invalide.";
+      } catch (error) {
+        console.error("Erreur lors de la vérification du lien :", error);
+        this.tokenState = "error";
+        this.tokenErrorMessage =
+          "Impossible de vérifier ce lien pour le moment. Veuillez réessayer.";
+      }
+    },
     // Submit the form to update the database via API
     async resetPassword() {
       if (this.password !== this.confirmPassword) {
         alert("Les mots de passe ne correspondent pas.");
         return;
       }
-
-      // Extract user ID from JWT token
-      const userId = this.getUserIdFromToken();
-      if (!userId) {
-        console.error("Impossible de récupérer l'ID de l'utilisateur.");
+      if (!this.validerPassword) {
+        alert(this.passwordRuleMessage);
         return;
       }
 
-      // Build the PATCH request URL with user ID
       const url = this.getUrl();
 
       try {
@@ -146,7 +187,6 @@ export default {
           }),
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${this.token}`,
           },
         });
 
@@ -155,8 +195,12 @@ export default {
           this.openErrorModal();
           this.errorMessage = "Mot de passe réinitialisé avec succès !";
         } else {
-          this.openErrorModal();
-          this.errorMessage =
+          // The token may have expired between page load and submit —
+          // switch to the same dedicated error state rather than a generic alert.
+          const body = await response.json().catch(() => ({}));
+          this.tokenState = "error";
+          this.tokenErrorMessage =
+            body?.message ||
             "Une erreur s'est produite lors de la réinitialisation du mot de passe.";
         }
       } catch (error) {
@@ -165,29 +209,6 @@ export default {
           error
         );
       }
-    },
-
-    // Function to extract user ID from JWT token
-    getUserIdFromToken() {
-      const token = this.token;
-      if (!token) {
-        console.error("Aucun token trouvé.");
-        return null;
-      }
-
-      const tokenParts = token.split(".");
-      if (tokenParts.length !== 3) {
-        console.error("Le token JWT est invalide.");
-        return null;
-      }
-
-      const payload = JSON.parse(atob(tokenParts[1]));
-      if (!payload || !payload.sub) {
-        console.error("Impossible de trouver le champ 'sub' dans le token.");
-        return null;
-      }
-
-      return payload.sub;
     },
     openErrorModal() {
       this.showErrorModal = true;

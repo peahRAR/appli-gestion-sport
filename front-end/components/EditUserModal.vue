@@ -6,13 +6,18 @@
                 <!-- Col gauche: Avatar + nom -->
                 <div class="relative p-6 md:p-8 flex flex-col items-center justify-center">
                     <Avatar :src="user?.avatar" :gender="user?.gender" />
-                    <h2 class="mt-4 text-xl font-semibold text-white text-center">
+                    <UploadAvatar
+                        :key="user?.id"
+                        :user-avatar="user?.avatar"
+                        @avatarSaved="onAvatarSaved"
+                        message="Photo de profil (png, jpeg ou jpg, moins de 3 Mo)"
+                    />
+                    <h2 class="mt-4 text-xl font-semibold text-white text-center flex items-center justify-center gap-1.5">
                         <template v-if="isAdmin">
-                            {{ (localUser.firstname || user?.firstname) || "Prénom" }}
-                            {{ (localUser.name || user?.name) || "Nom" }}
+                            <UserNameWithGrade :user="headerUser" />
                         </template>
                         <template v-else>
-                            {{ user?.firstname }} {{ user?.name }}
+                            <UserNameWithGrade :user="user" />
                         </template>
                     </h2>
                     <p class="mt-1 text-sm text-white text-center">
@@ -122,32 +127,36 @@
                     <!-- Séparateur -->
                     <div class="my-6 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent"></div>
 
-                    <!-- Licences -->
-                    <div>
-                        <h3 class="text-sm font-semibold text-white">Licence</h3>
+                    <!-- Licences (éditables — réservé aux administrateurs) -->
+                    <LicenseEditor
+                        v-if="user?.id"
+                        :key="user.id"
+                        :userId="user.id"
+                        :baseUrl="baseUrl"
+                        :licenses="licensesForDisplay"
+                        @saved="$emit('licenses-saved')"
+                    />
+                    <p v-if="licensesLoading" class="mt-2 text-sm text-white">Chargement…</p>
+                    <p v-if="licensesError" class="mt-2 text-sm text-red-300">
+                        {{ licensesError }}
+                    </p>
 
-                        <p v-if="licensesLoading" class="mt-2 text-sm text-white">Chargement…</p>
-                        <p v-else-if="licensesForDisplay.length === 0" class="mt-2 text-sm text-white">
-                            Non Renseigné
-                        </p>
-
-                        <ul v-else class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <li v-for="lic in licensesForDisplay" :key="lic.id">
-                                <div
-                                    class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                                    <span class="text-xs font-semibold text-slate-600">
-                                        {{ lic.federation?.code }}
-                                    </span>
-                                    <span class="text-sm font-semibold text-slate-900">
-                                        {{ lic.number_plain }}
-                                    </span>
-                                </div>
-                            </li>
-                        </ul>
-
-                        <p v-if="licensesError" class="mt-2 text-sm text-red-300">
-                            {{ licensesError }}
-                        </p>
+                    <!-- Grade / formation FMMAF — uniquement si licencié FMMAF -->
+                    <div v-if="user?.hasFmmafLicense" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="grade" class="block text-xs font-semibold tracking-wide text-white">Grade</label>
+                            <select id="grade" v-model="localUser.grade"
+                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white focus:outline-hidden focus:ring-2 focus:ring-white/60">
+                                <option v-for="g in gradeValues" :key="g" :value="g">{{ gradeLabel(g) }}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="formation" class="block text-xs font-semibold tracking-wide text-white">Formation</label>
+                            <select id="formation" v-model="localUser.formation"
+                                class="mt-1 w-full rounded-md border border-white/40 bg-white/10 px-3 py-2 text-white focus:outline-hidden focus:ring-2 focus:ring-white/60">
+                                <option v-for="f in formationValues" :key="f" :value="f">{{ formationLabel(f) }}</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Séparateur -->
@@ -206,6 +215,7 @@
 <script>
 import TheModal from "@/components/TheModal.vue";
 import { formatDate, formatBirthday } from "~/composables/useDateFormat";
+import { GRADE_VALUES, FORMATION_VALUES, gradeLabel, formationLabel } from "~/utils/fmmaf";
 
 export default {
     name: "EditUserModal",
@@ -234,12 +244,13 @@ export default {
     props: {
         isOpen: { type: Boolean, required: true },
         user: { type: Object, default: () => ({}) },
+        baseUrl: { type: String, required: true },
         // Fournis-les depuis le parent si tu veux afficher les licences
         licenses: { type: Array, default: () => [] },
         licensesLoading: { type: Boolean, default: false },
         licensesError: { type: String, default: "" },
     },
-    emits: ["close", "update-user", "delete-user", "change-role"],
+    emits: ["close", "update-user", "delete-user", "change-role", "licenses-saved"],
     data() {
         return {
             // on édite des champs sans muter directement la prop user
@@ -249,7 +260,12 @@ export default {
                 birthday: this.toInputDate(this.user?.birthday) || "",
                 date_payment: this.toInputDate(this.user?.date_payment) || "",
                 date_end_pay: this.toInputDate(this.user?.date_end_pay) || "",
+                grade: this.user?.grade || "blanc",
+                formation: this.user?.formation || "aucune",
             },
+            avatarBlob: null,
+            gradeValues: GRADE_VALUES,
+            formationValues: FORMATION_VALUES,
         };
     },
     watch: {
@@ -264,7 +280,10 @@ export default {
                     birthday: this.toInputDate(u?.birthday) || "",
                     date_payment: this.toInputDate(u?.date_payment) || "",
                     date_end_pay: this.toInputDate(u?.date_end_pay) || "",
+                    grade: u?.grade || "blanc",
+                    formation: u?.formation || "aucune",
                 };
+                this.avatarBlob = null;
             },
         },
     },
@@ -276,8 +295,25 @@ export default {
             // attends un tableau d’objets { id, number_plain, federation: { code } }
             return Array.isArray(this.licenses) ? this.licenses : [];
         },
+        // Aperçu du nom en cours d'édition, avec le grade/la formation actuels
+        // (ces deux derniers ne sont pas dans localUser : voir les selects dédiés).
+        headerUser() {
+            return {
+                ...this.user,
+                firstname: this.localUser.firstname || this.user?.firstname,
+                name: this.localUser.name || this.user?.name,
+                grade: this.localUser.grade,
+                formation: this.localUser.formation,
+            };
+        },
     },
     methods: {
+        gradeLabel(g) {
+            return gradeLabel(g);
+        },
+        formationLabel(f) {
+            return formationLabel(f);
+        },
         toInputDate(value) {
             if (!value) return "";
             const d = new Date(value);
@@ -290,6 +326,9 @@ export default {
         close() {
             this.$emit("close");
         },
+        onAvatarSaved(blob) {
+            this.avatarBlob = blob;
+        },
         emitUpdate() {
             this.$emit("update-user", {
                 firstname: this.localUser.firstname || null,
@@ -297,6 +336,9 @@ export default {
                 birthday: this.localUser.birthday || null,
                 date_payment: this.localUser.date_payment || null,
                 date_end_pay: this.localUser.date_end_pay || null,
+                avatar: this.avatarBlob, // Blob | null — géré côté parent (multipart si présent)
+                grade: this.localUser.grade,
+                formation: this.localUser.formation,
             });
         },
         getUserRole() {

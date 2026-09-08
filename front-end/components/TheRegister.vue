@@ -36,6 +36,7 @@
 
       <!-- Afficher un message d'erreur si le mot de passe ne respecte pas les critères  -->
       <check-password :isLength="isLength" :isSpecial="isSpecial" :isMaj="isMaj" :isMin="isMin" :isNumber="isNumber" />
+      <p class="mt-1 text-xs text-text-muted">{{ passwordRuleMessage }}</p>
     </div>
     <inputPassword label="Confirmer votre mot de passe : " id="confirmNewPassword" v-model="confirmNewPassword"
       :isValid="validerConfirmPassword" ref="confirmPassword" class="mb-4" />
@@ -109,8 +110,8 @@ export default {
         approve_rules: false,
       },
       rules,
-      regexPassword:
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      regexPassword: PASSWORD_REGEX,
+      passwordRuleMessage: PASSWORD_RULE_MESSAGE,
       showModal: false, // Ajouter une propriété pour contrôler l'affichage de la modal
       showErrorModal: false,
       errorMessage: null,
@@ -118,24 +119,13 @@ export default {
     };
   },
   computed: {
-    // Pattern Regex
-    patternRegex() {
-      return this.regexPassword.toString().slice(1, -1);
-    },
     // ValiderPassword
     validerPassword() {
-      if (!this.regexPassword.test(this.user.password)) {
-        return false;
-      }
-
-      return true;
+      return this.regexPassword.test(this.user.password);
     },
-    // Valider Confirm Password
+    // Valider Confirm Password (mot de passe correct ET confirmation identique)
     validerConfirmPassword() {
-      if ((this.confirmNewPassword === this.user.password) && this.validerPassword) {
-        return true;
-      }
-      return false;
+      return this.confirmNewPassword === this.user.password && this.validerPassword;
     },
     isLength() {
       return this.user.password.length >= 8;
@@ -149,8 +139,7 @@ export default {
       return regex.test(this.user.password);
     },
     isSpecial() {
-      const regex = /[@$!%*?&]/;
-      return regex.test(this.user.password);
+      return [...this.user.password].some((ch) => PASSWORD_SPECIAL_CHARS.includes(ch));
     },
     isNumber() {
       const regex = /[0-9]/;
@@ -168,7 +157,12 @@ export default {
     async signUp() {
       const url = this.getUrl();
 
-      if (!this.validerConfirmPassword) {
+      if (!this.validerPassword) {
+        this.openErrorModal();
+        this.errorMessage = this.passwordRuleMessage;
+        return;
+      }
+      if (this.confirmNewPassword !== this.user.password) {
         this.openErrorModal();
         this.errorMessage = "Les mots de passes ne correspondent pas !";
         return;
@@ -226,13 +220,6 @@ export default {
       this.user.gender = null;
       this.confirmNewPassword = "";
       this.user.approve_rules = false;
-    },
-    // Regex
-    validatePassword(password) {
-      // Expression régulière pour valider le mot de passe
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      return passwordRegex.test(password);
     },
     openErrorModal() {
       this.showErrorModal = true;

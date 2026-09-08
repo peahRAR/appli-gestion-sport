@@ -1,4 +1,5 @@
-import { IsEmail, IsOptional, IsString, MinLength, IsDate, IsBoolean, IsDateString } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, IsDate, IsBoolean, IsDateString, IsIn } from 'class-validator';
+import { GRADE_VALUES, FORMATION_VALUES, Grade, Formation } from '../constants/fmmaf';
 
 export class UpdateUserDto {
   @IsEmail()
@@ -65,4 +66,14 @@ export class UpdateUserDto {
   @IsBoolean()
   @IsOptional()
   approove_rules?: boolean;
+
+  // Réservés aux administrateurs (vérifié dans UsersController.update()) et
+  // pertinents uniquement pour un licencié FMMAF.
+  @IsIn(GRADE_VALUES)
+  @IsOptional()
+  grade?: Grade;
+
+  @IsIn(FORMATION_VALUES)
+  @IsOptional()
+  formation?: Formation;
 }

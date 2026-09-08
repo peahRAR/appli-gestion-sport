@@ -1,12 +1,11 @@
 <template>
   <div class="w-full container m-auto">
     <TheModal :isOpen="isOpen" title="Modifications" @close="cancelEdit">
-      <!-- Avatar -->
-      <UploadAvatar
-        :user-avatar="user.avatar"
-        @avatarSaved="updateAvatar"
-        message="Fichier image png, jpeg ou jpg de moins de 3 Mo"
-      />
+      <!-- Avatar (lecture seule) -->
+      <div class="flex items-center gap-3">
+        <Avatar :src="user.avatar" :gender="user.gender" />
+        <p class="text-xs text-text-muted">Photo modifiable uniquement par un administrateur.</p>
+      </div>
 
       <!-- Poids -->
       <div class="w-full flex items-baseline mt-4">
@@ -56,12 +55,13 @@
         />
       </div>
 
-      <!-- Licences par fédération (nouveau système) -->
+      <!-- Licences par fédération (lecture seule) -->
       <div class="mt-6">
         <div class="flex items-center justify-between">
           <p class="font-semibold">Licences</p>
           <span v-if="licensesLoading" class="text-sm text-text-muted">Chargement…</span>
         </div>
+        <p class="text-xs text-text-muted">Modifiable uniquement par un administrateur.</p>
 
         <p v-if="licensesError" class="mt-2 text-sm text-red-600">{{ licensesError }}</p>
 
@@ -79,22 +79,9 @@
                 {{ fed.name }}
               </div>
             </div>
-            <div class="mt-2">
-              <label class="block text-xs font-medium text-text-muted mb-1">Numéro de licence</label>
-              <input
-                v-model="licenseMap[fed.code].number"
-                @input="markTouched(fed.code)"
-                type="text"
-                placeholder="Non renseigné"
-                class="w-full rounded-sm border border-border-strong bg-surface text-text px-3 py-2 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-              />
-              <p
-                v-if="licenseMap[fed.code].original && !licenseMap[fed.code].touched"
-                class="mt-1 text-[11px] text-text-muted"
-              >
-                Actuel : {{ licenseMap[fed.code].original }}
-              </p>
-            </div>
+            <p class="mt-2 text-sm text-text">
+              {{ licenseNumberFor(fed.code) || 'Non renseigné' }}
+            </p>
           </div>
         </div>
 
@@ -130,14 +117,12 @@ export default {
       editedTelNum: this.user.tel_num,
       editedTelMedic: this.user.tel_medic,
       editedTelEmergency: this.user.tel_emergency,
-      avatarBlob: null,
 
-      // Licences
+      // Licences (lecture seule — modifiables uniquement par un administrateur)
       licensesLoading: false,
       licensesError: null,
       federations: [],      // [{ id, code, name }]
       licenses: [],         // [{ id, federation:{code,name}, number_plain, ...}]
-      licenseMap: {},       // code -> { number, original, touched }
 
       saving: false,
     };
@@ -157,7 +142,6 @@ export default {
           this.editedTelNum = this.user.tel_num;
           this.editedTelMedic = this.user.tel_medic;
           this.editedTelEmergency = this.user.tel_emergency;
-          this.avatarBlob = null;
 
           await this.loadLicensesData();
         }
@@ -169,11 +153,11 @@ export default {
       this[field] = value;
       this.$emit(`update:${field}`, value);
     },
-    updateAvatar(blob) {
-      this.avatarBlob = blob;
-    },
     token() {
       return localStorage.getItem('accessToken');
+    },
+    licenseNumberFor(federationCode) {
+      return this.licenses.find(l => l?.federation?.code === federationCode)?.number_plain || '';
     },
     async loadLicensesData() {
       this.licensesLoading = true;
@@ -197,45 +181,23 @@ export default {
 
         this.federations = await fedsRes.json();
         this.licenses = await licRes.json();
-
-        // Build map code -> {number, original, touched}
-        const map = {};
-        for (const f of this.federations) {
-          if (f.code === 'LEGACY') continue;
-          const found = this.licenses.find(l => l?.federation?.code === f.code);
-          map[f.code] = {
-            number: found?.number_plain || '',
-            original: found?.number_plain || '',
-            touched: false,
-          };
-        }
-        this.licenseMap = map;
       } catch (e) {
         this.licensesError = e?.message || 'Erreur de chargement';
       } finally {
         this.licensesLoading = false;
       }
     },
-    markTouched(code) {
-      if (this.licenseMap[code]) this.licenseMap[code].touched = true;
-    },
     saveChanges() {
-      // payload profil (ancien PATCH user)
+      // payload profil (ancien PATCH user) — avatar et licence ne sont plus
+      // modifiables ici, réservés à l'administration.
       const profile = {
-        avatar: this.avatarBlob, // blob
         weight: this.editedWeight,
         tel_num: this.editedTelNum,
         tel_medic: this.editedTelMedic,
         tel_emergency: this.editedTelEmergency,
       };
 
-      // payload licences (les modifiées ; un champ vidé envoie number: null
-      // pour que le back-end efface la licence de cette fédération)
-      const licenses = Object.entries(this.licenseMap)
-        .filter(([, v]) => v.touched)
-        .map(([federationCode, v]) => ({ federationCode, number: v.number.trim() || null }));
-
-      this.$emit('saveChanges', { profile, licenses });
+      this.$emit('saveChanges', { profile });
     },
     cancelEdit() {
       this.$emit('cancelEdit');

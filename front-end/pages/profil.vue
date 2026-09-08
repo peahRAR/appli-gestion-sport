@@ -10,8 +10,7 @@
       <EditProfileModal :isOpen="isEditing" :user="user" :baseUrl="getUrl()" @cancelEdit="cancelEdit"
         @saveChanges="saveChanges" />
       <ChangePasswordModal :isOpen="showChangePasswordModal" @close="closeModal" @changePassword="changePassword"
-        v-model:currentPassword="currentPassword" v-model:newPassword="newPassword"
-        v-model:confirmNewPassword="confirmNewPassword" :regexPassword="regexPassword" />
+        :regexPassword="regexPassword" />
       <ErrorModal :isOpen="showErrorModal" :message="errorMessage" @close="closeErrorModal" />
       <ConfirmationModal :isOpen="showConfirmationModal" :message="confirmationMessage" @confirm="deleteUser" @cancel="
         () => {
@@ -42,14 +41,9 @@ export default {
       },
       isEditing: false,
       avatar: null,
-      password: "",
-      currentPassword: "",
-      newPassword: "",
-      confirmNewPassword: "",
       showChangePasswordModal: false,
-      passwordValidate: false,
       loading: true,
-      regexPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      regexPassword: PASSWORD_REGEX,
       showErrorModal: false,
       errorMessage: null,
       showConfirmationModal: false,
@@ -59,32 +53,6 @@ export default {
   async mounted() {
     await this.fetchUserData();
     this.checkAccessToken();
-  },
-  computed: {
-    patternRegex() {
-      return this.regexPassword.toString().slice(1, -1);
-    },
-    validerNewPassword() {
-      return this.regexPassword.test(this.newPassword);
-    },
-    validerConfirmPassword() {
-      return this.confirmNewPassword === this.newPassword && this.validerNewPassword;
-    },
-    isLength() {
-      return this.newPassword.length >= 8;
-    },
-    isMaj() {
-      return /[A-Z]/.test(this.newPassword);
-    },
-    isMin() {
-      return /[a-z]/.test(this.newPassword);
-    },
-    isSpecial() {
-      return /[@$!%*?&]/.test(this.newPassword);
-    },
-    isNumber() {
-      return /[0-9]/.test(this.newPassword);
-    },
   },
   methods: {
     getUrl() {
@@ -149,7 +117,7 @@ export default {
       this.isEditing = true;
     },
     async saveChanges(payload) {
-      const { profile, licenses } = payload;
+      const { profile } = payload;
 
       // helpers locaux
       const isBlank = v => v === null || v === undefined || (typeof v === 'string' && v.trim() === '');
@@ -172,55 +140,25 @@ export default {
       const userId = this.getUserIdFromToken();
       const url = this.getUrl();
 
-      // 2) PATCH user
-      // - Si avatar présent → multipart avec { user: JSON(patch), file: avatar }
-      // - Sinon → JSON simple (patch)
-      if ((patch && Object.keys(patch).length) || profile.avatar instanceof Blob) {
-        let res;
-        if (profile.avatar instanceof Blob) {
-          const fd = new FormData();
-          fd.append("user", JSON.stringify(patch)); // ⚠️ uniquement les clés du patch
-          fd.append("file", profile.avatar);
-          res = await fetch(`${url}/users/${userId}`, {
-            method: "PATCH",
-            mode: "cors",
-            headers: { Authorization: `Bearer ${token}` }, // pas de Content-Type ici
-            body: fd,
-          });
-        } else {
-          res = await fetch(`${url}/users/${userId}`, {
-            method: "PATCH",
-            mode: "cors",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify(patch),
-          });
-        }
+      // 2) PATCH user — avatar/licence ne sont plus modifiables ici
+      // (réservés à l'administration), seul un JSON simple est envoyé.
+      if (patch && Object.keys(patch).length) {
+        const res = await fetch(`${url}/users/${userId}`, {
+          method: "PATCH",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(patch),
+        });
         if (!res.ok) {
           const txt = await res.text().catch(() => '');
           throw new Error(`Échec update profil: ${res.status} ${txt}`);
         }
       }
 
-      // 3) Upsert licences (celles modifiées — number peut être null pour effacer)
-      for (const lic of (licenses || [])) {
-        const r = await fetch(`${url}/users/${userId}/licenses`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(lic), // { federationCode, number }
-        });
-        if (!r.ok) {
-          const txt = await r.text().catch(() => '');
-          throw new Error(`Échec licences: ${r.status} ${txt}`);
-        }
-      }
-
-      // 4) refresh
+      // 3) refresh
       await this.fetchUserData();
       // fetchUserData() ne recharge que `user`, pas les licences (endpoint
       // séparé) — et comme user.id ne change pas ici, le watcher de
@@ -266,16 +204,8 @@ export default {
     },
     closeModal() {
       this.showChangePasswordModal = false;
-      this.currentPassword = "";
-      this.newPassword = "";
-      this.confirmNewPassword = "";
     },
-    async changePassword() {
-      if (this.newPassword !== this.confirmNewPassword) {
-        this.openErrorModal();
-        this.errorMessage = "Les nouveaux mots de passe ne correspondent pas.";
-        return;
-      }
+    async changePassword({ currentPassword, newPassword }) {
       try {
         const token = localStorage.getItem("accessToken");
         const userId = this.getUserIdFromToken();
@@ -288,8 +218,8 @@ export default {
           method: "PATCH",
           mode: "cors",
           body: JSON.stringify({
-            currentPassword: this.currentPassword,
-            password: this.newPassword,
+            currentPassword,
+            password: newPassword,
           }),
           headers: {
             "Content-Type": "application/json",

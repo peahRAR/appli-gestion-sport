@@ -58,9 +58,10 @@
 
       </div>
 
-      <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" :licenses="selectedUserLicenses"
-        :licensesLoading="licensesLoading" :licensesError="licensesError" @close="closeModalUser"
-        @update-user="updateUser" @delete-user="deleteUser" @change-role="changeUserRole" />
+      <EditUserModal :isOpen="showModalSelectedUser" :user="selectedUser" :baseUrl="getUrl()"
+        :licenses="selectedUserLicenses" :licensesLoading="licensesLoading" :licensesError="licensesError"
+        @close="closeModalUser" @update-user="updateUser" @delete-user="deleteUser" @change-role="changeUserRole"
+        @licenses-saved="onLicensesSaved" />
 
       <!-- Modal For Editing Event -->
       <EditEventModal :isOpen="showModal" :event="editedEvent" @close="closeModal" @save-changes="saveChanges" />
@@ -318,6 +319,12 @@ export default {
         this.licensesLoading = false;
       }
     },
+    onLicensesSaved() {
+      if (this.selectedUser?.id) {
+        this.licensesCache.delete(this.selectedUser.id);
+        this.loadLicensesFor(this.selectedUser.id);
+      }
+    },
 
     // Open Selected User Modal to show user details
     openModal(user) {
@@ -343,22 +350,35 @@ export default {
           return;
         }
 
-        // (debug) vérifie ce que la modale envoie
-        console.log("PATCH envoyé =>", patch);
-
         const token = localStorage.getItem("accessToken");
         const userId = this.selectedUser.id;
         const url = this.getUrl();
 
-        const response = await fetch(`${url}/users/${userId}`, {
-          method: "PATCH",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(patch), // ✅ on envoie ce que la modale a émis
-        });
+        // Avatar (Blob) envoyé par la modale → multipart, réservé aux admins
+        // côté back (voir users.controller.ts update()).
+        const { avatar, ...rest } = patch;
+        let response;
+        if (avatar instanceof Blob) {
+          const fd = new FormData();
+          fd.append("user", JSON.stringify(rest));
+          fd.append("file", avatar);
+          response = await fetch(`${url}/users/${userId}`, {
+            method: "PATCH",
+            mode: "cors",
+            headers: { Authorization: `Bearer ${token}` }, // pas de Content-Type ici
+            body: fd,
+          });
+        } else {
+          response = await fetch(`${url}/users/${userId}`, {
+            method: "PATCH",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(rest),
+          });
+        }
 
         if (!response.ok) {
           const txt = await response.text();

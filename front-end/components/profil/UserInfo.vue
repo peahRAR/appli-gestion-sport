@@ -7,8 +7,8 @@
       <div class="relative p-6 md:p-8 flex flex-col items-center justify-center">
         <Avatar :src="user.avatar" :gender="user.gender" />
 
-        <h2 class="mt-4 text-xl font-semibold text-white text-center">
-          {{ user.firstname }} {{ user.name }}
+        <h2 class="mt-4 text-xl font-semibold text-white text-center flex items-center justify-center gap-1.5">
+          <UserNameWithGrade :user="user" />
         </h2>
 
         <p class="mt-1 text-sm text-white text-center">

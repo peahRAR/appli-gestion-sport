@@ -1,6 +1,6 @@
 <template>
     <TheModal :isOpen="isOpen" title="Changement du mot de passe" @close="closeModal">
-        <form @submit.prevent="changePassword" method="post">
+        <form @submit.prevent="submit" method="post">
             <div class="mb-4">
                 <inputPassword v-model="currentPassword" label="Mot de passe actuel : " id="currentPassword"
                     :isValid="null" />
@@ -10,6 +10,7 @@
                     id="newPassword" :isValid="validerNewPassword" />
                 <check-password :isLength="isLength" :isSpecial="isSpecial" :isMaj="isMaj" :isMin="isMin"
                     :isNumber="isNumber" />
+                <p class="mt-1 text-xs text-text-muted">{{ passwordRuleMessage }}</p>
             </div>
             <div class="mb-4">
                 <inputPassword label="Confirmer votre mot de passe : " id="confirmNewPassword"
@@ -32,16 +33,25 @@ export default {
         isOpen: Boolean,
         regexPassword: RegExp,
     },
-    model: {
-        prop: 'currentPassword',
-        event: 'input',
-    },
+    emits: ['close', 'changePassword'],
     data() {
         return {
             currentPassword: '',
             newPassword: '',
             confirmNewPassword: '',
+            passwordRuleMessage: PASSWORD_RULE_MESSAGE,
         };
+    },
+    watch: {
+        // Reset the fields when the modal closes, so a stale password isn't
+        // still sitting in the form the next time it's opened.
+        isOpen(open) {
+            if (!open) {
+                this.currentPassword = '';
+                this.newPassword = '';
+                this.confirmNewPassword = '';
+            }
+        },
     },
     computed: {
         validerNewPassword() {
@@ -60,15 +70,19 @@ export default {
             return /[a-z]/.test(this.newPassword);
         },
         isSpecial() {
-            return /[@$!%*?&]/.test(this.newPassword);
+            return [...this.newPassword].some((ch) => PASSWORD_SPECIAL_CHARS.includes(ch));
         },
         isNumber() {
             return /[0-9]/.test(this.newPassword);
         },
     },
     methods: {
-        changePassword() {
-            this.$emit('changePassword');
+        submit() {
+            if (!this.currentPassword || !this.validerConfirmPassword) return;
+            this.$emit('changePassword', {
+                currentPassword: this.currentPassword,
+                newPassword: this.newPassword,
+            });
         },
         closeModal() {
             this.$emit('close');

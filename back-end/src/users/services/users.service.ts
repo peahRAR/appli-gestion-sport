@@ -1,4 +1,5 @@
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import {
   BadRequestException,
   Injectable,
@@ -15,13 +16,14 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { ConfigService } from '@nestjs/config';
 import * as disposableEmailDomains from 'disposable-email-domains';
-import { JwtService } from '@nestjs/jwt';
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ResetPassword } from '../entities/reset-password.entity';
 import { EncryptionService } from './encryption.service';
 import { EmailService } from './email.service';
 import { UserLicense } from '../entities/user-license.entity';
 import { Federation } from '../../federations/federations.entity';
+import { isValidPassword, PASSWORD_RULE_MESSAGE } from '../../common/validators/password-policy';
+import { GRADE_VALUES, FORMATION_VALUES } from '../constants/fmmaf';
 
 
 @Injectable()
@@ -41,7 +43,6 @@ export class UsersService {
     private readonly fedRepo: Repository<Federation>,
 
     private readonly configService: ConfigService,
-    private readonly jwtService: JwtService,
     @Inject(forwardRef(() => ListsMembersService))
     private readonly listsMembersService: ListsMembersService,
     private readonly encryptionService: EncryptionService,
@@ -49,9 +50,7 @@ export class UsersService {
   ) { }
 
   verifyPasswordRegex(password: string): boolean {
-    const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(password);
+    return isValidPassword(password);
   }
 
   async listFederations() {
@@ -175,8 +174,8 @@ export class UsersService {
     // Date création de compte
     const dateSubscribeString = new Date().toISOString();
 
-    if (!this.verifyPasswordRegex(createUserDto.password)) {
-      throw new BadRequestException('Le mot de passe ne correspond pas aux critères requis.');
+    if (!isValidPassword(createUserDto.password)) {
+      throw new BadRequestException(PASSWORD_RULE_MESSAGE);
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -233,6 +232,8 @@ export class UsersService {
         'date_payment',
         'date_subscribe',
         'role',
+        'grade',
+        'formation',
       ],
       relations: ['licenses', 'licenses.federation'],
     });
@@ -245,6 +246,7 @@ export class UsersService {
       ...user,
       hasLicense: !!user.license
         || (licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted),
+      hasFmmafLicense: (licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
     }));
   }
 
@@ -268,7 +270,9 @@ export class UsersService {
         'date_payment',
         'date_subscribe',
         'role',
-        'approove_rules'
+        'approove_rules',
+        'grade',
+        'formation',
       ],
     });
 
@@ -277,6 +281,48 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  // Variant used by the self/admin "view one user" route only — adds
+  // hasFmmafLicense (needs a licenses+federation join), unlike the plain
+  // findOne() above which stays lean since it's also called by JwtStrategy on
+  // every authenticated request, and by remove() which needs a real entity.
+  async findOneWithFmmafInfo(id: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'email',
+        'birthday',
+        'gender',
+        'weight',
+        'license',
+        'name',
+        'firstname',
+        'tel_num',
+        'tel_medic',
+        'tel_emergency',
+        'avatar',
+        'date_end_pay',
+        'date_payment',
+        'date_subscribe',
+        'role',
+        'approove_rules',
+        'grade',
+        'formation',
+      ],
+      relations: ['licenses', 'licenses.federation'],
+    });
+
+    if (!user) {
+      return undefined;
+    }
+
+    const { licenses, ...rest } = user;
+    return {
+      ...rest,
+      hasFmmafLicense: (licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
+    };
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -316,6 +362,13 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
       throw new UnauthorizedException('Mot de passe actuel incorrect.');
     }
 
+    // Not enforced by UpdateUserDto's decorators: this endpoint receives an
+    // untyped body (@Body() body: any) in the controller, so class-validator
+    // never runs against UpdateUserDto here — check imperatively instead.
+    if (!isValidPassword(updateUserDto.password)) {
+      throw new BadRequestException(PASSWORD_RULE_MESSAGE);
+    }
+
     user.password = await bcrypt.hash(updateUserDto.password, 10);
   }
 
@@ -351,6 +404,19 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
     date_subscribe: user.date_subscribe,
   };
 
+  if (has('grade')) {
+    if (!GRADE_VALUES.includes(updateUserDto.grade as any)) {
+      throw new BadRequestException('Grade invalide.');
+    }
+    (userDto as any).grade = updateUserDto.grade;
+  }
+  if (has('formation')) {
+    if (!FORMATION_VALUES.includes(updateUserDto.formation as any)) {
+      throw new BadRequestException('Formation invalide.');
+    }
+    (userDto as any).formation = updateUserDto.formation;
+  }
+
   // userDto only holds plain strings (either from the DTO, or from `user`, which
   // was already decrypted by the @EncryptedColumn transformer above) — saving
   // re-encrypts automatically, no manual encryption needed.
@@ -380,6 +446,8 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
       'role',
       'approove_rules',
       'isActive',
+      'grade',
+      'formation',
     ],
   });
 
@@ -402,22 +470,30 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
     await this.userRepository.remove(user);
   }
 
+  private getResetTokenTtlMinutes(): number {
+    const raw = this.configService.get<string>('RESET_PASSWORD_TOKEN_TTL_MINUTES');
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 60;
+  }
+
   async requestPasswordReset(email: string): Promise<void> {
     const user = await this.findByEmail(email);
     if (!user) {
       throw new Error('Utilisateur non trouvé.');
     }
 
-    const payload = { sub: user.id, email: user.email };
-    const resetToken = await this.jwtService.signAsync(payload);
-
-    const expires = new Date();
-    expires.setHours(expires.getHours() + 1);
+    // Opaque random token — not a JWT, so this flow no longer depends on the
+    // login JWT_SECRET/JWT_EXP and doesn't need the client to send it as an
+    // Authorization bearer.
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const ttlMinutes = this.getResetTokenTtlMinutes();
+    const expires = new Date(Date.now() + ttlMinutes * 60_000);
 
     const resetRecord = new ResetPassword();
     resetRecord.token = resetToken;
     resetRecord.userId = user.id;
     resetRecord.expires = expires;
+    resetRecord.usedAt = null;
 
     await this.resetPasswordRepository.save(resetRecord);
 
@@ -427,29 +503,58 @@ async update(id: string, updateUserDto: UpdateUserDto): Promise<User | undefined
     await this.emailService.sendResetPasswordEmail(user.email, resetUrl);
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
-    let userId: string;
-    try {
-      const payload = this.jwtService.verify(token);
-      userId = payload.sub;
-    } catch (error) {
-      throw new UnauthorizedException('Token invalide ou expiré.');
-    }
-
+  private async getResetRecordStatus(
+    token: string,
+  ): Promise<{ status: 'valid' | 'expired' | 'invalid' | 'used'; resetRecord?: ResetPassword }> {
     const resetRecord = await this.resetPasswordRepository.findOne({ where: { token } });
+    if (!resetRecord) return { status: 'invalid' };
+    if (resetRecord.usedAt) return { status: 'used', resetRecord };
+    if (resetRecord.expires < new Date()) return { status: 'expired', resetRecord };
+    return { status: 'valid', resetRecord };
+  }
 
-    if (!resetRecord || resetRecord.expires < new Date()) {
-      throw new Error('Token de réinitialisation invalide ou expiré.');
+  private throwForResetStatus(status: 'expired' | 'invalid' | 'used'): never {
+    const ttlMinutes = this.getResetTokenTtlMinutes();
+    const messages: Record<typeof status, string> = {
+      expired:
+        `Ce lien de réinitialisation a expiré. Pour des raisons de sécurité, les liens ne sont ` +
+        `valables que ${ttlMinutes} minute${ttlMinutes > 1 ? 's' : ''}. ` +
+        `Veuillez refaire une demande via « Mot de passe oublié ».`,
+      invalid: 'Ce lien de réinitialisation est invalide. Veuillez refaire une demande via « Mot de passe oublié ».',
+      used:
+        'Ce lien de réinitialisation a déjà été utilisé. Veuillez refaire une demande via « Mot de passe oublié ».',
+    };
+    const codes: Record<typeof status, string> = {
+      expired: 'RESET_TOKEN_EXPIRED',
+      invalid: 'RESET_TOKEN_INVALID',
+      used: 'RESET_TOKEN_USED',
+    };
+    throw new BadRequestException({ code: codes[status], message: messages[status] });
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: true }> {
+    const { status } = await this.getResetRecordStatus(token);
+    if (status !== 'valid') this.throwForResetStatus(status);
+    return { valid: true };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const { status, resetRecord } = await this.getResetRecordStatus(token);
+    if (status !== 'valid') this.throwForResetStatus(status);
+
+    const user = await this.userRepository.findOne({ where: { id: resetRecord.userId } });
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé.');
     }
 
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    if (!user) {
-      throw new Error('Utilisateur non trouvé.');
+    if (!isValidPassword(newPassword)) {
+      throw new BadRequestException(PASSWORD_RULE_MESSAGE);
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
     await this.userRepository.save(user);
-    await this.resetPasswordRepository.delete(resetRecord.id);
+
+    resetRecord.usedAt = new Date();
+    await this.resetPasswordRepository.save(resetRecord);
   }
 }

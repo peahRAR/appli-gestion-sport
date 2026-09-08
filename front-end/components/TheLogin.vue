@@ -76,13 +76,12 @@ export default {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
   },
-  computed: {
-    // Pattern Regex
-    patternRegex() {
-      return this.regexPassword.toString().slice(1, -1);
-    },
+  created() {
+    // Lien direct depuis un message "lien de réinitialisation expiré/invalide"
+    if (this.$route?.query?.resetPassword) {
+      this.showResetPasswordModal = true;
+    }
   },
-
   methods: {
     getUrl() {
       const config = useRuntimeConfig();

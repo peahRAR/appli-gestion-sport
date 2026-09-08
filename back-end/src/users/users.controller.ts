@@ -5,10 +5,13 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Delete,
+  Request,
   UploadedFile,
   UseInterceptors,
   NotFoundException,
+  ForbiddenException,
   UseGuards,
   forwardRef,
   Inject,
@@ -24,6 +27,7 @@ import { SelfOrSuperAdminGuard } from '../common/guard/self-or-superadmin.guard'
 import { ListsMembersService } from 'src/lists-members/lists-members.service';
 import { ConfigService } from '@nestjs/config';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { isAdminRole } from '../common/utils/roles';
 
 @Controller('users')
 export class UsersController {
@@ -127,7 +131,17 @@ export class UsersController {
     return this.usersService.listFederations();
   }
 
-  // Réinitialiser le mot de passe
+  // Vérifier la validité d'un lien de réinitialisation (sans le consommer),
+  // pour prévenir l'utilisateur avant qu'il ne saisisse un nouveau mot de passe.
+  @Public()
+  @Get('reset-password/validate')
+  async validateResetToken(@Query('token') token: string) {
+    return this.usersService.validateResetToken(token);
+  }
+
+  // Réinitialiser le mot de passe — le token voyage dans le corps de la
+  // requête, plus besoin de le détourner en Authorization: Bearer.
+  @Public()
   @Patch('reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     const { token, newPassword } = resetPasswordDto;
@@ -145,7 +159,7 @@ export class UsersController {
   // Trouver un User
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.findOneWithFmmafInfo(id);
   }
 
   // Modifier un User
@@ -156,6 +170,7 @@ export class UsersController {
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() body: any,
+    @Request() req,
   ) {
     let data;
     // On parse le body user pour récuperer un objet
@@ -169,6 +184,16 @@ export class UsersController {
       delete data.license;
     }
 
+    // Photo de profil et grade/formation FMMAF réservés aux administrateurs
+    // (lecture seule pour l'utilisateur lui-même) — UserIdOradminRoleGuard
+    // laisse passer le self-service, donc c'est ici qu'on distingue les deux cas.
+    const targetsAdminOnlyField = !!file
+      || (data && typeof data === 'object' && ('grade' in data || 'formation' in data));
+    if (targetsAdminOnlyField && !isAdminRole(req.user?.role)) {
+      throw new ForbiddenException(
+        'Seul un administrateur peut modifier la photo de profil, le grade ou la formation.',
+      );
+    }
 
     // Si un avatar est envoyé, uploadez-le sur GCS et mettez à jour l'URL de l'avatar dans les données de l'utilisateur
     if (file) {
@@ -235,7 +260,14 @@ export class UsersController {
   addOrUpdateLicense(
     @Param('id') id: string,
     @Body() dto: { federationCode: string; number: string | null },
+    @Request() req,
   ) {
+    // Licence réservée aux administrateurs, y compris pour son propre compte
+    // — UserIdOradminRoleGuard laisse passer le self-service, donc c'est ici
+    // qu'on le bloque réellement.
+    if (!isAdminRole(req.user?.role)) {
+      throw new ForbiddenException('Seul un administrateur peut modifier une licence.');
+    }
     return this.usersService.upsertUserLicense(id, dto.federationCode, dto.number);
   }
 }

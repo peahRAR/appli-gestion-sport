@@ -9,6 +9,7 @@ import { KeyHolder } from 'src/keyholder/entities/keyholder.entity';
 import { Badge } from 'src/badges/entities/badge.entity';
 import { UserLicense } from './user-license.entity';
 import { EncryptedColumn } from 'src/common/decorators/encrypted-column.decorator';
+import { DEFAULT_FORMATION, DEFAULT_GRADE, Formation, Grade } from '../constants/fmmaf';
 
 @Entity()
 export class User {
@@ -68,6 +69,14 @@ export class User {
 
   @Column({ type: 'boolean', default: false })
   approove_rules: boolean;
+
+  // N'ont de sens que pour un licencié FMMAF (voir hasFmmafLicense) ; visibles
+  // et éditables uniquement par un administrateur (voir Lot 3).
+  @Column({ type: 'varchar', length: 10, default: DEFAULT_GRADE })
+  grade: Grade;
+
+  @Column({ type: 'varchar', length: 20, default: DEFAULT_FORMATION })
+  formation: Formation;
 
   @OneToMany(() => ListsMember, listsMember => listsMember.user, { cascade: ['remove'] })
   listsMembers: ListsMember[];

@@ -20,8 +20,8 @@
                         class="absolute bottom-0 right-0 w-6 h-6 p-1 rounded-full" />
                 </div>
             </div>
-            <strong class="text-center text-xl mb-4">
-                {{ userDetails.firstname }} {{ userDetails.name }}
+            <strong class="flex justify-center items-center gap-1.5 text-xl mb-4">
+                <UserNameWithGrade :user="userDetails" />
             </strong>
 
             <ul>

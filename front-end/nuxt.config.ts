@@ -30,6 +30,12 @@ export default defineNuxtConfig({
     manifest: false,
     injectManifest: {
       globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
+      // 200.html/404.html are Nuxt's static-hosting SPA fallback files, served
+      // by the CDN for unmatched routes — they aren't real URLs on the site
+      // (GET /200 and GET /404 both 404). Precaching them anyway made Workbox
+      // fail the whole install step on a bad response, silently discarding
+      // the entire service worker registration on every load.
+      globIgnores: ["200.html", "404.html"],
     },
     devOptions: {
       enabled: false,

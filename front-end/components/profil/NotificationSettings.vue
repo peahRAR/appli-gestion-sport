@@ -39,58 +39,12 @@
     </div>
 
     <p v-if="error" class="text-xs text-red-500 mt-2">{{ error }}</p>
-
-    <!-- TEMP DEBUG PANEL — à retirer une fois le problème identifié -->
-    <pre class="mt-4 p-2 bg-black text-green-400 text-[10px] whitespace-pre-wrap rounded-sm">{{ debugInfo }}</pre>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
 import { usePushNotifications } from "~/composables/usePushNotifications";
 
 const { isSupported, permission, enabled, loading, error, isIosNonStandalone, toggle } =
   usePushNotifications();
-
-const debugInfo = ref("chargement du debug...");
-
-onMounted(async () => {
-  const lines = [];
-  lines.push("standalone=" + (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone));
-  lines.push("serviceWorker in navigator=" + ("serviceWorker" in navigator));
-  lines.push("PushManager in window=" + ("PushManager" in window));
-  lines.push("Notification.permission=" + (typeof Notification !== "undefined" ? Notification.permission : "n/a"));
-  lines.push("navigator.serviceWorker.controller=" + (navigator.serviceWorker?.controller ? navigator.serviceWorker.controller.scriptURL : "aucun"));
-
-  const { $pwa } = useNuxtApp();
-  lines.push("--- état @vite-pwa/nuxt ---");
-  lines.push("pwa.registrationError=" + $pwa?.registrationError);
-  lines.push("pwa.swActivated=" + $pwa?.swActivated);
-  lines.push("pwa.offlineReady=" + $pwa?.offlineReady);
-  lines.push("pwa.needRefresh=" + $pwa?.needRefresh);
-
-  try {
-    const regs = await navigator.serviceWorker.getRegistrations();
-    lines.push("--- getRegistrations() ---");
-    lines.push("count=" + regs.length);
-    regs.forEach((r, i) => {
-      lines.push(`  [${i}] scope=${r.scope}`);
-      lines.push(`  [${i}] active=${r.active ? r.active.scriptURL + " state=" + r.active.state : "aucun"}`);
-      lines.push(`  [${i}] waiting=${r.waiting ? r.waiting.scriptURL + " state=" + r.waiting.state : "aucun"}`);
-      lines.push(`  [${i}] installing=${r.installing ? r.installing.scriptURL + " state=" + r.installing.state : "aucun"}`);
-    });
-  } catch (e) {
-    lines.push("getRegistrations() ERROR: " + (e?.message || e));
-  }
-
-  lines.push("--- test manuel navigator.serviceWorker.register('/sw.js') ---");
-  try {
-    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
-    lines.push("register() OK, scope=" + reg.scope);
-  } catch (e) {
-    lines.push("register() ERROR: " + (e?.name || "") + ": " + (e?.message || e));
-  }
-
-  debugInfo.value = lines.join("\n");
-});
 </script>

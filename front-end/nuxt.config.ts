@@ -29,13 +29,17 @@ export default defineNuxtConfig({
     // The manifest already exists and is linked below — don't generate/inject a second one.
     manifest: false,
     injectManifest: {
-      globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
-      // 200.html/404.html are Nuxt's static-hosting SPA fallback files, served
-      // by the CDN for unmatched routes — they aren't real URLs on the site
-      // (GET /200 and GET /404 both 404). Precaching them anyway made Workbox
-      // fail the whole install step on a bad response, silently discarding
-      // the entire service worker registration on every load.
-      globIgnores: ["200.html", "404.html"],
+      // No .html here on purpose: `nuxt generate` (ssr:false) writes one
+      // dist/<route>/index.html per page, whose "clean" precache URL becomes
+      // e.g. "admin" — but the server 301-redirects that (no trailing slash)
+      // to "admin/", and the Nuxt fallback pages "200"/"404" (from 200.html/
+      // 404.html) don't correspond to any real route at all (both 404).
+      // Workbox aborts the ENTIRE service worker install on the first
+      // non-2xx/redirected precached response, so any one of these silently
+      // discarded every registration. Push notifications don't need HTML
+      // precached anyway (this app has no offline-browsing requirement) —
+      // only the JS/CSS/image assets below matter.
+      globPatterns: ["**/*.{js,css,png,svg,ico,webmanifest}"],
     },
     devOptions: {
       enabled: false,

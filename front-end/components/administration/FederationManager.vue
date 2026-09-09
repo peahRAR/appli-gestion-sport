@@ -27,14 +27,14 @@
               <input
                 v-model="editName"
                 type="text"
-                class="w-64 rounded-sm border border-border-strong bg-surface text-text px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+                class="w-full max-w-64 rounded-sm border border-border-strong bg-surface text-text px-3 py-1.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
                 placeholder="Nom de la fédération"
               />
             </div>
             <span v-else>{{ f.name }}</span>
           </td>
           <td class="text-center">
-            <div v-if="editingId === f.id" class="flex items-center justify-center gap-2">
+            <div v-if="editingId === f.id" class="flex flex-wrap items-center justify-center gap-2">
               <button
                 class="bg-indigo-600 text-white px-3 py-1 rounded-sm hover:bg-indigo-500 disabled:opacity-50"
                 :disabled="loading || !editName.trim()"
@@ -52,18 +52,26 @@
             </div>
             <div v-else class="flex items-center justify-center gap-2">
               <button
-                class="px-3 py-1 rounded-sm border border-border-strong hover:bg-surface-2"
+                class="p-2 rounded-sm border border-border-strong hover:bg-surface-2"
                 :disabled="loading"
+                aria-label="Modifier" title="Modifier"
                 @click="startEdit(f)"
               >
-                Modifier
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                  <path fill="currentColor"
+                    d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zm17.71-10.04a1 1 0 0 0 0-1.42l-2.5-2.5a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75z" />
+                </svg>
               </button>
               <button
-                class="px-3 py-1 rounded-sm border border-red-200 text-red-600 hover:bg-red-50"
+                class="p-2 rounded-sm border border-red-200 text-red-600 hover:bg-red-50"
                 :disabled="loading"
+                aria-label="Supprimer" title="Supprimer"
                 @click="askDelete(f)"
               >
-                Supprimer
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                  <path fill="currentColor"
+                    d="M9 3v1H4v2h16V4h-5V3zM6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8z" />
+                </svg>
               </button>
             </div>
           </td>
@@ -295,6 +303,6 @@ export default {
 <style scoped>
 @reference "../../assets/main.css";
 
-th, td { @apply border text-center border-solid border-border p-3; }
+th, td { @apply border text-center border-solid border-border p-2 sm:p-3; }
 th { @apply bg-surface-2; }
 </style>

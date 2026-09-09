@@ -1,8 +1,16 @@
 <template>
   <transition name="modal">
     <div v-if="isOpen" @click="handleBackdropClick" ref="backdrop"
-      class="fixed p-2 inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black bg-opacity-50">
-      <div class="relative p-8 min-w-full max-h-full overflow-y-auto mx-auto bg-surface rounded-lg shadow-lg">
+      class="fixed p-2 inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+      <!--
+        Un seul conteneur défilant (le fond, ci-dessus) : `items-center` +
+        `overflow-y-auto` sur un flex ET un second `overflow-y-auto` sur la
+        boîte à l'intérieur créaient deux zones de scroll imbriquées. Sur
+        Safari iOS, ce double scroll provoque un blocage aléatoire de l'écran
+        quand on remonte dans une longue liste. `my-8 mx-auto` centre la
+        boîte horizontalement sans dépendre du flex centering.
+      -->
+      <div class="relative w-full p-8 my-8 mx-auto bg-surface rounded-lg shadow-lg">
         <button v-if="showClose" @click="closeModal"
           class="absolute top-0 right-0 m-4 text-text-muted hover:text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

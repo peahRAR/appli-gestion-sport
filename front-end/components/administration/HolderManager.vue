@@ -26,8 +26,13 @@
                         </select>
                     </td>
                     <td>
-                        <button @click="removeHolder(index)"
-                            class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600">Supprimer</button>
+                        <button @click="removeHolder(index)" aria-label="Supprimer" title="Supprimer"
+                            class="bg-red-500 text-white p-2 rounded-md hover:bg-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                    d="M9 3v1H4v2h16V4h-5V3zM6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8z" />
+                            </svg>
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -209,7 +214,7 @@ export default {
 
 th,
 td {
-    @apply border text-center border-solid border-border p-3;
+    @apply border text-center border-solid border-border p-2 sm:p-3;
 }
 
 th {

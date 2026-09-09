@@ -5,28 +5,28 @@
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr class="bg-surface-2">
-            <th class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
-            <th class="px-3 py-1 text-center max-w-2 text-xs font-medium text-text-muted uppercase tracking-wider">
+            <th class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Date</th>
+            <th class="px-2 py-1 text-center max-w-2 text-xs font-medium text-text-muted uppercase tracking-wider">
               Intitulé</th>
-            <th class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Visibilité</th>
-            <th class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
+            <th class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Visibilité</th>
+            <th class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
 
         <tbody class="bg-bg divide-y divide-border">
           <tr v-for="(event, index) in paginatedEvents" :key="event.id">
-            <td class="px-3 py-2 whitespace-nowrap text-sm text-text font-semibold capitalize">
+            <td class="px-2 py-2 whitespace-nowrap text-sm text-text font-semibold capitalize">
               {{ formatDate(event.date_event) }}
             </td>
 
-            <td class="px-3 py-2 max-w-20 text-sm text-text font-semibold uppercase">
+            <td class="px-2 py-2 max-w-20 text-sm text-text font-semibold uppercase">
               {{ event.name_event }}
             </td>
 
             <!-- Colonne Visibilité avec toggle -->
-            <td class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-text">
-              <div class="flex items-center justify-center gap-3">
-                <label class="relative inline-flex items-center cursor-pointer select-none">
+            <td class="px-2 py-2 whitespace-nowrap text-sm font-semibold text-text">
+              <div class="flex items-center justify-center gap-2">
+                <label class="relative inline-flex items-center cursor-pointer select-none shrink-0">
                   <input type="checkbox" class="sr-only peer" :checked="isVisible(event)"
                     :disabled="loadingId === event.id" @change="onToggleVisibility(event)"
                     aria-label="Basculer la visibilité du cours" />
@@ -38,22 +38,30 @@
                   </div>
                 </label>
 
-                <span class="text-xs px-2 py-0.5 rounded-full"
+                <span class="hidden sm:inline text-xs px-2 py-0.5 rounded-full whitespace-nowrap"
                   :class="isVisible(event) ? 'bg-green-200 text-green-800' : 'bg-surface-2 text-text-muted'">
                   {{ isVisible(event) ? 'Visible' : 'Masqué' }}
                 </span>
               </div>
             </td>
 
-            <td class="flex flex-col px-3 py-2 whitespace-nowrap text-sm font-semibold text-text">
-              <button @click="emitEditEvent(event)"
-                class="bg-blue-500 mb-1 text-white px-4 py-1 rounded-md hover:bg-blue-600">
-                Modifier
-              </button>
-              <button @click="emitDeleteEvent(event.id)"
-                class="bg-red-500 text-white px-4 py-1 rounded-md hover:bg-red-600">
-                Supprimer
-              </button>
+            <td class="px-2 py-2 whitespace-nowrap text-sm font-semibold text-text">
+              <div class="flex items-center justify-center gap-2">
+                <button @click="emitEditEvent(event)" aria-label="Modifier le cours" title="Modifier"
+                  class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                      d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zm17.71-10.04a1 1 0 0 0 0-1.42l-2.5-2.5a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75z" />
+                  </svg>
+                </button>
+                <button @click="emitDeleteEvent(event.id)" aria-label="Supprimer le cours" title="Supprimer"
+                  class="bg-red-500 text-white p-2 rounded-md hover:bg-red-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                      d="M9 3v1H4v2h16V4h-5V3zM6 8v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8z" />
+                  </svg>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

@@ -1,5 +1,5 @@
 <template>
-  <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+  <span class="inline-flex items-center gap-1.5 min-w-0 max-w-full">
     <span
       v-if="user?.hasFmmafLicense"
       class="inline-block w-1.5 h-4 rounded-sm shrink-0"
@@ -13,7 +13,7 @@
     >
       {{ formationLabelText }}
     </span>
-    <span>{{ displayName }}</span>
+    <span class="truncate">{{ displayName }}</span>
   </span>
 </template>
 
@@ -24,10 +24,18 @@ export default {
   name: 'UserNameWithGrade',
   props: {
     user: { type: Object, default: () => ({}) },
+    // Espaces resserrés (listes mobiles) : nom de famille réduit à l'initiale
+    // au lieu du nom complet, pour éviter de pousser la ligne hors écran.
+    compact: { type: Boolean, default: false },
   },
   computed: {
     displayName() {
-      return [this.user?.firstname, this.user?.name].filter(Boolean).join(' ');
+      const first = this.user?.firstname;
+      const last = this.user?.name;
+      if (this.compact && last) {
+        return [first, `${last.charAt(0)}.`].filter(Boolean).join(' ');
+      }
+      return [first, last].filter(Boolean).join(' ');
     },
     isWhiteGrade() {
       return (this.user?.grade || 'blanc') === 'blanc';

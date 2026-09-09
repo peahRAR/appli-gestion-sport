@@ -10,7 +10,7 @@
                         :key="user?.id"
                         :user-avatar="user?.avatar"
                         @avatarSaved="onAvatarSaved"
-                        message="Photo de profil (png, jpeg ou jpg, moins de 3 Mo)"
+                        message="Photo de profil (tout format image)"
                     />
                     <h2 class="mt-4 text-xl font-semibold text-white text-center flex items-center justify-center gap-1.5">
                         <template v-if="isAdmin">

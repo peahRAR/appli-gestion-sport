@@ -47,7 +47,7 @@
         </button>
       </div>
 
-      <div class="flex items-center space-x-4 mb-4">
+      <div class="flex flex-wrap items-center gap-4 mb-4">
         <select
           v-model="filterOption"
           class="block w-24 bg-surface border border-border-strong hover:border-text-muted py-2 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
@@ -58,17 +58,17 @@
         </select>
 
         <!-- Search -->
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center gap-2 min-w-0">
           <input
             v-model.trim="searchQuery"
             type="text"
             placeholder="Rechercher prénom ou nom…"
-            class="block w-64 bg-surface border border-border-strong hover:border-text-muted py-2 px-3 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+            class="block w-40 sm:w-64 bg-surface border border-border-strong hover:border-text-muted py-2 px-3 rounded-sm shadow-sm leading-tight focus:border-blue-500 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
           />
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="px-3 py-2 bg-surface-2 hover:bg-bg rounded-sm"
+            class="shrink-0 px-3 py-2 bg-surface-2 hover:bg-bg rounded-sm"
             type="button"
           >
             Effacer

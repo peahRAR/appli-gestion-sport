@@ -40,6 +40,16 @@
   ::file-selector-button {
     border-color: var(--color-border, currentcolor);
   }
+
+  /* Filet de sécurité mobile : un élément isolé qui déborde (nom trop long,
+     modale plein écran…) ne doit jamais faire défiler la page entière
+     horizontalement. Les conteneurs qui ont volontairement leur propre
+     scroll horizontal (overflow-x-auto sur les tableaux) ne sont pas
+     affectés : ils créent leur propre zone de défilement. */
+  html,
+  body {
+    overflow-x: hidden;
+  }
 }
 
 html.dark {

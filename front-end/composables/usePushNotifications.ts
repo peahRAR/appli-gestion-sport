@@ -76,37 +76,48 @@ export function usePushNotifications() {
       const userId = getUserIdFromToken();
       const token = localStorage.getItem("accessToken");
       if (!userId || !token) throw new Error("Non connecté.");
+      alert("[debug 1/6] userId+token OK: " + userId);
 
       const perm = await Notification.requestPermission();
       permission.value = perm;
+      alert("[debug 2/6] permission = " + perm);
       if (perm !== "granted") {
         throw new Error("Permission refusée par le navigateur.");
       }
 
       const registration = await navigator.serviceWorker.ready;
+      alert("[debug 3/6] SW ready, state=" + (registration.active ? registration.active.state : "no active worker"));
+
       let subscription = await registration.pushManager.getSubscription();
+      alert("[debug 4/6] existing subscription = " + (subscription ? subscription.endpoint : "none"));
+
       if (!subscription) {
         const config = useRuntimeConfig();
+        alert("[debug 4b/6] vapidPublicKey = " + JSON.stringify(config.public.vapidPublicKey));
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(config.public.vapidPublicKey),
         });
+        alert("[debug 5/6] new subscription created: " + subscription.endpoint.slice(0, 60));
       }
 
       const url = getUrl();
-      await fetch(`${url}/users/${userId}/push-subscriptions`, {
+      const res1 = await fetch(`${url}/users/${userId}/push-subscriptions`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(subscription.toJSON()),
       });
-      await fetch(`${url}/users/${userId}/push-preference`, {
+      alert("[debug 6/6] POST push-subscriptions status = " + res1.status);
+      const res2 = await fetch(`${url}/users/${userId}/push-preference`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ enabled: true }),
       });
+      alert("[debug 7/6] PATCH push-preference status = " + res2.status);
 
       enabled.value = true;
     } catch (e) {
+      alert("[debug ERROR] " + (e?.name || "") + ": " + (e?.message || e));
       error.value = e?.message || "Erreur lors de l'activation des notifications.";
       enabled.value = false;
     } finally {

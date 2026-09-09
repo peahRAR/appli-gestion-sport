@@ -62,9 +62,17 @@ onMounted(async () => {
   lines.push("Notification.permission=" + (typeof Notification !== "undefined" ? Notification.permission : "n/a"));
   lines.push("navigator.serviceWorker.controller=" + (navigator.serviceWorker?.controller ? navigator.serviceWorker.controller.scriptURL : "aucun"));
 
+  const { $pwa } = useNuxtApp();
+  lines.push("--- état @vite-pwa/nuxt ---");
+  lines.push("pwa.registrationError=" + $pwa?.registrationError);
+  lines.push("pwa.swActivated=" + $pwa?.swActivated);
+  lines.push("pwa.offlineReady=" + $pwa?.offlineReady);
+  lines.push("pwa.needRefresh=" + $pwa?.needRefresh);
+
   try {
     const regs = await navigator.serviceWorker.getRegistrations();
-    lines.push("getRegistrations() count=" + regs.length);
+    lines.push("--- getRegistrations() ---");
+    lines.push("count=" + regs.length);
     regs.forEach((r, i) => {
       lines.push(`  [${i}] scope=${r.scope}`);
       lines.push(`  [${i}] active=${r.active ? r.active.scriptURL + " state=" + r.active.state : "aucun"}`);
@@ -73,6 +81,14 @@ onMounted(async () => {
     });
   } catch (e) {
     lines.push("getRegistrations() ERROR: " + (e?.message || e));
+  }
+
+  lines.push("--- test manuel navigator.serviceWorker.register('/sw.js') ---");
+  try {
+    const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+    lines.push("register() OK, scope=" + reg.scope);
+  } catch (e) {
+    lines.push("register() ERROR: " + (e?.name || "") + ": " + (e?.message || e));
   }
 
   debugInfo.value = lines.join("\n");

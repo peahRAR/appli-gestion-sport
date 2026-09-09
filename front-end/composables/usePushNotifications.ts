@@ -13,6 +13,15 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+// TEMP DEBUG helper: races a promise against a timeout so a hang reports
+// clearly instead of leaving the UI stuck with no signal.
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`TIMEOUT: ${label} n'a jamais résolu après ${ms}ms`)), ms)),
+  ]);
+}
+
 function getUserIdFromToken(): string | null {
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
@@ -79,18 +88,34 @@ export function usePushNotifications() {
 
       const perm = await Notification.requestPermission();
       permission.value = perm;
+      alert("[debug 1] permission=" + perm);
       if (perm !== "granted") {
         throw new Error("Permission refusée par le navigateur.");
       }
 
-      const registration = await navigator.serviceWorker.ready;
-      let subscription = await registration.pushManager.getSubscription();
+      alert("[debug 2] appel navigator.serviceWorker.ready...");
+      const registration = await withTimeout(navigator.serviceWorker.ready, 8000, "serviceWorker.ready");
+      alert("[debug 3] SW ready OK, scope=" + registration.scope + " active=" + !!registration.active);
+
+      let subscription = await withTimeout(
+        registration.pushManager.getSubscription(),
+        8000,
+        "getSubscription"
+      );
+      alert("[debug 4] getSubscription -> " + (subscription ? "existe deja" : "aucune"));
+
       if (!subscription) {
         const config = useRuntimeConfig();
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(config.public.vapidPublicKey),
-        });
+        alert("[debug 5] appel subscribe() avec cle=" + String(config.public.vapidPublicKey).slice(0, 15) + "...");
+        subscription = await withTimeout(
+          registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(config.public.vapidPublicKey),
+          }),
+          8000,
+          "pushManager.subscribe"
+        );
+        alert("[debug 6] subscribe() OK");
       }
 
       const url = getUrl();
@@ -110,6 +135,7 @@ export function usePushNotifications() {
 
       enabled.value = true;
     } catch (e) {
+      alert("[debug ERREUR] " + (e?.name || "") + ": " + (e?.message || e));
       error.value = e?.message || "Erreur lors de l'activation des notifications.";
       enabled.value = false;
     } finally {

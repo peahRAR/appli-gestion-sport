@@ -43,21 +43,8 @@
 </template>
 
 <script setup>
-import { watch } from "vue";
 import { usePushNotifications } from "~/composables/usePushNotifications";
 
-const props = defineProps({
-  user: { type: Object, default: () => ({}) },
-});
-
-const { isSupported, permission, enabled, loading, error, isIosNonStandalone, setInitialEnabled, toggle } =
+const { isSupported, permission, enabled, loading, error, isIosNonStandalone, toggle } =
   usePushNotifications();
-
-watch(
-  () => props.user?.push_notifications_enabled,
-  (value) => {
-    if (typeof value === "boolean") setInitialEnabled(value);
-  },
-  { immediate: true }
-);
 </script>

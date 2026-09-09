@@ -38,7 +38,7 @@ export function usePushNotifications() {
     return config.public.siteUrl;
   }
 
-  onMounted(() => {
+  onMounted(async () => {
     isSupported.value =
       typeof window !== "undefined" &&
       "serviceWorker" in navigator &&
@@ -47,6 +47,18 @@ export function usePushNotifications() {
 
     if (isSupported.value) {
       permission.value = Notification.permission;
+
+      // The toggle reflects THIS device's actual subscription, not the
+      // server-side preference (which defaults to true for every account —
+      // trusting it here would show "activé" even for a device that was
+      // never actually granted permission or subscribed).
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        enabled.value = !!subscription;
+      } catch {
+        enabled.value = false;
+      }
     }
 
     const ua = window.navigator.userAgent || "";
@@ -56,11 +68,6 @@ export function usePushNotifications() {
       window.navigator.standalone === true;
     isIosNonStandalone.value = isIos && !isStandalone;
   });
-
-  // Reflects the server's push_notifications_enabled value in the toggle on load.
-  function setInitialEnabled(value) {
-    enabled.value = !!value;
-  }
 
   async function subscribe() {
     error.value = "";
@@ -158,7 +165,6 @@ export function usePushNotifications() {
     loading,
     error,
     isIosNonStandalone,
-    setInitialEnabled,
     toggle,
   };
 }

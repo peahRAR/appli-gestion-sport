@@ -35,6 +35,33 @@
       </button>
     </div>
 
+    <!-- Ajout à l'écran d'accueil : masqué si déjà installée, sinon un vrai
+         bouton d'installation sur Android/desktop (beforeinstallprompt), ou
+         des instructions manuelles sur iPhone (Apple n'expose aucune API
+         pour déclencher l'installation depuis le site). -->
+    <div v-if="showInstallButton" class="flex justify-center items-center">
+      <button @click="onInstallClick" type="button"
+        class="mt-4 inline-flex items-center gap-2 bg-surface-2 hover:bg-bg text-text text-sm font-bold py-2 px-4 rounded-sm border border-border-strong focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 3v10.59l3.29-3.3L16.7 11.7L12 16.4l-4.7-4.7l1.41-1.41l3.29 3.3V3zM5 19h14v2H5z" />
+        </svg>
+        Ajouter à l'écran d'accueil
+      </button>
+    </div>
+
+    <!-- Instructions manuelles (iPhone) -->
+    <TheModal :isOpen="showInstallHelpModal" title="Ajouter à l'écran d'accueil" @close="showInstallHelpModal = false">
+      <p v-if="!isIosSafari" class="mb-3">
+        Sur iPhone, l'ajout à l'écran d'accueil n'est possible que depuis <strong>Safari</strong>.
+        Ouvre ce site dans Safari, puis suis les étapes ci-dessous.
+      </p>
+      <ol class="list-decimal list-inside space-y-2">
+        <li>Appuie sur le bouton <strong>Partager</strong> <span aria-hidden="true">(⬆️, en bas de Safari)</span></li>
+        <li>Fais défiler et sélectionne <strong>"Sur l'écran d'accueil"</strong></li>
+        <li>Confirme en appuyant sur <strong>"Ajouter"</strong></li>
+      </ol>
+    </TheModal>
+
     <!-- Reset Password Modal -->
     <TheModal :isOpen="showResetPasswordModal" title="Réinitialiser le mot de passe" @close="closeResetPasswordModal">
       <form @submit.prevent="requestPasswordReset">
@@ -70,8 +97,12 @@ export default {
       },
       showErrorModal: false,
       showResetPasswordModal: false,
+      showInstallHelpModal: false,
       errorMessage: null,
       resetEmail: "",
+      isIos: false,
+      isIosSafari: false,
+      isStandalone: false,
       regexPassword:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
@@ -82,7 +113,31 @@ export default {
       this.showResetPasswordModal = true;
     }
   },
+  mounted() {
+    const ua = window.navigator.userAgent || "";
+    this.isIos = /iP(hone|od|ad)/.test(ua);
+    // Chrome/Firefox sur iOS utilisent bien le moteur WebKit mais leur menu
+    // de partage n'installe pas toujours une vraie PWA en mode standalone —
+    // on ne peut compter que sur Safari pour ça.
+    this.isIosSafari = this.isIos && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+    this.isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+  },
+  computed: {
+    showInstallButton() {
+      if (this.isStandalone) return false;
+      return this.isIos || !!this.$pwa?.showInstallPrompt;
+    },
+  },
   methods: {
+    async onInstallClick() {
+      if (this.isIos) {
+        this.showInstallHelpModal = true;
+        return;
+      }
+      await this.$pwa?.install();
+    },
     getUrl() {
       const config = useRuntimeConfig();
       const url = config.public.siteUrl;

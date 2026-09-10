@@ -83,7 +83,7 @@
           <tr class="bg-surface-2">
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
+              class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Statut
             </th>
@@ -92,14 +92,14 @@
               v-for="col in currentColumns"
               :key="col"
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
+              class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               {{ columnsNames[col] || col }}
             </th>
 
             <th
               scope="col"
-              class="px-3 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
+              class="px-2 py-1 text-center text-xs font-medium text-text-muted uppercase tracking-wider"
             >
               Actions
             </th>
@@ -112,19 +112,19 @@
             :key="user.id"
             :class="userBgColor(user)"
           >
-            <td class="px-3 py-2 whitespace-nowrap text-sm text-text-muted">
-              <span class="inline-flex items-center gap-2">
+            <td class="px-2 py-2 whitespace-nowrap text-sm text-text-muted">
+              <span class="inline-flex items-center gap-1">
                 <Icon
                   v-if="!user.date_end_pay || new Date(user.date_end_pay) < new Date()"
                   name="tabler:tax-euro"
-                  class="text-text text-3xl"
+                  class="text-text text-lg shrink-0"
                 />
                 <svg
                   v-if="!user.hasLicense"
-                  class="text-text"
+                  class="text-text shrink-0"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                 >
                   <path
@@ -152,13 +152,13 @@
             <td
               v-for="col in currentColumns"
               :key="col"
-              class="px-3 py-2 whitespace-nowrap text-center text-sm text-text font-semibold capitalize"
+              class="px-2 py-2 whitespace-nowrap text-center text-sm text-text font-semibold capitalize"
             >
               {{ user[col] }}
             </td>
 
             <td
-              class="px-3 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-text-muted"
+              class="px-2 py-2 whitespace-nowrap text-sm font-semibold text-center pt-4 text-text-muted"
             >
               <button @click="openModal(user)" class="text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2" type="button">
                 <svg

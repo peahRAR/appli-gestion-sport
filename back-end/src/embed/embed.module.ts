@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { EmbedController } from './embed.controller';
-import { EmbedAssetsController, EmbedProxyController } from './embed-proxy.controller';
+import { EmbedAssetsController, EmbedProxyController, EmbedVideosController } from './embed-proxy.controller';
 import { EmbedProxyService } from './embed-proxy.service';
 import { EmbedSessionGuard } from './embed-session.guard';
 
@@ -17,7 +17,7 @@ import { EmbedSessionGuard } from './embed-session.guard';
       inject: [ConfigService],
     }),
   ],
-  controllers: [EmbedController, EmbedProxyController, EmbedAssetsController],
+  controllers: [EmbedController, EmbedProxyController, EmbedAssetsController, EmbedVideosController],
   providers: [EmbedProxyService, EmbedSessionGuard],
 })
 export class EmbedModule { }

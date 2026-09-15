@@ -50,3 +50,19 @@ export class EmbedAssetsController {
     await this.embedProxyService.proxy(req, res, req.path.replace(/^\//, ''));
   }
 }
+
+// Le partenaire sert aussi ses vidéos sous /videos/* à la racine du domaine
+// (comme /_next ci-dessus), quel que soit le chemin d'où la page est
+// chargée : sans ce proxy, le navigateur irait chercher ces fichiers sur
+// notre propre domaine racine au lieu de passer par /embed/mma/.
+@Public()
+@UseGuards(EmbedSessionGuard)
+@Controller('videos')
+export class EmbedVideosController {
+  constructor(private readonly embedProxyService: EmbedProxyService) { }
+
+  @All('*path')
+  async proxyVideo(@Req() req: Request, @Res() res: Response) {
+    await this.embedProxyService.proxy(req, res, req.path.replace(/^\//, ''));
+  }
+}

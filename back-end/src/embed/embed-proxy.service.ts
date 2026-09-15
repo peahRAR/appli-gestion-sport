@@ -21,8 +21,13 @@ const STRIPPED_REQUEST_HEADERS = new Set([
 // Headers de réponse Vercel qu'on ne renvoie jamais au navigateur : cookies
 // du partenaire (collision possible avec notre cookie embed_session),
 // en-têtes bloquant l'affichage en iframe, en-têtes d'infra qui
-// exposeraient l'hébergeur réel, et content-length/encoding devenus
-// invalides puisque fetch() décompresse déjà le corps en transit.
+// exposeraient l'hébergeur réel, et content-encoding devenu invalide
+// puisque fetch() décompresse déjà le corps en transit. content-length et
+// transfer-encoding ne sont PAS ici : ils ne deviennent invalides que si le
+// corps était effectivement compressé (cf. logique conditionnelle dans
+// proxy()) — les vidéos ne le sont jamais, et Safari/WebKit mobile exige un
+// Content-Length exact pour lire un <video> en 206 Partial Content, alors
+// que les navigateurs desktop tolèrent le chunked sans Content-Length.
 const STRIPPED_RESPONSE_HEADERS = new Set([
   'set-cookie',
   'x-frame-options',
@@ -33,8 +38,6 @@ const STRIPPED_RESPONSE_HEADERS = new Set([
   'age',
   'strict-transport-security',
   'content-encoding',
-  'transfer-encoding',
-  'content-length',
   'connection',
 ]);
 
@@ -111,9 +114,17 @@ export class EmbedProxyService {
 
     res.status(upstreamResponse.status);
 
+    // Le corps n'est réellement décompressé par fetch() que si la réponse
+    // upstream était compressée : dans ce cas seulement, content-length et
+    // transfer-encoding d'origine ne correspondent plus au corps relayé.
+    const contentEncoding = upstreamResponse.headers.get('content-encoding');
+
     upstreamResponse.headers.forEach((value, key) => {
       const lowerKey = key.toLowerCase();
       if (STRIPPED_RESPONSE_HEADERS.has(lowerKey)) {
+        return;
+      }
+      if ((lowerKey === 'content-length' || lowerKey === 'transfer-encoding') && contentEncoding) {
         return;
       }
       if (lowerKey === 'content-security-policy') {

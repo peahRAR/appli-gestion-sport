@@ -12,6 +12,8 @@
         :src="embedUrl"
         title="Tutoriel MMA — grades"
         class="w-full h-full border-0 block"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        allowfullscreen
       />
     </div>
   </div>

@@ -70,22 +70,27 @@
                     </div>
                 </div>
 
+                <p v-if="isWaitlisted" class="text-center text-sm text-text-muted mt-2">
+                    Cours complet : vous êtes en liste d'attente, position n°{{ event.waitlistPosition }}.
+                    Vous serez inscrit automatiquement si une place se libère.
+                </p>
+
                 <!--Buttons-->
                 <div class="flex items-center justify-between mt-4">
                     <div class="buttons w-full flex flex-col font-semibold">
                         <button @click.stop="participate(event, true)" @mousedown="isPresentButtonActive = true"
                             @mouseup="isPresentButtonActive = false" @mouseleave="isPresentButtonActive = false"
-                            :class="[presentButtonClass, { 'cursor-not-allowed ': event.isParticipating === true }]"
-                            :disabled="event.isParticipating === true"
+                            :class="[presentButtonClass, { 'cursor-not-allowed ': event.isParticipating === true || isWaitlisted }]"
+                            :disabled="event.isParticipating === true || isWaitlisted"
                             class="border border-border-strong drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
-                            Présent
+                            {{ presentButtonLabel }}
                         </button>
                         <button @click.stop="participate(event, false)" @mousedown="isAbsentButtonActive = true"
                             @mouseup="isAbsentButtonActive = false" @mouseleave="isAbsentButtonActive = false"
-                            :class="[absentButtonClass, { 'cursor-not-allowed ': event.isParticipating === false }]"
-                            :disabled="event.isParticipating === false"
+                            :class="[absentButtonClass, { 'cursor-not-allowed ': absentDisabled }]"
+                            :disabled="absentDisabled"
                             class="border border-border-strong drop-shadow-lg py-1 px-3 rounded-sm mb-2 flex justify-center items-center">
-                            Absent
+                            {{ isWaitlisted ? "Quitter la file" : "Absent" }}
                         </button>
                     </div>
                 </div>
@@ -111,6 +116,12 @@ export default {
             this.$emit('open-modal', event);
         },
         participate(event, value) {
+            if (!value && this.isWaitlisted) {
+                const confirmed = window.confirm(
+                    "Si vous quittez la liste d'attente, vous perdez votre place. Si vous vous réinscrivez ensuite, vous passerez en dernière position. Continuer ?"
+                );
+                if (!confirmed) return;
+            }
             this.$emit('participate', event, value);
         },
         emitToggleOverflow() {
@@ -130,10 +141,21 @@ export default {
             return 'bg-surface-2 text-text'; // Cliquable, état neutre
         },
         absentButtonClass() {
-            if (this.event.isParticipating === false) {
+            if (this.absentDisabled) {
                 return 'bg-red-600 text-white'; // Non cliquable et rouge
             }
             return 'bg-surface-2 text-text'; // Cliquable, état neutre
+        },
+        isWaitlisted() {
+            return this.event.waitlistPosition != null;
+        },
+        absentDisabled() {
+            return this.event.isParticipating === false && !this.isWaitlisted;
+        },
+        presentButtonLabel() {
+            if (this.isWaitlisted) return `En liste d'attente (n°${this.event.waitlistPosition})`;
+            if (this.event.places === 0 && this.event.isParticipating !== true) return "Rejoindre la liste d'attente";
+            return 'Présent';
         },
         participants() {
             return this.event.totalPlaces - this.event.places;

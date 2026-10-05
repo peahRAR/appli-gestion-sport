@@ -1,12 +1,20 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
+import { Repository, DataSource, In, EntityManager, LessThan } from 'typeorm';
 import { ListsMember } from './lists-member.entity';
+import { CourseWaitlist } from './course-waitlist.entity';
 import { CreateListsMemberDto } from './dto/create-lists-member.dto';
 import { UpdateListsMemberDto } from './dto/update-lists-member.dto';
 import { EventsService } from 'src/events/events.service';
 import { UsersService } from '../users/services/users.service';
 import { Event } from 'src/events/events.entity';
+import { PushNotificationsService } from 'src/push-notifications/push-notifications.service';
+
+export type UpdateListsMemberResult = {
+  isParticipant: boolean;
+  waitlistPosition: number | null;
+  places: number;
+};
 
 @Injectable()
 export class ListsMembersService {
@@ -18,6 +26,7 @@ export class ListsMembersService {
     @Inject(forwardRef(() => EventsService))
     private readonly eventsService: EventsService,
     private readonly dataSource: DataSource, // Injection de DataSource
+    private readonly pushNotificationsService: PushNotificationsService,
   ) { }
 
   async create(createListsMemberDto: CreateListsMemberDto): Promise<ListsMember> {
@@ -79,103 +88,155 @@ export class ListsMembersService {
     const listsMember = await this.listsMemberRepository.findOne({
       where: { eventId, userId },
     });
+    const waitlistPosition = await this.getWaitlistPosition(this.dataSource.manager, eventId, userId);
     if (!listsMember) {
-      return {}; // Ou return { error: 'Aucune correspondance trouvée' };
+      return { waitlistPosition };
     }
-    return listsMember;
+    return { ...listsMember, waitlistPosition };
   }
 
   async update(
     eventId: number,
     userId: string,
     updateListsMemberDto: UpdateListsMemberDto,
-  ): Promise<ListsMember | undefined> {
-    console.log(`Transaction started for eventId: ${eventId}, userId: ${userId}`);
-
-    return this.dataSource.transaction(async transactionalEntityManager => {
-      console.log(`Transaction in progress for eventId: ${eventId}, userId: ${userId}`);
-
-      // Récupérer les informations de l'événement
-      const event = await transactionalEntityManager.findOne(Event, {
-        where: { id: eventId }
+  ): Promise<UpdateListsMemberResult> {
+    const { promotedUserIds, result } = await this.dataSource.transaction(async em => {
+      // Verrou sur l'événement : sérialise les inscriptions, désinscriptions et
+      // promotions de la file pour ce cours, pour éviter de dépasser les places.
+      const event = await em.findOne(Event, {
+        where: { id: eventId },
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!event) {
         throw new Error(`Event with id ${eventId} not found`);
       }
 
-      const totalPlaces = event.totalPlaces;
+      const existingMember = await em.findOne(ListsMember, { where: { eventId, userId } });
+      let promotedUserIds: string[] = [];
 
-      // Récupérer l'entrée de la liste des membres correspondant à l'utilisateur et à l'événement
-      const existingMember = await transactionalEntityManager.findOne(ListsMember, {
-        where: { eventId, userId },
-        lock: { mode: 'pessimistic_write' }, // Verrouillage pessimiste
-      });
-
-      // Si l'utilisateur est déjà inscrit avec le même statut de participation
-      if (existingMember && existingMember.isParticipant === updateListsMemberDto.isParticipant) {
-        console.log(`No change in participation status for userId: ${userId}, eventId: ${eventId}`);
-        return existingMember; // Aucune action nécessaire si l'état de participation est le même
-      }
-
-      // Cas où l'utilisateur devient participant
-      if (updateListsMemberDto.isParticipant === true) {
-        // Récupérer le nombre de participants déjà inscrits
-        const participants = await transactionalEntityManager.count(ListsMember, {
-          where: { eventId, isParticipant: true },
-        });
-
-        if (participants >= totalPlaces) {
-          throw new Error("Désolé, il n'y a plus de place pour ce cours");
+      if (updateListsMemberDto.isParticipant) {
+        const alreadyWaiting = await em.findOne(CourseWaitlist, { where: { eventId, userId } });
+        if (!existingMember?.isParticipant && !alreadyWaiting) {
+          const participants = await em.count(ListsMember, { where: { eventId, isParticipant: true } });
+          const queueLength = await em.count(CourseWaitlist, { where: { eventId } });
+          if (participants < event.totalPlaces && queueLength === 0) {
+            await this.setParticipant(em, eventId, userId, existingMember);
+            this.usersService.touchLastCourseRegistration(userId).catch(() => {});
+          } else {
+            await em.save(em.create(CourseWaitlist, { eventId, userId }));
+          }
         }
-
-        if (!existingMember) {
-          console.log(`Creating participant entry for userId: ${userId}, eventId: ${eventId}`);
-          await transactionalEntityManager.save(ListsMember, {
-            eventId,
-            userId,
-            isParticipant: true,
-          });
-        } else {
-          console.log(`Updating to participant for userId: ${userId}, eventId: ${eventId}`);
-          existingMember.isParticipant = true;
-          await transactionalEntityManager.save(existingMember);
-        }
-        // Fire-and-forget, outside the transaction: a "last seen" timestamp
-        // doesn't need atomicity with the ListsMember write.
-        this.usersService.touchLastCourseRegistration(userId).catch(() => {});
       } else {
-        // Cas où l'utilisateur choisit de ne pas participer
+        await em.delete(CourseWaitlist, { eventId, userId });
         if (!existingMember) {
-          console.log(`Recording non-participation for userId: ${userId}, eventId: ${eventId}`);
-          await transactionalEntityManager.save(ListsMember, {
-            eventId,
-            userId,
-            isParticipant: false,
-          });
+          await em.save(ListsMember, { eventId, userId, isParticipant: false });
         } else if (existingMember.isParticipant) {
-          console.log(`Updating to non-participant for userId: ${userId}, eventId: ${eventId}`);
           existingMember.isParticipant = false;
-          await transactionalEntityManager.save(existingMember);
+          await em.save(existingMember);
+          promotedUserIds = await this.promoteFromWaitlist(em, event);
         }
       }
 
-      // Calculer le nombre de places restantes en fonction du nombre de participants
-      const updatedParticipantsCount = await transactionalEntityManager.count(ListsMember, {
+      const updatedParticipantsCount = await em.count(ListsMember, {
         where: { eventId, isParticipant: true },
       });
+      event.places = event.totalPlaces - updatedParticipantsCount;
+      await em.save(event);
 
-      event.places = totalPlaces - updatedParticipantsCount;
-
-      // Sauvegarder l'événement mis à jour avec les places restantes recalculées
-      await transactionalEntityManager.save(event);
-
-      console.log(`Transaction committed for eventId: ${eventId}, userId: ${userId}`);
-      return transactionalEntityManager.findOne(ListsMember, { where: { eventId, userId } });
-    }).catch(error => {
-      console.log(`Transaction failed for eventId: ${eventId}, userId: ${userId}`, error);
-      throw error;
+      const member = await em.findOne(ListsMember, { where: { eventId, userId } });
+      const waitlistPosition = await this.getWaitlistPosition(em, eventId, userId);
+      return {
+        promotedUserIds,
+        result: {
+          isParticipant: member?.isParticipant ?? false,
+          waitlistPosition,
+          places: event.places,
+        },
+      };
     });
+
+    this.notifyPromoted(promotedUserIds);
+
+    return result;
+  }
+
+  async applyCapacity(eventId: number, totalPlaces: number): Promise<void> {
+    const promotedUserIds = await this.dataSource.transaction(async em => {
+      const event = await em.findOne(Event, {
+        where: { id: eventId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!event) {
+        throw new Error(`Event with id ${eventId} not found`);
+      }
+
+      event.totalPlaces = totalPlaces;
+      const promoted = await this.promoteFromWaitlist(em, event);
+
+      const participants = await em.count(ListsMember, { where: { eventId, isParticipant: true } });
+      event.places = totalPlaces - participants;
+      await em.save(event);
+      return promoted;
+    });
+
+    this.notifyPromoted(promotedUserIds);
+  }
+
+  private notifyPromoted(userIds: string[]): void {
+    for (const userId of userIds) {
+      this.pushNotificationsService.notifyUser(userId, {
+        title: 'Une place s\'est libérée',
+        body: 'Bonne nouvelle, tu es inscrit au cours depuis la liste d\'attente !',
+      }).catch(() => {});
+    }
+  }
+
+  private async setParticipant(
+    em: EntityManager,
+    eventId: number,
+    userId: string,
+    existingMember: ListsMember | null,
+  ): Promise<void> {
+    if (!existingMember) {
+      await em.save(ListsMember, { eventId, userId, isParticipant: true });
+      return;
+    }
+    existingMember.isParticipant = true;
+    await em.save(existingMember);
+  }
+
+  private async promoteFromWaitlist(em: EntityManager, event: Event): Promise<string[]> {
+    const participants = await em.count(ListsMember, { where: { eventId: event.id, isParticipant: true } });
+    let freePlaces = event.totalPlaces - participants;
+    const promotedUserIds: string[] = [];
+
+    while (freePlaces > 0) {
+      const next = await em.findOne(CourseWaitlist, {
+        where: { eventId: event.id },
+        order: { id: 'ASC' },
+      });
+      if (!next) break;
+
+      await em.delete(CourseWaitlist, { id: next.id });
+      const member = await em.findOne(ListsMember, { where: { eventId: event.id, userId: next.userId } });
+      await this.setParticipant(em, event.id, next.userId, member);
+      promotedUserIds.push(next.userId);
+      freePlaces--;
+    }
+
+    return promotedUserIds;
+  }
+
+  private async getWaitlistPosition(
+    em: EntityManager,
+    eventId: number,
+    userId: string,
+  ): Promise<number | null> {
+    const entry = await em.findOne(CourseWaitlist, { where: { eventId, userId } });
+    if (!entry) return null;
+    const ahead = await em.count(CourseWaitlist, { where: { eventId, id: LessThan(entry.id) } });
+    return ahead + 1;
   }
 
   async remove(eventId: number, userId: string): Promise<void> {

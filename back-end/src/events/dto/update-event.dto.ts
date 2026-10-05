@@ -7,6 +7,7 @@ export class UpdateEventDto {
     minutes?: number;
   };
   places?: number;
+  totalPlaces?: number;
   name_event?: string;
   coach?: string;
   overview?: string;

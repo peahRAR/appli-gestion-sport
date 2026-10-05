@@ -142,8 +142,8 @@ export default {
           const eventsWithParticipation = await Promise.all(
             visibleOnly.map(async (event) => {
               if (event && event.id) {
-                const isParticipating = await this.checkParticipation(event.id, userId);
-                return { ...event, isParticipating };
+                const { isParticipant, waitlistPosition } = await this.checkParticipation(event.id, userId);
+                return { ...event, isParticipating: isParticipant, waitlistPosition };
               } else {
                 console.error("L'objet event ne contient pas de propriété id :", event);
                 return null;
@@ -285,9 +285,6 @@ export default {
         const url = this.getUrl();
         const userId = await this.getUserIdFromToken();
 
-        // Vérification de l'état de participation précédent
-        const previousParticipation = await this.checkParticipation(event.id, userId);
-
         const requestBody = {
           eventId: event.id,
           userId: userId,
@@ -305,24 +302,12 @@ export default {
           throw new Error("Failed to update participation status");
         }
 
+        const state = await response.json();
         const index = this.events.findIndex(e => e.id === event.id);
         if (index !== -1) {
-          this.events[index].isParticipating = value;
-        }
-
-        // Mise à jour de l'état de participation localement
-        const eventIndex = this.events.findIndex(e => e.id === event.id);
-        if (eventIndex !== -1) {
-          const currentParticipation = this.events[eventIndex].isParticipating;
-
-          // Comparer l'état actuel avec l'état précédent
-          if (previousParticipation !== undefined) {
-            if (currentParticipation) {
-              this.events[eventIndex].places -= 1;
-            } else {
-              this.events[eventIndex].places += 1;
-            }
-          }
+          this.events[index].isParticipating = state.isParticipant;
+          this.events[index].waitlistPosition = state.waitlistPosition;
+          this.events[index].places = state.places;
         }
 
       } catch (error) {
@@ -351,15 +336,13 @@ export default {
 
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
-          const data = await response.json();
-          const isParticipating = data.isParticipant;
-          return isParticipating;
+          return await response.json();
         } else {
           throw new Error("Response does not contain valid JSON data");
         }
       } catch (error) {
         console.error("Error checking participation:", error);
-        return false;
+        return { isParticipant: false, waitlistPosition: null };
       }
     },
     calculateEndTime(startTime, duration) {

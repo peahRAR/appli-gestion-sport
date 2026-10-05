@@ -79,7 +79,6 @@ export class EventsService {
     const updatedEvent: DeepPartial<Event> = {};
 
     if (updateEventDto.date_event) updatedEvent.date_event = updateEventDto.date_event;
-    if (updateEventDto.places) updatedEvent.places = updateEventDto.places;
     if (updateEventDto.name_event) updatedEvent.name_event = updateEventDto.name_event;
     if (updateEventDto.coach) updatedEvent.coach = updateEventDto.coach;
     if (updateEventDto.overview) updatedEvent.overview = updateEventDto.overview;
@@ -118,6 +117,12 @@ export class EventsService {
     }
 
     await this.eventRepository.update(id, updatedEvent);
+
+    const newTotalPlaces = Number(updateEventDto.totalPlaces);
+    if (before && updateEventDto.totalPlaces !== undefined && Number.isInteger(newTotalPlaces) && newTotalPlaces !== before.totalPlaces) {
+      await this.listsMembersService.applyCapacity(id, newTotalPlaces);
+    }
+
     const fresh = await this.eventRepository.findOne({ where: { id } });
 
     if (before && !before.isVisible && fresh?.isVisible) {

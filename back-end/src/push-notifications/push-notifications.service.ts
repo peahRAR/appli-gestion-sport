@@ -86,6 +86,22 @@ export class PushNotificationsService {
     await Promise.all(subscriptions.map((sub) => this.sendOrCleanup(sub, payload)));
   }
 
+  async notifyUser(userId: string, notification: { title: string; body: string; url?: string }): Promise<void> {
+    if (!this.vapidConfigured) return;
+
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      select: ['id', 'push_notifications_enabled'],
+    });
+    if (!user?.push_notifications_enabled) return;
+
+    const subscriptions = await this.subscriptionRepo.find({ where: { userId } });
+    if (subscriptions.length === 0) return;
+
+    const payload = JSON.stringify({ url: '/', ...notification });
+    await Promise.all(subscriptions.map((sub) => this.sendOrCleanup(sub, payload)));
+  }
+
   private async sendOrCleanup(sub: PushSubscription, payload: string): Promise<void> {
     try {
       await webpush.sendNotification(

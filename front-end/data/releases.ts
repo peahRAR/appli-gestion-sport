@@ -8,6 +8,17 @@ export type Release = {
 
 export const releases: Release[] = [
   {
+    version: "1.8.1",
+    date: "2026-10-05",
+    title: "Liste d'attente sur les cours complets et tutoriel vidéo corrigé",
+    changes: [
+      "Nouveautés — Liste d'attente : quand un cours est complet, « Présent » permet de rejoindre la file d'attente et d'afficher sa position. Si un participant se désinscrit, la première personne de la file est inscrite automatiquement et reçoit une notification",
+      "Attention — Quitter la liste d'attente fait perdre sa place : en se réinscrivant ensuite, on passe en dernière position",
+      "Améliorations — Administration : la modification du nombre de places d'un cours est désormais bien enregistrée, et les personnes en attente sont inscrites immédiatement si de nouvelles places se libèrent",
+      "Corrections — Tutoriel : les vidéos se lancent à nouveau (lecture, plein écran), y compris sur téléphone et en mode application installée",
+    ],
+  },
+  {
     version: "1.8",
     date: "2026-09-08",
     title: "Grade FMMAF, calendrier mensuel, notifications push et sécurité du mot de passe",

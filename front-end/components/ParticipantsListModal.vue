@@ -31,6 +31,19 @@
                 </div>
             </li>
         </ul>
+
+        <template v-if="eventWaitlist && eventWaitlist.length > 0">
+            <h3 class="font-semibold text-text mt-4 mb-2">Liste d'attente</h3>
+            <ul class="w-full">
+                <li v-for="entry in eventWaitlist" :key="entry.id"
+                    class="flex w-full items-center py-2 px-4 border text-text">
+                    <span class="shrink-0 w-10 h-10 mr-2 rounded-full bg-bg flex items-center justify-center text-sm font-bold text-text-muted">
+                        n°{{ entry.waitlistPosition }}
+                    </span>
+                    <UserNameWithGrade :user="entry" compact class="font-bold capitalize min-w-0 flex-1" />
+                </li>
+            </ul>
+        </template>
     </TheModal>
 </template>
 
@@ -39,6 +52,7 @@ export default {
     props: {
         isOpen: Boolean,
         eventParticipants: Array,
+        eventWaitlist: Array,
         userRole: Number
     },
     methods: {

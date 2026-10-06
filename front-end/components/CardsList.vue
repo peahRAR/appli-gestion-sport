@@ -14,7 +14,7 @@
     </div>
     <!--MODAL LISTE DES PARTICIPANTS-->
     <ParticipantsListModal v-if="showModal" :isOpen="showModal" @close="closeModal"
-      :eventParticipants="eventParticipants" :userRole="userRole" @open-details-modal="openDetailsModal" />
+      :eventParticipants="eventParticipants" :eventWaitlist="eventWaitlist" :userRole="userRole" @open-details-modal="openDetailsModal" />
 
     <!--MODAL DETAILS PARTICIPANTS-->
     <ParticipantDetailsModal v-if="showDetailsModal" :isOpen="showDetailsModal" @close="closeDetailsModal"
@@ -48,6 +48,7 @@ export default {
       showModal: false,
       showDetailsModal: false,
       eventParticipants: [],
+      eventWaitlist: [],
       userDetails: {},
       userRole: 0,
       loading: true,
@@ -230,21 +231,21 @@ export default {
         const token = this.getToken();
         const url = this.getUrl();
 
-        // Fetch participants for the given event
-        const response = await fetch(`${url}/lists-members/participants/${event.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        const [participantsResponse, waitlistResponse] = await Promise.all([
+          fetch(`${url}/lists-members/participants/${event.id}`, { method: "GET", headers }),
+          fetch(`${url}/lists-members/waitlist/${event.id}`, { method: "GET", headers }),
+        ]);
 
-        if (!response.ok) {
+        if (!participantsResponse.ok || !waitlistResponse.ok) {
           throw new Error("Failed to fetch event participants");
         }
 
-        // Directly assign the response data to eventParticipants
-        this.eventParticipants = await response.json();
+        this.eventParticipants = await participantsResponse.json();
+        this.eventWaitlist = await waitlistResponse.json();
 
         this.showModal = true;
       } catch (error) {

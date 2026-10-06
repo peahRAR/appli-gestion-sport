@@ -25,9 +25,14 @@ export class ListsMembersController {
     return this.listsMembersService.findAllByIdEvent(eventId);
   }
 
-  @Get('participants/:eventId') 
+  @Get('participants/:eventId')
   findParticipant(@Param('eventId') eventId: number) {
     return this.listsMembersService.findParticipants(eventId)
+  }
+
+  @Get('waitlist/:eventId')
+  findWaitlist(@Param('eventId') eventId: number) {
+    return this.listsMembersService.findWaitlist(eventId);
   }
 
   @Get(':eventId/:userId')

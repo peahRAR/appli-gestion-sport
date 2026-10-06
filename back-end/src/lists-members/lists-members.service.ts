@@ -84,6 +84,27 @@ export class ListsMembersService {
     }
   }
 
+  async findWaitlist(eventId: number): Promise<any[]> {
+    const entries = await this.dataSource.getRepository(CourseWaitlist).find({
+      where: { eventId },
+      order: { id: 'ASC' },
+      relations: ['user'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+          firstname: true,
+          name: true,
+          avatar: true,
+          grade: true,
+          formation: true,
+        },
+      },
+    });
+
+    return entries.map(({ user }, index) => ({ ...user, waitlistPosition: index + 1 }));
+  }
+
   async findOne(eventId: number, userId: string): Promise<any> {
     const listsMember = await this.listsMemberRepository.findOne({
       where: { eventId, userId },

@@ -8,6 +8,7 @@
       <my-footer class="mt-2"/>
     </footer>
     <AppUpdateBanner />
+    <InstallPromptBanner />
   </div>
 </template>
 

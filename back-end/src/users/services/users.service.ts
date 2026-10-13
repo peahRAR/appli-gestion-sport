@@ -10,7 +10,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User } from '../entities/users.entity';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -238,19 +238,58 @@ export class UsersService {
         'last_course_registration_at',
         'status',
       ],
-      relations: ['licenses', 'licenses.federation'],
+      // Pas de relations ici : jointe à `licenses`/`licenses.federation` dans
+      // cette même requête, ça produit un produit cartésien (une ligne par
+      // licence) dont les alias SQL générés par TypeORM pour les colonnes du
+      // `select` ci-dessus (notamment `license` vs la relation `licenses`,
+      // noms trop proches une fois tronqués) peuvent entrer en collision —
+      // TypeORM 0.3 raccourcit les alias trop longs par simple troncature,
+      // pas par hash. Sans ORDER BY, l'ordre des lignes Postgres n'est pas
+      // garanti stable d'une exécution à l'autre, donc une collision peut
+      // faire gagner tantôt la bonne valeur, tantôt celle d'une autre ligne
+      // (d'où des champs comme `avatar` parfois faux, corrigés en rechargeant
+      // la page). D'où la jointure des licences en requête séparée ci-dessous.
     });
 
-    // `license` (legacy single-field) can be empty even when a licence
-    // exists in the new per-federation system, so also check `licenses`.
-    // Only a derived boolean is returned — not the licence numbers
-    // themselves, to keep this list endpoint's response as lean as before.
-    return users.map(({ licenses, ...user }) => ({
-      ...user,
-      hasLicense: !!user.license
-        || (licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted),
-      hasFmmafLicense: (licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
-    }));
+    return this.attachLicenseFlags(users);
+  }
+
+  // `license` (legacy single-field) peut être vide même quand une licence
+  // existe dans le nouveau système par fédération, d'où le double check.
+  // Chargée en requête séparée (voir le commentaire dans findAll) : un
+  // simple join UserLicense → User par userId, sans aucune colonne
+  // chiffrée/`select` partiel en commun avec la requête `users`, donc aucun
+  // risque de collision d'alias.
+  async attachLicenseFlags<T extends { id: string; license?: string | null }>(
+    users: T[],
+  ): Promise<(T & { hasLicense: boolean; hasFmmafLicense: boolean })[]> {
+    if (users.length === 0) return [];
+
+    const licenses = await this.userLicenseRepo.find({
+      where: { user: { id: In(users.map(u => u.id)) } },
+      loadRelationIds: { relations: ['user'] },
+    });
+
+    const licensesByUserId = new Map<string, typeof licenses>();
+    for (const lic of licenses) {
+      const userId = lic.user as unknown as string;
+      const existing = licensesByUserId.get(userId);
+      if (existing) {
+        existing.push(lic);
+      } else {
+        licensesByUserId.set(userId, [lic]);
+      }
+    }
+
+    return users.map((user) => {
+      const userLicenses = licensesByUserId.get(user.id) ?? [];
+      return {
+        ...user,
+        hasLicense: !!user.license
+          || userLicenses.some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted),
+        hasFmmafLicense: userLicenses.some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
+      };
+    });
   }
 
   async findOne(id: string): Promise<User | undefined> {
@@ -315,18 +354,18 @@ export class UsersService {
         'formation',
         'push_notifications_enabled',
       ],
-      relations: ['licenses', 'licenses.federation'],
+      // Pas de relations licences ici non plus — voir le commentaire dans
+      // findAll() : jointe dans la même requête que ce `select`, elle peut
+      // faire remonter un `avatar` (ou autre champ) incorrect de façon
+      // intermittente.
     });
 
     if (!user) {
       return undefined;
     }
 
-    const { licenses, ...rest } = user;
-    return {
-      ...rest,
-      hasFmmafLicense: (licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted),
-    };
+    const [withFlags] = await this.attachLicenseFlags([user]);
+    return withFlags;
   }
 
   async touchLastLogin(userId: string): Promise<void> {

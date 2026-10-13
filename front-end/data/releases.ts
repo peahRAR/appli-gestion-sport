@@ -8,6 +8,15 @@ export type Release = {
 
 export const releases: Release[] = [
   {
+    version: "1.8.2",
+    date: "2026-10-13",
+    title: "Rappel d'installation et correction de photos de profil incorrectes",
+    changes: [
+      "Nouveautés — Un rappel discret pour ajouter l'application à l'écran d'accueil s'affiche désormais sur toutes les pages (Android et iPhone), même une fois connecté, avec la possibilité de le fermer ou de ne plus jamais l'afficher",
+      "Corrections — Il arrivait parfois qu'une mauvaise photo de profil s'affiche (liste des participants, Mon Profil), corrigée en rechargeant la page ; ce mélange aléatoire est désormais résolu à la source",
+    ],
+  },
+  {
     version: "1.8.1",
     date: "2026-10-05",
     title: "Liste d'attente sur les cours complets et tutoriel vidéo corrigé",

@@ -48,9 +48,18 @@ export class ListsMembersService {
 
   async findParticipants(eventId: number): Promise<any[]> {
     try {
+      // Pas de relations 'user.licenses'/'user.licenses.federation' dans
+      // cette même requête : jointes ici, en cartésien avec ce `select`
+      // partiel, les alias SQL générés par TypeORM (tronqués, pas hashés,
+      // ex. `license` vs la relation `licenses`) peuvent entrer en collision
+      // — sans ORDER BY, l'ordre des lignes Postgres n'est pas garanti
+      // stable, donc une collision fait gagner tantôt la bonne valeur,
+      // tantôt celle d'une autre ligne (vu en prod : `avatar` parfois faux,
+      // corrigé en rechargeant la page). D'où le chargement des licences en
+      // requête séparée via attachLicenseFlags.
       const participants = await this.listsMemberRepository.find({
         where: { eventId, isParticipant: true },
-        relations: ['user', 'user.licenses', 'user.licenses.federation'],
+        relations: ['user'],
         select: {
           user: {
             id: true,
@@ -66,17 +75,8 @@ export class ListsMembersService {
       });
 
       // Selected user fields are already decrypted by the @EncryptedColumn transformer.
-      // `license` (legacy single-field) can be empty even when a licence
-      // exists in the new per-federation system, so also check `licenses`.
-      const listParticipants = participants.map(({ user }) => {
-        const hasLicense = !!user.license
-          || (user.licenses ?? []).some(l => l.federation?.code !== 'LEGACY' && !!l.number_encrypted);
-        const hasFmmafLicense = (user.licenses ?? []).some(l => l.federation?.code === 'FMMAF' && !!l.number_encrypted);
-        const { licenses, ...rest } = user;
-        return { ...rest, hasLicense, hasFmmafLicense };
-      });
-
-      return listParticipants;
+      const users = participants.map(({ user }) => user);
+      return await this.usersService.attachLicenseFlags(users);
 
     } catch (error) {
       console.error('Error finding participants:', error);
